@@ -1,0 +1,77 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Distribution / packaging
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+sdist/
+wheels/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# ===== IDE / Editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+*.sublime-project
+*.sublime-workspace
+
+# ===== Testing =====
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ===== Type checking / linting =====
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+
+# ===== Project-specific =====
+
+# Symbolic computation cache
+.asymsafety_cache/
+
+# Matplotlib figures saved from GUI
+*.png
+*.pdf
+*.svg
+!README.md
+
+# Git submodules / subrepos (prevent accidental nesting)
+*/.git/
+.gitmodules
+
+# Dependency lock files that shouldn't be committed for libraries
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Installer logs
+install.log
