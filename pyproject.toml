@@ -32,6 +32,10 @@ cloud = [
     "ray[default]>=2.9",
     "docker>=7.0",
 ]
+quantum = [
+    "qiskit>=1.0",
+    "qiskit-aer>=0.13",
+]
 dev = [
     "pytest>=8.0",
     "pytest-timeout",
