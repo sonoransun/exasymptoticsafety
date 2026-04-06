@@ -41,3 +41,20 @@ def scalar_field_dim(d: int | Symbol = 4) -> Rational | Symbol:
 def gauge_field_dim(d: int | Symbol = 4) -> Rational | Symbol:
     """Mass dimension of gauge field: [A_μ] = (d-2)/2."""
     return scalar_field_dim(d)
+
+
+def quartic_coupling_dim(d: int | Symbol = 4) -> Rational | Symbol:
+    """Mass dimension of scalar quartic coupling: [λ_φ] = 4 - d."""
+    return 4 - d
+
+
+def yukawa_coupling_dim(d: int | Symbol = 4) -> Rational | Symbol:
+    """Mass dimension of Yukawa coupling: [y] = (4 - d)/2."""
+    if isinstance(d, int):
+        return Rational(4 - d, 2)
+    return (4 - d) / 2
+
+
+def nonminimal_coupling_dim() -> int:
+    """Mass dimension of non-minimal coupling: [ξ] = 0."""
+    return 0

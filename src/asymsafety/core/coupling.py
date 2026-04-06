@@ -127,3 +127,38 @@ def make_foliated_eh_couplings(d: int = 4) -> CouplingSet:
         dimensionless_symbol=Symbol("lambda_ADM", real=True),
     ))
     return cs
+
+
+def make_gravity_matter_couplings(
+    d: int = 4,
+    scalar_quartic: bool = False,
+    yukawa: bool = False,
+    running_xi: bool = False,
+) -> CouplingSet:
+    """Create gravity-matter coupling set.
+
+    Always includes (G, Λ). Optionally adds λ_φ, y, ξ.
+    """
+    cs = make_eh_couplings(d)
+    if scalar_quartic:
+        cs.add(Coupling(
+            name="scalar_quartic",
+            symbol=Symbol("lambda_phi_dim", real=True),
+            canonical_dim=4 - d,
+            dimensionless_symbol=Symbol("lambda_phi", real=True),
+        ))
+    if yukawa:
+        cs.add(Coupling(
+            name="Yukawa",
+            symbol=Symbol("y_dim", real=True),
+            canonical_dim=Rational(4 - d, 2),
+            dimensionless_symbol=Symbol("y", positive=True),
+        ))
+    if running_xi:
+        cs.add(Coupling(
+            name="non_minimal",
+            symbol=Symbol("xi_dim", real=True),
+            canonical_dim=0,
+            dimensionless_symbol=Symbol("xi", real=True),
+        ))
+    return cs
