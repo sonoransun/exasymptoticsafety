@@ -63,6 +63,7 @@ Desktop.ini
 *.png
 *.pdf
 *.svg
+!docs/images/*.png
 !README.md
 
 # Git submodules / subrepos (prevent accidental nesting)

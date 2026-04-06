@@ -14,17 +14,17 @@ Computes functional renormalization group (FRG) beta functions, locates non-Gaus
 
 General relativity, treated as a quantum field theory, is **perturbatively non-renormalizable**: the Newton coupling $G$ has negative mass dimension in $d = 4$, so standard perturbative methods generate an infinite tower of divergences that cannot be absorbed into finitely many couplings.
 
-**Asymptotic Safety** (Weinberg, 1979) offers a non-perturbative resolution. The proposal is that the renormalization group (RG) flow of gravitational couplings possesses a **non-Gaussian UV fixed point** (NGFP) — a point $g_i^*$ in coupling space where all beta functions vanish simultaneously:
+**Asymptotic Safety** (Weinberg, 1979) offers a non-perturbative resolution. The proposal is that the renormalization group (RG) flow of gravitational couplings possesses a **non-Gaussian UV fixed point** (NGFP) — a point $g_{i}^{*}$ in coupling space where all beta functions vanish simultaneously:
 
-$$\beta_i(g_1^*, g_2^*, \ldots) = 0 \quad \text{for all } i$$
+$$\beta_{i}(g_{1}^{*}, g_{2}^{*}, \ldots) = 0 \quad \text{for all } i$$
 
 At this fixed point, the theory is scale-invariant and UV-complete despite being non-renormalizable in the perturbative sense. The number of **relevant directions** (eigenvalues of the stability matrix with positive real part) determines how many free parameters the theory retains — and thus its predictive power.
 
 The central computational tool is the **Wetterich equation** (1993), an exact functional RG equation for the effective average action $\Gamma_k$:
 
-$$\partial_t \Gamma_k = \frac{1}{2} \mathrm{Tr}\left[\left(\Gamma_k^{(2)} + R_k\right)^{-1} \partial_t R_k\right]$$
+$$\partial_t \Gamma_k = \frac{1}{2} \mathrm{Tr}\left[\left(\Gamma_{k}^{(2)} + R_k\right)^{-1} \partial_t R_k\right]$$
 
-where $t = \log(k/k_0)$ is the RG time, $\Gamma_k^{(2)}$ is the second functional derivative (Hessian) of the action, and $R_k$ is an IR regulator that suppresses modes below the scale $k$.
+where $t = \log(k/k_0)$ is the RG time, $\Gamma_{k}^{(2)}$ is the second functional derivative (Hessian) of the action, and $R_k$ is an IR regulator that suppresses modes below the scale $k$.
 
 ![Conceptual overview of asymptotic safety](docs/images/asymptotic_safety_concept.png)
 
@@ -32,7 +32,7 @@ where $t = \log(k/k_0)$ is the RG time, $\Gamma_k^{(2)}$ is the second functiona
 
 ![The Wetterich equation](docs/images/wetterich_equation.png)
 
-*The Wetterich equation: an exact one-loop functional RG equation. The circle represents the trace over the full regularised propagator $(\Gamma_k^{(2)} + R_k)^{-1}$, with a single regulator insertion $\partial_t R_k$ (cross). Only modes near the scale $k$ contribute to the flow.*
+*The Wetterich equation: an exact one-loop functional RG equation. The circle represents the trace over the full regularised propagator $(\Gamma_{k}^{(2)} + R_k)^{-1}$, with a single regulator insertion $\partial_t R_k$ (cross). Only modes near the scale $k$ contribute to the flow.*
 
 ---
 
@@ -564,7 +564,7 @@ Three couplings $(g, \lambda, \lambda_{\text{ADM}})$ on background $S^1 \times S
 
 - **Heat kernel**: Seeley-DeWitt $b_0, b_2, b_4$ with Q-functionals
 - **Spectral sums**: eigenvalue spectra on $S^4$ and $S^1 \times S^3$ (vectorized: 100K iterations in one NumPy call)
-- **Threshold functions**: $\Phi^p_n(w) = 1/[\Gamma(n+1)(1+w)^p]$ (Litim closed form)
+- **Threshold functions**: $\Phi^{p}_{n}(w) = 1/[\Gamma(n+1)(1+w)^{p}]$ (Litim closed form)
 - **Anomalous dimension**: self-consistent $\eta_N = gA(\lambda) / [1 - gB(\lambda)]$
 
 ---
@@ -665,9 +665,9 @@ tests/                  # 78 tests across 11 files
 
 | Truncation | Reference | Key Result | Status |
 |------------|-----------|------------|--------|
-| Einstein-Hilbert | Reuter (1998) | NGFP with $\eta_N^* = -2$; complex critical exponents | Verified |
+| Einstein-Hilbert | Reuter (1998) | NGFP with $\eta_{N}^{*} = -2$; complex critical exponents | Verified |
 | Quadratic gravity | Codello et al. (2009) | Asymptotic freedom of $C^2$ coupling | Implemented |
-| Foliated EH | Manrique et al. (2011) | $\lambda_{\text{ADM}}^* = 1$ (full-Diff restoration) | Implemented |
+| Foliated EH | Manrique et al. (2011) | $\lambda_{\text{ADM}}^{*} = 1$ (full-Diff restoration) | Implemented |
 | Lorentzian foliated | Biemans et al. (2017) | Lorentzian signature effects on NGFP | Implemented |
 
 ---
