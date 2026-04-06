@@ -16,6 +16,8 @@ References:
     Codello, Percacci & Rahmede (2009), Ann. Phys. 324, 414
     Benedetti, Machado & Saueressig (2009), Mod. Phys. Lett. A24, 2233
     Ohta & Percacci (2014), Class. Quant. Grav. 31, 015024
+    Fehre, Litim, Sherrill & Sherrill (2023), [2311.12097]
+        (momentum-dependent field redefs remove ghost poles)
 """
 
 import sympy

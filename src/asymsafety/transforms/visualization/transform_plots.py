@@ -8,6 +8,11 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+from asymsafety.visualization.style import (
+    COLOR_RELEVANT,
+    COLOR_IRRELEVANT,
+)
+
 if TYPE_CHECKING:
     from asymsafety.transforms._types import WaveletResult
     from asymsafety.transforms.linear.resolvent import ResolventOperator
@@ -143,7 +148,7 @@ def plot_pseudospectrum(
 
     # Plot epsilon-pseudospectrum boundaries
     for eps in epsilon_values:
-        ax.contour(
+        contours = ax.contour(
             real_grid,
             imag_grid,
             norm_grid,
@@ -151,6 +156,8 @@ def plot_pseudospectrum(
             colors="white",
             linewidths=1.5,
         )
+        ax.clabel(contours, fmt={1.0 / eps: f"$\\varepsilon={eps}$"},
+                  fontsize=8, colors="white")
 
     # Plot eigenvalues
     poles = resolvent_op.poles()
@@ -208,10 +215,18 @@ def plot_comparison_table(
             alpha=0.8,
         )
 
+    ax.axhline(y=0, color="0.5", ls="--", lw=1)
+
     ax.set_xlabel("Exponent index")
     ax.set_ylabel("Re(\u03b8)")
     ax.set_title("Critical Exponents: Cross-Method Comparison")
     ax.legend()
     ax.grid(True, alpha=0.3, axis="y")
+
+    # Shaded bands for relevant (above 0) / irrelevant (below 0)
+    y_lo, y_hi = ax.get_ylim()
+    ax.axhspan(0, y_hi, color=COLOR_RELEVANT, alpha=0.06)
+    ax.axhspan(y_lo, 0, color=COLOR_IRRELEVANT, alpha=0.06)
+    ax.set_ylim(y_lo, y_hi)
 
     return fig

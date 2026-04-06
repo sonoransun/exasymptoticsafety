@@ -15,6 +15,12 @@ Known results (approximate, gauge/regulator dependent):
 References:
     Dona, Eichhorn & Percacci (2014), Phys. Rev. D 89, 084035
     Meibohm, Pawlowski & Reichert (2016), Phys. Rev. D 93, 084035
+    Eichhorn & Schiffer (2022), in Handbook of Quantum Gravity [2212.07456]
+        (updated matter bounds in covariant setting)
+    Korver, Saueressig & Wang (2024), Phys. Lett. B 855, 138789 [2402.01260]
+        (foliated gravity-matter bounds)
+    Buccio, Percacci et al. (2025), Phys. Rev. D 111, 085030 [2501.10307]
+        (AS with non-vanishing scalar quartic coupling)
 """
 
 import sympy

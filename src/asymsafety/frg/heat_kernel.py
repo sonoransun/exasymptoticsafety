@@ -23,6 +23,8 @@ On S^d (maximally symmetric), the curvature invariants simplify:
 References:
     Vassilevich (2003), Phys. Rept. 388, 279 [hep-th/0306138]
     Codello, Percacci & Rahmede (2009), Ann. Phys. 324, 414
+    Saueressig (2023), in Handbook of Quantum Gravity [2302.14152]
+        (current review of heat kernel methods in gravitational FRG)
 """
 
 from dataclasses import dataclass

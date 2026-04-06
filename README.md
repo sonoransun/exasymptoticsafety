@@ -26,6 +26,22 @@ $$\partial_t \Gamma_k = \frac{1}{2} \mathrm{Tr}\left[\left(\Gamma_k^{(2)} + R_k\
 
 where $t = \log(k/k_0)$ is the RG time, $\Gamma_k^{(2)}$ is the second functional derivative (Hessian) of the action, and $R_k$ is an IR regulator that suppresses modes below the scale $k$.
 
+![Conceptual overview of asymptotic safety](docs/images/asymptotic_safety_concept.png)
+
+*Left: Theory space showing the Gaussian (GFP) and non-Gaussian (NGFP) fixed points, RG flow trajectories, and the UV-critical surface. Right: The dimensionless Newton coupling $g(k) = G(k)k^2$ — perturbative gravity diverges at a Landau pole, while asymptotic safety yields a finite UV limit at $g^*$.*
+
+![The Wetterich equation](docs/images/wetterich_equation.png)
+
+*The Wetterich equation: an exact one-loop functional RG equation. The circle represents the trace over the full regularised propagator $(\Gamma_k^{(2)} + R_k)^{-1}$, with a single regulator insertion $\partial_t R_k$ (cross). Only modes near the scale $k$ contribute to the flow.*
+
+---
+
+## RG Flow in the Einstein–Hilbert Truncation
+
+![Annotated EH phase portrait](docs/images/eh_phase_portrait.png)
+
+*RG flow in the $(g, \lambda)$ coupling plane ($d = 4$, Litim regulator). The non-Gaussian UV fixed point (NGFP, green star) at $g^* \approx 0.69$, $\lambda^* \approx 0.14$ has relevant (blue) and irrelevant (orange) eigendirections. The Gaussian fixed point (GFP, white circle) sits at the origin. Coloured curves are integrated trajectories from different initial conditions. The dashed line marks the $\lambda = \tfrac{1}{2}$ singularity boundary.*
+
 ---
 
 ## Capabilities
@@ -221,6 +237,10 @@ Install with `pip install asymsafety[gui]` and launch with `asymsafety-gui`.
 ## 3D Visualizations
 
 Three interactive 3D visualization functions using `mpl_toolkits.mplot3d`, with mouse rotation and zoom:
+
+![3D RG flow trajectories](docs/images/3d_flow.png)
+
+*3D flow trajectories coloured by RG time (blue = IR, red = UV), with fixed points marked.*
 
 ### RG Flow Trajectories in 3D Coupling Space
 
@@ -485,6 +505,22 @@ spec = generate_kuberay_spec(replicas=4, gpu_per_worker=1, image="asymsafety:lat
 
 ---
 
+## Fixed Point Stability & Critical Exponents
+
+![Fixed point stability](docs/images/fp_stability_concept.png)
+
+*Left: Linearised RG flow near a non-Gaussian fixed point. Blue eigenvectors correspond to relevant directions ($\theta > 0$, UV-attractive), orange to irrelevant ($\theta < 0$, UV-repulsive). The shaded region is the UV-critical surface. Right: Critical exponents $\theta_i = -\text{eigenvalues}(M_{ij})$ with colour coding for relevance.*
+
+---
+
+## Running Couplings
+
+![Running couplings](docs/images/running_couplings.png)
+
+*Evolution of the dimensionless Newton coupling $g$ and cosmological constant $\lambda$ as a function of RG time $t = \log(k/k_0)$ for several initial conditions in the Einstein–Hilbert truncation.*
+
+---
+
 ## Supported Truncations
 
 ### Einstein-Hilbert
@@ -514,6 +550,10 @@ Three couplings $(g, \lambda, \lambda_{\text{ADM}})$ on background $S^1 \times S
 ---
 
 ## FRG Methods
+
+![Regulator shape comparison](docs/images/regulator_comparison.png)
+
+*Comparison of the Litim (optimised, step-function) and Exponential (smooth) IR regulators. The Litim regulator yields closed-form beta functions and minimises scheme dependence; the Exponential regulator is $C^\infty$ but requires numerical integration.*
 
 | Regulator | $R_k(z)$ | Properties |
 |-----------|----------|------------|
@@ -571,6 +611,24 @@ fps = finder.find_all_fixed_points(n_grid=20, prefilter_threshold=0.5)
 ```bash
 asymsafety-gui
 ```
+
+---
+
+## Physical Computational Analogues
+
+The toolkit provides three novel physical mappings — hydraulic networks, quantum circuits, and integral/linear transforms — connected via a commutative bridge that verifies all domains produce consistent critical exponents.
+
+![Hydraulic analogy](docs/images/hydraulic_analogy.png)
+
+*The hydraulic analogy: RG couplings map to pressures, beta functions to flow equations, fixed points to steady states, and critical exponents to impedance eigenvalues. Regulators map to valve types (Litim → on/off, Exponential → proportional).*
+
+![Hydraulic network](docs/images/hydraulic_network.png)
+
+*Hydraulic network generated from the Einstein–Hilbert beta function system, with nodes coloured by pressure.*
+
+![Cross-analogue bridge](docs/images/cross_analogue_bridge.png)
+
+*Commutative diagram showing how different mathematical representations (classical RG, control theory / hydraulic, integral transforms, quantum computing) are connected. All paths through the diagram yield consistent critical exponents $\theta_i$.*
 
 ---
 
@@ -641,6 +699,15 @@ tests/                  # 78 tests across 11 files
 8. A. Dona, A. Eichhorn & R. Percacci, *Matter matters in asymptotically safe quantum gravity*, Phys. Rev. D **89**, 084035 (2014) [[1311.2898](https://arxiv.org/abs/1311.2898)]
 9. D.F. Litim, *Optimized renormalization group flows*, Phys. Rev. D **64**, 105007 (2001) [[hep-th/0103195](https://arxiv.org/abs/hep-th/0103195)]
 10. D.V. Vassilevich, *Heat kernel expansion: user's manual*, Phys. Rept. **388**, 279 (2003) [[hep-th/0306138](https://arxiv.org/abs/hep-th/0306138)]
+11. A. Bonanno, A. Eichhorn, H. Gies, J.M. Pawlowski, R. Percacci, M. Reuter, F. Saueressig & G.P. Vacca, *Critical reflections on asymptotically safe gravity*, Front. Phys. **8**, 269 (2020) [[2004.06810](https://arxiv.org/abs/2004.06810)]
+12. F. Saueressig, *The Functional Renormalization Group in Quantum Gravity*, in Handbook of Quantum Gravity, Springer (2023) [[2302.14152](https://arxiv.org/abs/2302.14152)]
+13. G.B. D'Angelo, N. Drago, N. Pinamonti & K. Rejzner, *Asymptotic safety in Lorentzian quantum gravity*, Phys. Rev. D **109**, 066012 (2024) [[2310.20603](https://arxiv.org/abs/2310.20603)]
+14. G. Korver, F. Saueressig & J. Wang, *Global Flows of Foliated Gravity-Matter Systems*, Phys. Lett. B **855**, 138789 (2024) [[2402.01260](https://arxiv.org/abs/2402.01260)]
+15. F. Saueressig et al., *Foliated Asymptotically Safe Gravity: Lorentzian Signature Fluctuations from the Wick Rotation*, Phys. Rev. D **111**, 106007 (2025) [[2501.03752](https://arxiv.org/abs/2501.03752)]
+16. T. Draper, B. Knorr, C. Ripken & F. Saueressig, *$e^+e^- \to \mu^+\mu^-$ in the Asymptotically Safe Standard Model*, Phys. Rev. D **111**, 106005 (2025) [[2412.13800](https://arxiv.org/abs/2412.13800)]
+17. A. Platania, *Black Holes in Asymptotically Safe Gravity*, in Handbook of Quantum Gravity, Springer (2023) [[2302.04272](https://arxiv.org/abs/2302.04272)]
+
+For a comprehensive review of recent literature organized by topic, see [docs/LITERATURE.md](docs/LITERATURE.md).
 
 ---
 

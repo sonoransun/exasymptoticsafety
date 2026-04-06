@@ -11,10 +11,19 @@ Key results:
 The agreement between covariant (S⁴) and foliated (S¹ × S³)
 results is a non-trivial consistency check of the program.
 
+The 2025 Wick rotation result (Saueressig et al.) confirms that
+λ_ADM → 1 at the NGFP is preserved under analytic continuation
+to Lorentzian signature, and that the Lorentzian graviton propagator
+has the correct Feynman causal structure.
+
 References:
     Manrique, Rechenberger & Saueressig (2011), Phys. Rev. Lett. 106, 251302
     Rechenberger & Saueressig (2013), JHEP 03, 010
     Biemans, Platania & Saueressig (2017), JHEP 05, 093 (Lorentzian)
+    Knorr, Ripken & Saueressig (2023), JHEP 09, 064 [2306.10408]
+        (fluctuation approach)
+    Saueressig et al. (2025), Phys. Rev. D 111, 106007 [2501.03752]
+        (Wick rotation confirmation)
 """
 
 FOLIATED_EH_FP = {

@@ -8,6 +8,11 @@ from matplotlib.figure import Figure
 
 from asymsafety.analysis.continuation import ContinuationResult
 from asymsafety.analysis.fixed_points import FixedPoint
+from asymsafety.visualization.style import (
+    COLOR_RELEVANT,
+    COLOR_IRRELEVANT,
+    coupling_label,
+)
 
 
 def plot_critical_exponents(
@@ -48,6 +53,20 @@ def plot_critical_exponents(
     ax1.grid(True, alpha=0.3)
     ax2.grid(True, alpha=0.3)
 
+    # Shaded bands for relevant / irrelevant regions
+    y_lo, y_hi = ax1.get_ylim()
+    ax1.axhspan(0, y_hi, color=COLOR_RELEVANT, alpha=0.06)
+    ax1.axhspan(y_lo, 0, color=COLOR_IRRELEVANT, alpha=0.06)
+    ax1.text(
+        0.02, 0.95, "relevant", transform=ax1.transAxes,
+        fontsize=9, color=COLOR_RELEVANT, va="top", alpha=0.7,
+    )
+    ax1.text(
+        0.02, 0.05, "irrelevant", transform=ax1.transAxes,
+        fontsize=9, color=COLOR_IRRELEVANT, va="bottom", alpha=0.7,
+    )
+    ax1.set_ylim(y_lo, y_hi)
+
     fig.tight_layout()
     return fig
 
@@ -64,7 +83,7 @@ def plot_fixed_point_locations(
         ax = axes[0, i]
         ax.plot(continuation.parameter_values, values, 'b-o', markersize=3)
         ax.set_xlabel(continuation.parameter_name, fontsize=12)
-        ax.set_ylabel(f"${name}^*$", fontsize=12)
+        ax.set_ylabel(coupling_label(name).rstrip("$") + "^*$", fontsize=12)
         ax.grid(True, alpha=0.3)
 
     fig.suptitle("Fixed Point Location", fontsize=14)

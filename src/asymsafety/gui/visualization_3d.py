@@ -21,6 +21,14 @@ from asymsafety.analysis.fixed_points import FixedPoint
 from asymsafety.analysis.flow import RGTrajectory
 from asymsafety.analysis.stability import StabilityAnalysis
 from asymsafety.beta.system import BetaFunctionSystem
+from asymsafety.visualization.style import (
+    coupling_label,
+    add_colorbar,
+    COLOR_NGFP,
+    COLOR_GFP,
+    COLOR_RELEVANT,
+    COLOR_IRRELEVANT,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -111,14 +119,14 @@ def _draw_fixed_points(
         if fp.is_gaussian:
             ax.plot(
                 [xv], [yv], [zv],
-                marker='o', color='white', markersize=12,
+                marker='o', color=COLOR_GFP, markersize=12,
                 markeredgecolor='black', markeredgewidth=1.5,
                 label='GFP', zorder=5,
             )
         else:
             ax.plot(
                 [xv], [yv], [zv],
-                marker='*', color='limegreen', markersize=14,
+                marker='*', color=COLOR_NGFP, markersize=14,
                 markeredgecolor='black', markeredgewidth=0.8,
                 label=f'NGFP ({fp.relevant_directions} rel.)', zorder=5,
             )
@@ -148,7 +156,7 @@ def _draw_eigenvectors(
         if norm < 1e-14:
             continue
         direction = vec / norm * scale
-        color = 'dodgerblue' if theta.real > 0 else 'darkorange'
+        color = COLOR_RELEVANT if theta.real > 0 else COLOR_IRRELEVANT
         ax.quiver(
             xv, yv, zv,
             direction[0], direction[1], direction[2],
@@ -231,9 +239,21 @@ def flow_trajectories_3d(
                     scale=eigenvector_scale,
                 )
 
-    ax.set_xlabel(f"${x_coupling}$", fontsize=13)
-    ax.set_ylabel(f"${y_coupling}$", fontsize=13)
-    ax.set_zlabel(f"${z_coupling}$", fontsize=13)
+    # Colorbar for RG-time gradient
+    all_t = [traj.t_values for traj in trajectories
+             if traj.t_values is not None and len(traj.t_values) > 0]
+    if all_t:
+        t_min = min(t.min() for t in all_t)
+        t_max = max(t.max() for t in all_t)
+        add_colorbar(
+            fig, ax, mappable=None,
+            label=r"$t = \log(k/k_0)$",
+            vmin=t_min, vmax=t_max, cmap="coolwarm",
+        )
+
+    ax.set_xlabel(coupling_label(x_coupling), fontsize=13)
+    ax.set_ylabel(coupling_label(y_coupling), fontsize=13)
+    ax.set_zlabel(coupling_label(z_coupling), fontsize=13)
     ax.set_title("RG Flow Trajectories (3D)", fontsize=14)
 
     # Deduplicate legend entries
@@ -373,9 +393,16 @@ def phase_portrait_3d(
     if fixed_points:
         _draw_fixed_points(ax, fixed_points, x_coupling, y_coupling, z_coupling)
 
-    ax.set_xlabel(f"${x_coupling}$", fontsize=13)
-    ax.set_ylabel(f"${y_coupling}$", fontsize=13)
-    ax.set_zlabel(f"${z_coupling}$", fontsize=13)
+    # Colorbar for log-speed
+    add_colorbar(
+        fig, ax, mappable=None,
+        label=r"$\log(1 + |\beta|)$",
+        vmin=float(ls_min), vmax=float(ls_max), cmap="coolwarm",
+    )
+
+    ax.set_xlabel(coupling_label(x_coupling), fontsize=13)
+    ax.set_ylabel(coupling_label(y_coupling), fontsize=13)
+    ax.set_zlabel(coupling_label(z_coupling), fontsize=13)
     ax.set_xlim(x_range)
     ax.set_ylim(y_range)
     ax.set_zlim(z_range)
@@ -439,7 +466,7 @@ def fixed_point_stability_3d(
     if fixed_point.is_gaussian:
         ax.plot(
             [xc], [yc], [zc],
-            marker='o', color='white', markersize=16,
+            marker='o', color=COLOR_GFP, markersize=16,
             markeredgecolor='black', markeredgewidth=2,
             label='GFP', zorder=5,
         )
@@ -447,7 +474,7 @@ def fixed_point_stability_3d(
     else:
         ax.plot(
             [xc], [yc], [zc],
-            marker='*', color='limegreen', markersize=18,
+            marker='*', color=COLOR_NGFP, markersize=18,
             markeredgecolor='black', markeredgewidth=1,
             label=f'NGFP ({fixed_point.relevant_directions} rel.)', zorder=5,
         )
@@ -486,7 +513,7 @@ def fixed_point_stability_3d(
                 continue
             direction = direction / norm * scale
 
-            color = 'dodgerblue' if theta.real > 0 else 'darkorange'
+            color = COLOR_RELEVANT if theta.real > 0 else COLOR_IRRELEVANT
             weight = abs(theta.real) / max_re
             lw = 1.0 + 2.5 * weight
             alpha = 0.35 + 0.65 * weight
@@ -547,9 +574,16 @@ def fixed_point_stability_3d(
     ax.set_ylim(yc - margin, yc + margin)
     ax.set_zlim(zc - margin, zc + margin)
 
-    ax.set_xlabel(f"${x_coupling}$", fontsize=13)
-    ax.set_ylabel(f"${y_coupling}$", fontsize=13)
-    ax.set_zlabel(f"${z_coupling}$", fontsize=13)
+    ax.set_xlabel(coupling_label(x_coupling), fontsize=13)
+    ax.set_ylabel(coupling_label(y_coupling), fontsize=13)
+    ax.set_zlabel(coupling_label(z_coupling), fontsize=13)
+
+    # Text legend explaining colour coding
+    ax.text2D(
+        0.02, 0.02,
+        "Blue = relevant, Orange = irrelevant, Dashed = spiral",
+        transform=ax.transAxes, fontsize=9, color="0.4",
+    )
 
     # Build informative title
     loc_str = ", ".join(

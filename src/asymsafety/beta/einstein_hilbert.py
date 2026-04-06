@@ -23,6 +23,8 @@ References:
     Lauscher & Reuter (2002), Phys. Rev. D 65, 025013
     Codello, Percacci & Rahmede (2009), Ann. Phys. 324, 414
     Dona, Eichhorn & Percacci (2014), Phys. Rev. D 89, 084035
+    D'Angelo, Drago, Pinamonti & Rejzner (2024), Phys. Rev. D 109, 066012
+        [2310.20603] (Lorentzian FRG confirmation of Reuter FP)
 """
 
 import sympy

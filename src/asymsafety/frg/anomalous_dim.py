@@ -12,6 +12,8 @@ which gives the algebraic solution:
 
 References:
     Reuter & Saueressig (2002), Phys. Rev. D 65, 065016
+    Pawlowski & Reichert (2023), [2309.10785]
+        (systematic vertex expansion for dynamical graviton propagator)
 """
 
 import sympy

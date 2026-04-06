@@ -7,6 +7,10 @@ Evaluates the functional trace on the RHS of the Wetterich equation:
 using the heat kernel expansion or spectral sums. The result is
 decomposed into curvature invariants {1, R, R², C², ...} whose
 coefficients give the running of the respective couplings.
+
+References:
+    Saueressig (2023), in Handbook of Quantum Gravity [2302.14152]
+        (most current comprehensive review of FRG methods for gravity)
 """
 
 from __future__ import annotations

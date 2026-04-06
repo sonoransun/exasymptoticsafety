@@ -13,6 +13,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
+from asymsafety.visualization.style import (
+    CMAP_PRESSURE,
+    coupling_label,
+)
+
 if TYPE_CHECKING:
     from asymsafety.hydraulic.network import HydraulicNetwork
     from asymsafety.hydraulic.simulator import HydraulicTrajectory
@@ -121,26 +126,28 @@ def plot_hydraulic_network(
         reg_p = p_vals[regular_idx]
         sc = ax.scatter(
             reg_pos[:, 0], reg_pos[:, 1],
-            c=reg_p, cmap="coolwarm", s=300, zorder=5,
+            c=reg_p, cmap=CMAP_PRESSURE, s=300, zorder=5,
             edgecolors="black", linewidths=1.5,
         )
         fig.colorbar(sc, ax=ax, label="Pressure (Pa)", shrink=0.8)
         for idx in regular_idx:
+            node_name = names[idx]
+            display = coupling_label(node_name).strip("$")
             ax.annotate(
-                names[idx],
+                f"${display}$ (pressure)",
                 (pos[idx, 0], pos[idx, 1]),
                 ha="center", va="center", fontsize=9, fontweight="bold",
                 zorder=6,
             )
 
-    # Reservoir nodes (squares)
+    # Reservoir nodes (squares, light gray fill)
     res_idx = [i for i in range(n) if is_reservoir[i]]
     if res_idx:
         res_pos = pos[res_idx]
         res_p = p_vals[res_idx]
         ax.scatter(
             res_pos[:, 0], res_pos[:, 1],
-            c="lightblue", s=200, zorder=5, marker="s",
+            c="lightgray", s=200, zorder=5, marker="s",
             edgecolors="black", linewidths=1.5,
         )
 
@@ -177,7 +184,7 @@ def plot_transient_response(
             ax.plot(
                 trajectory.t_values,
                 trajectory.pressure_values[name],
-                label=f"${name}$",
+                label=coupling_label(name),
             )
 
     ax.set_xlabel("Time (s)", fontsize=14)

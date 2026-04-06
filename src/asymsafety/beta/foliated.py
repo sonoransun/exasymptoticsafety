@@ -13,6 +13,12 @@ References:
     Manrique, Rechenberger & Saueressig (2011), Phys. Rev. Lett. 106, 251302
     Rechenberger & Saueressig (2013), JHEP 03, 010
     Biemans, Platania & Saueressig (2017), JHEP 05, 093
+    Knorr, Ripken & Saueressig (2023), JHEP 09, 064 [2306.10408]
+        (fluctuation approach, background-independent beta functions)
+    Korver, Saueressig & Wang (2024), Phys. Lett. B 855, 138789 [2402.01260]
+        (global flows of foliated gravity-matter systems)
+    Saueressig et al. (2025), Phys. Rev. D 111, 106007 [2501.03752]
+        (Wick rotation: Lorentzian signature, Feynman causal structure)
 """
 
 import sympy
