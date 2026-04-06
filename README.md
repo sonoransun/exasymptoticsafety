@@ -47,38 +47,38 @@ where $t = \log(k/k_0)$ is the RG time, $\Gamma_k^{(2)}$ is the second functiona
 ## Capabilities
 
 ```mermaid
-block-beta
-    columns 3
-
-    block:truncations["Gravitational Truncations"]:3
-        eh["Einstein-Hilbert\n(G, Λ)"]
-        quad["Quadratic Gravity\n(G, Λ, α, β)\nR² + C² terms"]
-        fol["Foliated (ADM)\n(G, Λ, λ_ADM)\nLorentzian signature"]
+flowchart TD
+    subgraph truncations["Gravitational Truncations"]
+        eh["Einstein-Hilbert\n(G, Lambda)"]
+        quad["Quadratic Gravity\n(G, Lambda, alpha, beta)\nR^2 + C^2 terms"]
+        fol["Foliated ADM\n(G, Lambda, lambda_ADM)\nLorentzian signature"]
     end
 
-    block:matter["Matter Coupling"]:3
-        scalar["Scalar Fields\nMinimal & non-minimal ξRφ²"]
+    subgraph matter["Matter Coupling"]
+        scalar["Scalar Fields\nMinimal, non-minimal xi R phi^2"]
         gauge["Gauge Fields\nU(1), SU(N)"]
         combined["Gravity-Matter\nFixed Points"]
     end
 
-    block:methods["FRG Computation Engine"]:3
-        reg["Regulators\nLitim · Exponential\nType-II · Type-III"]
-        trace["Trace Evaluation\nHeat kernel (b₀, b₂, b₄)\nSpectral sums on S⁴, S¹×S³"]
-        threshold["Threshold Functions\nΦ^p_n(w), Φ̃^p_n(w)\nClosed-form (Litim)"]
+    subgraph methods["FRG Computation Engine"]
+        reg["Regulators\nLitim, Exponential\nType-II, Type-III"]
+        trace["Trace Evaluation\nHeat kernel (b0, b2, b4)\nSpectral sums on S^4, S^1 x S^3"]
+        threshold["Threshold Functions\nPhi^p_n(w), Phi-tilde^p_n(w)\nClosed-form (Litim)"]
     end
 
-    block:accel["Acceleration & Compute"]:3
+    subgraph accel["Acceleration and Compute"]
         batch["Batch Evaluation\nNumPy broadcasting\nJAX vmap + jit (GPU)"]
-        dist["Distributed Computing\nRay clusters\nDask · BOINC crowd"]
-        cloud["Cloud Deployment\nDocker · Kubernetes\nRay autoscaling"]
+        dist["Distributed Computing\nRay clusters\nDask, BOINC crowd"]
+        cloud["Cloud Deployment\nDocker, Kubernetes\nRay autoscaling"]
     end
 
-    block:ui["Interactive GUI & Visualization"]:3
+    subgraph ui["Interactive GUI and Visualization"]
         gui["Desktop GUI\nPySide6 cross-platform\n4 config panels"]
-        viz3d["3D Visualization\nFlow trajectories\nPhase portraits · Stability"]
-        viz2d["2D Visualization\nStreamplots\nRunning couplings · θᵢ plots"]
+        viz3d["3D Visualization\nFlow trajectories\nPhase portraits, Stability"]
+        viz2d["2D Visualization\nStreamplots\nRunning couplings, theta_i plots"]
     end
+
+    truncations --> matter --> methods --> accel --> ui
 ```
 
 ### At a Glance
@@ -118,7 +118,7 @@ flowchart TD
 
     subgraph FRG["FRG Engine"]
         REG[Regulators]
-        HK[Heat Kernel b₀ b₂ b₄]
+        HK[Heat Kernel b0 b2 b4]
         TRACE[Trace Evaluator]
         TH[Threshold Functions]
     end
@@ -136,7 +136,7 @@ flowchart TD
 
     subgraph Analysis["Analysis"]
         FP[Fixed Point Finder]
-        STAB[Stability & θᵢ]
+        STAB[Stability & theta_i]
         FLOW[Flow Integrator]
         CONT[Continuation]
     end
@@ -676,14 +676,14 @@ tests/                  # 78 tests across 11 files
 
 | Package | Version | Purpose | Install |
 |---------|---------|---------|---------|
-| SymPy | $\geq$ 1.13 | Symbolic algebra | Core |
-| NumPy | $\geq$ 1.26 | Numerical arrays | Core |
-| SciPy | $\geq$ 1.12 | Root finding, ODE integration | Core |
-| Matplotlib | $\geq$ 3.8 | 2D/3D plotting | Core |
-| PySide6 | $\geq$ 6.6 | Desktop GUI | `pip install .[gui]` |
-| JAX | $\geq$ 0.4 | GPU acceleration | `pip install .[gpu]` |
-| Ray | $\geq$ 2.9 | Distributed computing | `pip install .[distributed]` |
-| Dask | $\geq$ 2024.1 | Distributed (alternative) | `pip install .[dask]` |
+| SymPy | ≥ 1.13 | Symbolic algebra | Core |
+| NumPy | ≥ 1.26 | Numerical arrays | Core |
+| SciPy | ≥ 1.12 | Root finding, ODE integration | Core |
+| Matplotlib | ≥ 3.8 | 2D/3D plotting | Core |
+| PySide6 | ≥ 6.6 | Desktop GUI | `pip install .[gui]` |
+| JAX | ≥ 0.4 | GPU acceleration | `pip install .[gpu]` |
+| Ray | ≥ 2.9 | Distributed computing | `pip install .[distributed]` |
+| Dask | ≥ 2024.1 | Distributed (alternative) | `pip install .[dask]` |
 
 ---
 
