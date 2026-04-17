@@ -152,6 +152,10 @@ class FixedPointFinder:
         n_random: int = 50,
         tol: float = 1e-10,
         merge_tol: float = 1e-4,
+        prefilter_threshold: float | None = None,
+        batch_backend: str = "numpy",
+        parallel: bool = False,
+        max_workers: int | None = None,
     ) -> list[FixedPoint]:
         """Find all fixed points using multiple strategies.
 
@@ -161,6 +165,17 @@ class FixedPointFinder:
             n_random: Number of random initial conditions.
             tol: Convergence tolerance.
             merge_tol: Distance below which FPs are considered identical.
+            prefilter_threshold: If set, batch-evaluate ``|β(x)|`` at every
+                candidate first and only refine those below the threshold.
+                Eliminates wasted fsolve calls on points far from any FP.
+                A value of ~1.0 is a sensible default; ``None`` disables.
+            batch_backend: Backend for the prefilter — ``"numpy"`` (default,
+                always available), ``"jax"`` (requires ``asymsafety[gpu]``),
+                or ``"auto"`` (use JAX if installed, else NumPy).
+            parallel: If True, run the candidate fsolve refinements in a
+                ProcessPoolExecutor. Best for systems with > ~50 candidates.
+            max_workers: Worker count for the process pool; ``None`` uses
+                the OS default.
 
         Returns:
             List of unique fixed points found.
@@ -171,38 +186,86 @@ class FixedPointFinder:
         if bounds is None:
             bounds = {name: (-2.0, 2.0) for name in names}
 
-        found: list[FixedPoint] = []
-
-        # Always include the Gaussian FP
-        gfp = self.gaussian_fixed_point()
-        found.append(gfp)
-
-        # Strategy 1: Grid scan
+        # Build the full candidate set: grid ∪ random
         grids = [
             np.linspace(bounds[name][0], bounds[name][1], n_grid)
             for name in names
         ]
         mesh = np.meshgrid(*grids)
-        points = np.column_stack([m.ravel() for m in mesh])
+        grid_points = np.column_stack([m.ravel() for m in mesh])
 
-        for point in points:
-            guess = {names[i]: point[i] for i in range(n_dim)}
-            fp = self.find_fixed_point(guess, tol=tol)
-            if fp is not None:
-                self._add_if_new(found, fp, merge_tol, bounds)
-
-        # Strategy 2: Random initial conditions
         rng = np.random.default_rng(42)
-        for _ in range(n_random):
-            guess = {}
-            for name in names:
-                lo, hi = bounds[name]
-                guess[name] = rng.uniform(lo, hi)
-            fp = self.find_fixed_point(guess, tol=tol)
+        random_points = np.column_stack([
+            rng.uniform(bounds[name][0], bounds[name][1], n_random)
+            for name in names
+        ])
+        candidates = np.vstack([grid_points, random_points])
+
+        # Optional batch prefilter
+        if prefilter_threshold is not None:
+            from asymsafety.compute.accelerated.fixed_points import (
+                _select_batch_backend,
+            )
+            evaluator = _select_batch_backend(self.system, batch_backend)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                norms = evaluator.evaluate_norms(candidates)
+            mask = (norms < prefilter_threshold) | np.isnan(norms)
+            candidates = candidates[mask]
+
+        # Always include the Gaussian FP
+        found: list[FixedPoint] = [self.gaussian_fixed_point()]
+
+        if len(candidates) == 0:
+            return found
+
+        guesses = [
+            {names[i]: float(candidates[j, i]) for i in range(n_dim)}
+            for j in range(len(candidates))
+        ]
+
+        # Refinement: serial or parallel
+        if parallel and len(guesses) > 1:
+            results = self._refine_parallel(guesses, tol, max_workers)
+        else:
+            results = [self.find_fixed_point(g, tol=tol) for g in guesses]
+
+        for fp in results:
             if fp is not None:
                 self._add_if_new(found, fp, merge_tol, bounds)
 
         return found
+
+    def _refine_parallel(
+        self,
+        guesses: list[dict[str, float]],
+        tol: float,
+        max_workers: int | None,
+    ) -> list[FixedPoint | None]:
+        """Refine candidate guesses with fsolve in a ProcessPoolExecutor.
+
+        Guesses are bundled into per-worker batches (~`len/(4·workers)` each)
+        so the per-pickle overhead amortizes over many sub-millisecond
+        fsolve calls. ``BetaFunctionSystem.__getstate__`` strips the
+        lambdified cache, so each worker rebuilds it lazily on first call
+        within the chunk.
+        """
+        import os
+        from concurrent.futures import ProcessPoolExecutor
+        from functools import partial
+
+        n_workers = max_workers or os.cpu_count() or 1
+        chunk_size = max(1, len(guesses) // (4 * n_workers))
+        chunks = [
+            guesses[i : i + chunk_size]
+            for i in range(0, len(guesses), chunk_size)
+        ]
+
+        worker = partial(_refine_chunk, self.system, tol)
+        with ProcessPoolExecutor(max_workers=max_workers) as pool:
+            chunked_results = list(pool.map(worker, chunks))
+
+        # Flatten back to a flat list aligned with the original guesses
+        return [fp for chunk_results in chunked_results for fp in chunk_results]
 
     @staticmethod
     def _add_if_new(found: list[FixedPoint], fp: FixedPoint,
@@ -226,3 +289,17 @@ class FixedPointFinder:
                 return
 
         found.append(fp)
+
+
+def _refine_chunk(
+    system: BetaFunctionSystem,
+    tol: float,
+    guesses: list[dict[str, float]],
+) -> list[FixedPoint | None]:
+    """Worker that refines a batch of guesses inside a single subprocess.
+
+    The subprocess builds one FixedPointFinder, which lazily lambdifies the
+    system once and reuses it across all guesses in this chunk.
+    """
+    finder = FixedPointFinder(system)
+    return [finder.find_fixed_point(g, tol=tol) for g in guesses]

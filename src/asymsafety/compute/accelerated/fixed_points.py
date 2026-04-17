@@ -9,6 +9,20 @@ from asymsafety.analysis.stability import analyze_stability
 from asymsafety.beta.system import BetaFunctionSystem
 
 
+def _select_batch_backend(system: BetaFunctionSystem, request: str):
+    """Build a batch evaluator, honoring the "auto" sentinel.
+
+    ``"auto"`` picks ``"jax"`` when importable, else ``"numpy"``.
+    """
+    if request == "auto":
+        try:
+            import jax  # noqa: F401
+            request = "jax"
+        except ImportError:
+            request = "numpy"
+    return system.batch_evaluator(request)
+
+
 class AcceleratedFixedPointFinder:
     """Fixed point finder using batch pre-filtering and parallel root-finding.
 
@@ -16,13 +30,24 @@ class AcceleratedFixedPointFinder:
     1. Pre-filter: batch-evaluate |β(x)| at all grid points, keep only
        points where the norm is below a threshold (eliminates 90%+ of candidates)
     2. Refine: run fsolve on surviving candidates in parallel via the backend
+
+    The batch evaluator is selectable via ``batch_backend``:
+        - ``"auto"`` (default): JAX if installed, otherwise NumPy.
+        - ``"numpy"``: CPU NumPy broadcasting.
+        - ``"jax"``: JIT + vmap via JAX (requires ``asymsafety[gpu]`` extra).
     """
 
-    def __init__(self, system: BetaFunctionSystem, backend=None):
+    def __init__(
+        self,
+        system: BetaFunctionSystem,
+        backend=None,
+        batch_backend: str = "auto",
+    ):
         from asymsafety.compute.backends.base import LocalBackend
         self.system = system
         self.backend = backend or LocalBackend()
-        self._evaluator = system.batch_evaluator("numpy")
+        self._evaluator = _select_batch_backend(system, batch_backend)
+        self.batch_backend = batch_backend
         self._base_finder = FixedPointFinder(system)
 
     def find_all_fixed_points(

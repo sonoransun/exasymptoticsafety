@@ -39,10 +39,18 @@ class RGTrajectory:
         Returns:
             Dictionary of coupling values at scale t.
         """
-        result = {}
-        for name, values in self.coupling_values.items():
-            result[name] = float(np.interp(t, self.t_values, values))
-        return result
+        # np.interp requires xp to be increasing; reverse if integration
+        # ran backward (e.g., flow from UV to IR via t_span=(t_uv, t_ir)).
+        if self.t_values.size > 1 and self.t_values[0] > self.t_values[-1]:
+            t_arr = self.t_values[::-1]
+            return {
+                name: float(np.interp(t, t_arr, values[::-1]))
+                for name, values in self.coupling_values.items()
+            }
+        return {
+            name: float(np.interp(t, self.t_values, values))
+            for name, values in self.coupling_values.items()
+        }
 
     @property
     def uv_values(self) -> dict[str, float]:

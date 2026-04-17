@@ -18,6 +18,22 @@ import numpy as np
 import sympy
 from sympy import Expr, Matrix, Symbol, lambdify
 
+from asymsafety.utils.caching import disk_cache
+
+
+@disk_cache(name="jacobian_symbolic")
+def _compute_jacobian_symbolic(exprs: tuple[Expr, ...],
+                                 syms: tuple[Symbol, ...]) -> Matrix:
+    """Symbolic ∂β_i/∂g_j — disk-cached across sessions.
+
+    Pure function of (expressions, symbols); identical inputs return the
+    same Matrix bit-exactly, so disk caching is safe.
+    """
+    return Matrix([
+        [sympy.diff(expr, sym) for sym in syms]
+        for expr in exprs
+    ])
+
 
 @dataclass
 class BetaFunction:
@@ -53,19 +69,30 @@ class BetaFunctionSystem:
 
     Represents ∂_t g_i = β_i(g_1, ..., g_n) for all couplings
     in a given truncation.
+
+    All hot paths (``evaluate``, ``jacobian_numerical``, ``rhs_vector``)
+    use SymPy ``lambdify``-cached callables under the hood; symbolic
+    substitution happens at most once per system, not per call.
     """
 
     def __init__(self):
         self._betas: OrderedDict[str, BetaFunction] = OrderedDict()
         self._symbols: list[Symbol] = []
         self._rhs_func: Callable | None = None
+        self._eval_func: Callable | None = None
+        self._jac_func: Callable | None = None
+        self._jac_symbolic: Matrix | None = None
 
     def add(self, beta: BetaFunction) -> None:
         """Add a beta function to the system."""
         self._betas[beta.coupling_name] = beta
         if beta.coupling_symbol not in self._symbols:
             self._symbols.append(beta.coupling_symbol)
-        self._rhs_func = None  # Invalidate cache
+        # Invalidate all derived caches
+        self._rhs_func = None
+        self._eval_func = None
+        self._jac_func = None
+        self._jac_symbolic = None
 
     @property
     def coupling_names(self) -> list[str]:
@@ -88,45 +115,63 @@ class BetaFunctionSystem:
         """Return all beta functions as a list of symbolic expressions."""
         return [b.expression for b in self._betas.values()]
 
+    def _get_eval_func(self) -> Callable:
+        """Lambdified vector evaluator: ``f(*values) -> list[float]``."""
+        if self._eval_func is None:
+            self._eval_func = lambdify(
+                self._symbols, self.symbolic_vector(), modules="numpy"
+            )
+        return self._eval_func
+
+    def _args_from_point(self, point: dict[str, float]) -> list[float]:
+        """Pack coupling values in canonical order, defaulting missing → 0.0."""
+        return [float(point.get(name, 0.0)) for name in self._betas.keys()]
+
     def evaluate(self, point: dict[str, float]) -> dict[str, float]:
         """Evaluate all beta functions at a point in coupling space.
 
         Args:
-            point: Dictionary mapping coupling names to values.
+            point: Dictionary mapping coupling names to values. Missing
+                couplings default to 0.0.
 
         Returns:
             Dictionary mapping coupling names to β_i values.
         """
-        # Build substitution dict
-        subs = {}
-        for beta in self._betas.values():
-            if beta.coupling_name in point:
-                subs[beta.coupling_symbol] = point[beta.coupling_name]
-
-        result = {}
-        for name, beta in self._betas.items():
-            val = beta.expression.subs(subs)
-            result[name] = float(val)
-        return result
+        fn = self._get_eval_func()
+        args = self._args_from_point(point)
+        vals = fn(*args)
+        # lambdify on a list returns a list; on a Matrix it returns ndarray.
+        return {
+            name: float(v)
+            for name, v in zip(self._betas.keys(), vals)
+        }
 
     def jacobian_symbolic(self) -> Matrix:
-        """Symbolic stability matrix M_ij = ∂β_i/∂g_j."""
-        exprs = self.symbolic_vector()
-        syms = self.coupling_symbols
-        return Matrix([
-            [sympy.diff(expr, sym) for sym in syms]
-            for expr in exprs
-        ])
+        """Symbolic stability matrix M_ij = ∂β_i/∂g_j.
+
+        Memory-cached on the system instance; the underlying differentiation
+        is also disk-cached when joblib is available (see ``utils.caching``).
+        """
+        if self._jac_symbolic is None:
+            self._jac_symbolic = _compute_jacobian_symbolic(
+                tuple(self.symbolic_vector()),
+                tuple(self.coupling_symbols),
+            )
+        return self._jac_symbolic
+
+    def _get_jac_func(self) -> Callable:
+        """Lambdified Jacobian: ``f(*values) -> ndarray``."""
+        if self._jac_func is None:
+            self._jac_func = lambdify(
+                self._symbols, self.jacobian_symbolic(), modules="numpy"
+            )
+        return self._jac_func
 
     def jacobian_numerical(self, point: dict[str, float]) -> np.ndarray:
         """Numerical stability matrix at a given point."""
-        J_sym = self.jacobian_symbolic()
-        subs = {}
-        for beta in self._betas.values():
-            if beta.coupling_name in point:
-                subs[beta.coupling_symbol] = point[beta.coupling_name]
-        J_eval = J_sym.subs(subs)
-        return np.array(J_eval.tolist(), dtype=float)
+        fn = self._get_jac_func()
+        args = self._args_from_point(point)
+        return np.asarray(fn(*args), dtype=float)
 
     def rhs_vector(self) -> Callable:
         """Return f(t, y) suitable for scipy.integrate.solve_ivp.
@@ -134,18 +179,31 @@ class BetaFunctionSystem:
         The RG flow is ∂_t g_i = β_i(g_1, ..., g_n).
         """
         if self._rhs_func is None:
-            syms = self.coupling_symbols
-            funcs = [
-                b.lambdify_func(syms) for b in self._betas.values()
-            ]
+            fn = self._get_eval_func()
+            n = len(self._symbols)
 
             def rhs(t, y):
-                vals = {s: y[i] for i, s in enumerate(syms)}
-                args = [y[i] for i in range(len(syms))]
-                return [f(*args) for f in funcs]
+                return list(fn(*[y[i] for i in range(n)]))
 
             self._rhs_func = rhs
         return self._rhs_func
+
+    def __getstate__(self) -> dict:
+        """Strip lambdified caches before pickling.
+
+        Sympy expressions pickle cleanly; lambdified callables do not
+        (their dynamic code object cannot be referenced from another
+        interpreter). Workers rebuild the caches lazily.
+        """
+        state = self.__dict__.copy()
+        state["_rhs_func"] = None
+        state["_eval_func"] = None
+        state["_jac_func"] = None
+        # _jac_symbolic is a sympy Matrix and pickles fine — keep it.
+        # Per-BetaFunction lambdify cache:
+        for beta in state["_betas"].values():
+            beta._numerical_func = None
+        return state
 
     def to_latex(self) -> str:
         """Generate LaTeX representation of all beta functions."""

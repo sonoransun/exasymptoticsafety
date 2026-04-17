@@ -1,0 +1,136 @@
+# Getting started with `asymsafety`
+
+A 5-minute on-ramp to the asymptotic-safety FRG toolkit. Once you've
+worked through this page, the [tutorial notebooks](#tutorial-notebooks)
+demonstrate everything else by example.
+
+## Install
+
+The toolkit is not yet packaged on PyPI. Clone and run from source:
+
+```bash
+git clone <repo-url> asymsafety
+cd asymsafety
+python3 -m pip install -e .
+```
+
+If you skip the `-e .` install, every Python invocation needs
+`PYTHONPATH=src` (the source layout is `src/asymsafety/`):
+
+```bash
+PYTHONPATH=src python3 -m pytest tests/
+```
+
+### Optional extras
+
+Pick whichever you need:
+
+| Extra | Adds |
+|---|---|
+| `asymsafety[gui]` | PySide6 desktop GUI |
+| `asymsafety[gpu]` | JAX backend (`numpy` or `jax` batch evaluator) |
+| `asymsafety[cache]` | joblib for persistent symbolic-cache to disk |
+| `asymsafety[hdf5]` | h5py for HDF5 sweep output |
+| `asymsafety[notebooks]` | jupyter + nbmake for tutorials |
+| `asymsafety[distributed]` | Ray cluster backend |
+| `asymsafety[dev]` | pytest + dev tooling |
+
+Combine with commas, e.g. `pip install -e .[gpu,cache,notebooks]`.
+
+## 30-second tour
+
+```python
+from asymsafety.beta.einstein_hilbert import build_eh_beta_system
+from asymsafety.analysis.fixed_points import FixedPointFinder
+from asymsafety.analysis.stability import analyze_stability
+
+system  = build_eh_beta_system(d=4)
+ngfp    = FixedPointFinder(system).find_fixed_point({"g": 0.7, "lambda": 0.14})
+stab    = analyze_stability(system, ngfp)
+
+print(stab.summary())
+```
+
+This prints the location of the Reuter NGFP, its critical exponents, and
+the number of relevant directions — about 10 lines for the canonical AS
+result.
+
+## Command-line interface
+
+Two subcommands of the `asymsafety` console script:
+
+```bash
+# Batch-evaluate β over a coupling grid
+asymsafety eval \
+    --truncation eh \
+    --grid 'g:0:1.5:30,lambda:-0.4:0.4:30' \
+    --output sweep.npz
+
+# Sweep an external integer parameter, find the NGFP at each value
+asymsafety scan \
+    --truncation gravity_matter \
+    --param scalar_quartic=true \
+    --param-range n_scalars=0:8:9 \
+    --guess g=0.65,lambda=0.14,lambda_phi=0.01 \
+    --output gm_scan.json
+```
+
+Output formats are picked by extension: `.npz` (always available),
+`.h5` (needs `asymsafety[hdf5]`), `.json` (always available).
+
+If you skipped `pip install -e .`, invoke the CLI as
+`PYTHONPATH=src python3 -m asymsafety.cli.main eval ...`.
+
+## Configuration
+
+Drop an `asymsafety.toml` into your project (or `~/.asymsafety.toml`
+for user-global defaults):
+
+```toml
+[solver]
+fixed_point_tol = 1.0e-12
+
+[compute]
+batch_backend = "auto"      # numpy | jax | auto
+parallel_default = true
+max_workers = 8
+
+[cache]
+dir = "~/.cache/asymsafety"
+disk_enabled = true
+```
+
+Environment variables override file values:
+`ASYMSAFETY_SOLVER_FIXED_POINT_TOL=1e-9 …`. Load with
+`from asymsafety.config import load_config; cfg = load_config()`.
+
+## Tutorial notebooks
+
+Five end-to-end notebooks live under [`notebooks/`](../notebooks/):
+
+| File | What it shows |
+|---|---|
+| `01_reuter_fixed_point.ipynb` | Find the Reuter NGFP, compute critical exponents, compare to Reuter (1998) |
+| `02_phase_portrait.ipynb` | 2D streamplot of the EH flow with trajectories overlaid |
+| `03_gravity_matter_scan.ipynb` | Sweep N_scalars 0–8 with quartic + Yukawa; plot how the NGFP shifts |
+| `04_rg_improved_bh.ipynb` | Bonanno–Reuter geometry: G(r), lapse, horizons, critical mass |
+| `05_acceleration_and_sweep.ipynb` | Parallel `find_all_fixed_points` and the `asymsafety eval` CLI end-to-end |
+
+Run them with Jupyter:
+
+```bash
+pip install -e .[notebooks]
+jupyter notebook notebooks/
+```
+
+Or smoke-test all of them in CI with `pytest --nbmake notebooks/`.
+
+## Where to go next
+
+- Heat-kernel internals: [`docs/LITERATURE.md`](LITERATURE.md) maps each
+  module to the paper(s) it implements.
+- Customizing truncations: see `src/asymsafety/beta/einstein_hilbert.py`
+  for the canonical pattern; mirror `build_<truncation>_beta_system(...)`.
+- Cosmology / RG-improved black holes: `src/asymsafety/cosmology/`.
+- Compute backends and acceleration: `src/asymsafety/compute/` and the
+  `prefilter` / `parallel` kwargs of `find_all_fixed_points`.
