@@ -38,12 +38,18 @@ class GroverSearchResult:
         Number of Grover iterations applied.
     success_probability:
         Theoretical success probability ``sin^2((2k+1) * arcsin(sqrt(M/N)))``.
+    counts:
+        Raw measurement histogram ``{bitstring: shots}`` from the Grover
+        run, retained so plotting code (the measurement-distribution
+        heatmap) can reconstruct the per-grid-point shot counts. ``None``
+        when the search short-circuited (no marked states).
     """
 
     measured_couplings: dict[str, float]
     refined_fixed_point: FixedPoint | None
     n_grover_iterations: int
     success_probability: float
+    counts: dict[str, int] | None = None
 
 
 class GroverFixedPointSearch:
@@ -182,7 +188,7 @@ class GroverFixedPointSearch:
         measured_couplings = self._encoding.bitstring_to_couplings(best_bitstring)
 
         # Compute theoretical success probability
-        success_prob = self._success_probability(n_iter)
+        success_prob = self.success_probability_at(n_iter)
 
         # Classical refinement via fsolve
         refined_fp = self._refine(measured_couplings)
@@ -192,6 +198,7 @@ class GroverFixedPointSearch:
             refined_fixed_point=refined_fp,
             n_grover_iterations=n_iter,
             success_probability=success_prob,
+            counts=dict(counts),
         )
 
     # ------------------------------------------------------------------
@@ -260,11 +267,14 @@ class GroverFixedPointSearch:
         result = job.result()
         return dict(result.get_counts())
 
-    def _success_probability(self, n_iter: int) -> float:
-        r"""Theoretical Grover success probability.
+    def success_probability_at(self, n_iter: int) -> float:
+        r"""Theoretical Grover success probability after *n_iter* iterations.
 
         .. math::
-            P = \sin^2\!\bigl((2k+1)\,\arcsin\!\sqrt{M/N}\bigr)
+            P(k) = \sin^2\!\bigl((2k+1)\,\arcsin\!\sqrt{M/N}\bigr)
+
+        Plotted against ``k`` by
+        ``asymsafety.quantum.visualization.grover_plots.plot_grover_success_probability``.
         """
         n_total = self._encoding.n_grid_points
         n_marked = self._oracle.n_marked

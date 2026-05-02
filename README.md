@@ -302,6 +302,14 @@ fig = fixed_point_stability_3d(
 )
 ```
 
+![Fixed-point stability in 3D](docs/images/fp_stability_3d.png)
+
+*Eigenvector view of the foliated EH NGFP — blue = relevant, orange = irrelevant, dashed arcs flag complex-conjugate spiral flow.*
+
+![Basin of attraction (3D Monte Carlo)](docs/images/flow_basin_3d.png)
+
+*Monte-Carlo basin: blue trajectories stayed bounded, orange escaped — projected onto the $(g, \lambda, t)$ axes.*
+
 ---
 
 ## GPU & Compute Acceleration
@@ -535,17 +543,29 @@ $$\Gamma_k = \int d^4x\,\sqrt{g}\left[\frac{R - 2\Lambda}{16\pi G} + \alpha\, R^
 
 Four couplings $(g, \lambda, \alpha, \beta)$. The $R^2$ and Weyl-squared ($C^2$) terms generate **fourth-order propagators** decomposed via partial fractions. The Weyl-squared coupling $\beta$ is **asymptotically free**.
 
+![Quadratic gravity pairwise phase portraits](docs/images/quadratic_pairwise.png)
+
+*Six pairwise streamplots of the four-coupling quadratic-gravity flow $(g, \lambda, \alpha, \beta)$.*
+
 ### Lorentzian Foliated (ADM)
 
 $$\Gamma_k = \frac{1}{16\pi G}\int dt\,d^3x\,N\sqrt{\sigma}\left(K_{ij}K^{ij} - \lambda_{\text{ADM}}\,K^2 + R^{(3)} - 2\Lambda\right)$$
 
 Three couplings $(g, \lambda, \lambda_{\text{ADM}})$ on background $S^1 \times S^3$. At the NGFP, $\lambda_{\text{ADM}} \to 1$, restoring full diffeomorphism invariance. A **foliated quadratic extension** adds up to 7 independent FDiff curvature-squared invariants.
 
+![Foliated EH 3D phase portrait](docs/images/foliated_3d.png)
+
+*3D phase portrait of the foliated EH truncation, with the $\lambda_{\text{ADM}} = 1$ full-diffeomorphism plane highlighted.*
+
 ### Matter Coupling
 
 - **Scalar fields**: minimally coupled ($\xi = 0$) or non-minimally coupled ($\xi R\varphi^2$)
 - **Gauge fields**: $U(1)$ and $SU(N)$ with transverse + ghost mode counting
 - **Combined analysis**: matter contributions parameterised by $(N_s, N_D, N_v)$; parameter continuation tracks the NGFP as matter content varies
+
+![NGFP versus matter content](docs/images/matter_continuation.png)
+
+*Continuation of the NGFP coordinates and critical exponents under a sweep of $N_s$, with the Korver–Saueressig–Wang (2024) foliated bound shaded.*
 
 ---
 
@@ -629,6 +649,51 @@ The toolkit provides three novel physical mappings — hydraulic networks, quant
 ![Cross-analogue bridge](docs/images/cross_analogue_bridge.png)
 
 *Commutative diagram showing how different mathematical representations (classical RG, control theory / hydraulic, integral transforms, quantum computing) are connected. All paths through the diagram yield consistent critical exponents $\theta_i$.*
+
+### Transform domain
+
+| | | |
+|:---:|:---:|:---:|
+| ![Bode plot](docs/images/bode.png) | ![Pseudospectrum](docs/images/pseudospectrum.png) | ![Wavelet scalogram](docs/images/scalogram.png) |
+| Bode plot of the EH stability matrix | $\varepsilon$-pseudospectrum (robustness of $\theta_i$) | Wavelet scalogram of $g(t)$ |
+
+![Cross-method comparison](docs/images/comparison_table.png)
+
+*Side-by-side critical exponents from RG stability, transfer-matrix exponentiation, resolvent poles, and the hydraulic-impedance steady state — the cross-analogue bridge requires within-group bars to align.*
+
+### Quantum domain
+
+The toolkit ships canonical plotters for every quantum sub-domain (Koopman / Grover / VQRG / thermal). Examples below use the Einstein-Hilbert truncation:
+
+| | | |
+|:---:|:---:|:---:|
+| ![Koopman spectrum](docs/images/koopman_spectrum.png) | ![VQRG cost landscape](docs/images/vqrg_cost_landscape.png) | ![Partition function](docs/images/partition_function.png) |
+| Koopman eigenvalues from EDMD | VQRG cost landscape (2-parameter slice) | Heat-kernel partition function $Z(\beta)$ |
+
+```python
+# Three-line VQRG-cost-landscape recipe (qiskit needed for the circuit step)
+from asymsafety.quantum.vqrg.cost import VQRGCostFunction
+from asymsafety.quantum.visualization import plot_vqrg_cost_landscape
+fig = plot_vqrg_cost_landscape(cost, base_params, dims=(0, 1), n_grid=24)
+```
+
+See [`docs/visualization-guide.md`](docs/visualization-guide.md#6-quantum) for the full quantum gallery (Koopman modes, Grover success-probability and measurement distribution, quantum Fisher information, Gibbs purity, Seeley–DeWitt extraction).
+
+### Cosmology
+
+RG-improved Schwarzschild geometry and FLRW cosmology with the running couplings substituted for the classical $G_N$ and $\Lambda$:
+
+| | | |
+|:---:|:---:|:---:|
+| ![Lapse with horizons](docs/images/lapse_with_horizons.png) | ![Hawking temperature](docs/images/hawking_temperature.png) | ![FLRW evolution](docs/images/flrw_evolution.png) |
+| RG-improved Schwarzschild lapse with $r_\pm$ | Hawking $T_H(M)$ — peak then zero at $M_{\text{crit}}$ | $a(t)$, $H(t)$, and running couplings |
+
+```python
+from asymsafety.cosmology.rg_improved_bh import RGImprovedSchwarzschild
+from asymsafety.cosmology.visualization import plot_lapse_with_horizons
+bh = RGImprovedSchwarzschild(trajectory=eh_trajectory, M=2.0)
+fig = plot_lapse_with_horizons(bh)
+```
 
 ---
 

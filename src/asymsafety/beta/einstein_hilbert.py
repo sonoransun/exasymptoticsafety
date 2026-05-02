@@ -57,6 +57,22 @@ def build_eh_beta_system(d: int = 4,
 
     Returns:
         BetaFunctionSystem with β_g and β_λ.
+
+    See Also:
+        :func:`asymsafety.visualization.phase_portrait.annotated_eh_phase_portrait`
+            Publication-grade annotated 2D phase portrait of the
+            (g, λ) flow produced by this builder.
+        :func:`asymsafety.visualization.phase_portrait.separatrix_overlay`
+            Back-integrated UV-critical-surface separatrix overlay.
+        :func:`asymsafety.gui.visualization_3d.flow_trajectories_3d`
+            3D world-line view of the same flow.
+        :mod:`asymsafety.validation.reuter_1998`
+            Benchmark fixed-point coordinates ``g* ≈ 0.707, λ* ≈ 0.193``.
+
+    References:
+        Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].
+        Lauscher & Reuter (2002), Phys. Rev. D 65, 025013 [hep-th/0108040].
+        Litim (2001), Phys. Rev. D 64, 105007 [hep-th/0103195].
     """
     g = Symbol("g", positive=True)
     lam = Symbol("lambda", real=True)

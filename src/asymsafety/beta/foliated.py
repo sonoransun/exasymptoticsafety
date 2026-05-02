@@ -41,6 +41,23 @@ def build_foliated_eh_beta_system(
 
     Returns:
         BetaFunctionSystem with β_g, β_λ, β_{λ_ADM}.
+
+    See Also:
+        :func:`asymsafety.gui.visualization_3d.foliated_phase_portrait_3d`
+            3D phase portrait of the (g, λ, λ_ADM) flow with the
+            full-Diff-restoration plane highlighted.
+        :func:`asymsafety.gui.visualization_3d.fixed_point_stability_3d`
+            Local zoom on the foliated NGFP.
+        :mod:`asymsafety.validation.manrique_2011`
+            Benchmark coordinates ``g* ≈ 0.96, λ* ≈ 0.20, λ_ADM* = 1.0``.
+        :mod:`asymsafety.validation.lorentzian_2024`
+            Lorentzian-signature confirmation of the NGFP.
+
+    References:
+        Manrique, Rechenberger & Saueressig (2011),
+            Phys. Rev. Lett. 106, 251302 [1003.5129].
+        Biemans et al. (2017), JHEP 05, 093 [1609.02803].
+        Saueressig et al. (2025), Phys. Rev. D 111, 106007 [2501.03752].
     """
     g = Symbol("g", positive=True)
     lam = Symbol("lambda", real=True)

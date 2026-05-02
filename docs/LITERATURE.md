@@ -4,6 +4,7 @@ A structured survey of recent scientific papers expanding on the physics and com
 
 ---
 
+<a id="lorentzian-foliated"></a>
 ## 1. Lorentzian Signature & Foliated Gravity
 
 These papers directly extend the foliated ADM formulation in `beta/foliated.py` and the Manrique et al. (2011) benchmarks in `validation/`.
@@ -28,6 +29,8 @@ Studies the Wick rotation from Euclidean to Lorentzian signature spacetimes with
 
 **Relevance**: Directly extends `beta/foliated.py`. Confirms $\lambda_{\mathrm{ADM}} \to 1$ (full-Diff restoration) under Wick rotation. New Lorentzian coefficients could be added to the existing foliated beta functions.
 
+**Figures**: [`foliated_3d`](images/foliated_3d.caption.md), [`fp_stability_3d`](images/fp_stability_3d.caption.md).
+
 ---
 
 ### Korver, Saueressig & Wang (2024)
@@ -38,6 +41,8 @@ Phys. Lett. B **855**, 138789 [[2402.01260](https://arxiv.org/abs/2402.01260)]
 Derives bounds on the number of matter fields compatible with asymptotic safety in the foliated setting. The flow is driven by 3- and 4-point vertices from the foliated Einstein–Hilbert action supplemented by minimally coupled scalar and vector fields. An intriguing feature is the presence of an IR fixed point for the graviton mass that prevents the squared mass from taking negative values — this persists for any number of matter fields.
 
 **Relevance**: Extends `beta/matter.py` with foliated matter bounds. New validation benchmarks for the number of allowed matter fields.
+
+**Figures**: [`matter_continuation`](images/matter_continuation.caption.md).
 
 ---
 
@@ -52,6 +57,7 @@ Applies the fluctuation approach (background-field split with independent dynami
 
 ---
 
+<a id="vertex-expansions"></a>
 ## 2. Vertex Expansions & Momentum-Dependent Couplings
 
 These papers extend the trace evaluation and anomalous dimension methods in `frg/traces.py` and `frg/anomalous_dim.py`.
@@ -85,10 +91,15 @@ Introduces momentum-dependent form factors that modify the UV graviton propagato
 
 Shows that momentum-dependent field redefinitions can eliminate ghost poles that appear in higher-derivative truncations. Evidence that the asymptotically safe fixed point may not feature extra ghost degrees of freedom.
 
+<a id="quadratic"></a>
+
 **Relevance**: Directly addresses unitarity concerns with the quadratic gravity truncation in `beta/quadratic.py`. Suggests the ghost poles in the 4th-order propagator may be artefacts of the truncation.
+
+**Figures**: [`quadratic_pairwise`](images/quadratic_pairwise.caption.md).
 
 ---
 
+<a id="matter-coupling"></a>
 ## 3. Matter Coupling & Phenomenology
 
 These papers extend the matter coupling computations in `beta/matter.py`.
@@ -101,6 +112,8 @@ In *Handbook of Quantum Gravity*, Springer [[2212.07456](https://arxiv.org/abs/2
 Comprehensive review of gravity-matter fixed points. Provides updated bounds on the matter content $(N_s, N_D, N_v)$ compatible with asymptotic safety in various truncation schemes. Discusses the interplay between gravitational and matter beta functions.
 
 **Relevance**: Directly updates the matter bounds in `beta/matter.py` and provides new reference values for validation.
+
+**Figures**: [`matter_continuation`](images/matter_continuation.caption.md).
 
 ---
 
@@ -137,6 +150,7 @@ Connects asymptotic safety to swampland conjectures and positivity bounds derive
 
 ---
 
+<a id="black-holes-cosmology"></a>
 ## 4. Black Holes & Cosmological Applications
 
 These papers represent new application directions for the running couplings computed by this project.
@@ -153,6 +167,8 @@ Comprehensive review of quantum-corrected black hole solutions constructed via R
 
 **Relevance**: The running couplings $g(k)$, $\lambda(k)$ computed by this project can be directly inserted into the RG improvement procedure to generate quantum-corrected black hole metrics.
 
+**Figures**: [`running_newton_constant`](images/running_newton_constant.caption.md), [`lapse_with_horizons`](images/lapse_with_horizons.caption.md), [`classical_vs_rg_lapse`](images/classical_vs_rg_lapse.caption.md), [`hawking_temperature`](images/hawking_temperature.caption.md).
+
 ---
 
 ### Platania (2025)
@@ -163,6 +179,8 @@ Comprehensive review of quantum-corrected black hole solutions constructed via R
 Shows that emergent inflation and dynamical dark energy can arise from the asymptotically safe effective action. The $R^2$ terms from the quadratic truncation drive early-universe acceleration, while late-time acceleration emerges from quantum gravity effects.
 
 **Relevance**: Connects the $R^2$ coupling $\alpha$ from `beta/quadratic.py` to inflationary phenomenology. The Starobinsky model $R + \alpha R^2$ naturally arises from the quadratic truncation.
+
+**Figures**: [`flrw_evolution`](images/flrw_evolution.caption.md), [`quadratic_pairwise`](images/quadratic_pairwise.caption.md).
 
 ---
 
@@ -176,6 +194,7 @@ Comprehensive review including constraints from the Event Horizon Telescope (EHT
 
 ---
 
+<a id="lattice-continuum"></a>
 ## 5. Lattice–Continuum Connection
 
 These papers provide independent verification of the FRG approach used in this project.
@@ -202,6 +221,7 @@ Review of CDT status including the spectral dimension reduction from $d_s \appro
 
 ---
 
+<a id="reviews"></a>
 ## 6. Systematic Reviews & Conceptual Assessments
 
 ### Bonanno, Eichhorn, Gies, Pawlowski, Percacci, Reuter, Saueressig & Vacca (2020)
@@ -212,6 +232,8 @@ Front. Phys. **8**, 269 [[2004.06810](https://arxiv.org/abs/2004.06810)]
 Multi-author critical assessment of the asymptotic safety program by leading researchers. Addresses: convergence of truncation schemes, scheme/gauge dependence, the role of essential vs. inessential couplings, unitarity, and predictivity. Identifies the key open questions for the program.
 
 **Relevance**: Essential context document. The open questions identified here (scheme dependence, convergence, unitarity) directly motivate the validation benchmarks and multiple-regulator approach implemented in this project.
+
+**Figures**: [`asymptotic_safety_concept`](images/asymptotic_safety_concept.caption.md), [`eh_phase_portrait`](images/eh_phase_portrait.caption.md), [`comparison_table`](images/comparison_table.caption.md), [`pseudospectrum`](images/pseudospectrum.caption.md).
 
 ---
 

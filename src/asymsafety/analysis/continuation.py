@@ -4,6 +4,16 @@ Useful for studying how the Reuter fixed point changes with:
     - Number of matter fields (N_s, N_D, N_v)
     - Gauge parameters (α, β)
     - Spacetime dimension d (near d=4)
+
+See Also
+--------
+:func:`asymsafety.visualization.fixed_point_plot.plot_critical_exponents`
+    Two-panel ``Re(θ_i)`` / ``Im(θ_i)`` plot along the continuation.
+:func:`asymsafety.visualization.fixed_point_plot.plot_fixed_point_locations`
+    Fixed-point coordinates ``g_i^*`` along the same continuation.
+:func:`asymsafety.visualization.fixed_point_plot.plot_matter_content_continuation`
+    Specialised plot for matter-content sweeps with the Korver
+    (2024) bound shaded.
 """
 
 from __future__ import annotations

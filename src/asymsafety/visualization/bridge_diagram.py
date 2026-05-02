@@ -118,14 +118,41 @@ def _curved_arrow(
 def cross_analogue_bridge_diagram(
     figsize: tuple[float, float] = (10, 8),
 ) -> Figure:
-    """Commutative diagram connecting four analogue representations.
+    r"""Commutative diagram connecting four analogue representations of RG flow.
 
-    Boxes: Classical RG (top), Hydraulic / Control Theory (right),
-    Integral Transforms (bottom), Quantum Computing (left).
-    Arrows show the mathematical bridges between domains.
+    Physics
+    -------
+    The package's :class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`
+    enforces a commutative diagram: every path through the boxes
+    (classical RG ↔ hydraulic network ↔ quantum circuit ↔ integral
+    transforms) yields the same critical exponents ``theta_i`` at a
+    fixed point. Boxes: Classical RG (top), Hydraulic / Control Theory
+    (right), Integral Transforms (bottom), Quantum Computing (left).
+    Arrows show the mathematical bridges between domains. Used as the
+    cover-figure for the cross-analogue subsystem.
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(10, 8)``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Wetterich (1993), Phys. Lett. B 301, 90 — exact RG equation
+      (anchor of the classical-RG box).
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].
+    - See ``docs/LITERATURE.md`` and the README section
+      "Physical Computational Analogues".
+
+    See Also
+    --------
+    :func:`hydraulic_analogy_diagram`
+        Side-by-side companion comparing RG and hydraulic networks.
+    :class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`
+        Numerical implementation of the diagram.
     """
     apply_style()
     fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
@@ -256,14 +283,38 @@ def cross_analogue_bridge_diagram(
 def hydraulic_analogy_diagram(
     figsize: tuple[float, float] = (14, 6),
 ) -> Figure:
-    """Side-by-side comparison of RG flow and a hydraulic network.
+    r"""Side-by-side comparison of RG flow and a hydraulic network.
 
-    Left panel: schematic vector field, NGFP, and trajectories.
+    Physics
+    -------
+    Maps RG-flow concepts onto a control-theoretic / hydraulic
+    framework: couplings ``g_i`` ↔ pressures ``P_i``, beta functions
+    ↔ flow equations, fixed points ↔ steady states, regulators ↔
+    valves, critical exponents ↔ impedance eigenvalues. Left panel:
+    schematic RG vector field with the NGFP and inflow trajectories.
     Right panel: pipe network with nodes, pressures, and flow arrows.
     Centre: correspondence table with double-headed arrows.
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(14, 6)``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - See README "Physical Computational Analogues".
+    - The hydraulic mapping itself is documented in
+      :class:`asymsafety.hydraulic.mapping.RGToHydraulicMapper`.
+
+    See Also
+    --------
+    :func:`asymsafety.hydraulic.visualization.plot_hydraulic_network`
+        Data-driven plot of the actual generated network.
+    :func:`cross_analogue_bridge_diagram`
+        Higher-level commutative-diagram view.
     """
     apply_style()
 

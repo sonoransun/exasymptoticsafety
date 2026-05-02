@@ -28,25 +28,44 @@ def plot_hydraulic_network(
     pressures: dict[str, float] | None = None,
     ax: plt.Axes | None = None,
 ) -> Figure:
-    """Plot the hydraulic network graph.
+    r"""Plot the hydraulic network graph.
 
-    Nodes are drawn as circles coloured by pressure (using the
-    ``coolwarm`` colourmap).  Pipes are drawn as arrows whose width
-    is proportional to the pipe diameter.  Reservoir nodes are shown
-    as squares.
+    Physics
+    -------
+    The hydraulic mapping (see
+    :class:`asymsafety.hydraulic.mapping.RGToHydraulicMapper`) sends
+    each coupling ``g_i`` to a node carrying pressure ``P_i``, each
+    beta-function term to a pipe between nodes, and each regulator to
+    a valve. Spring-embedded layout positions the nodes; pressure is
+    rendered as the node colour with the shared
+    :data:`asymsafety.visualization.style.CMAP_PRESSURE` colourmap.
+    Reservoir nodes are drawn as grey squares; pipe widths scale with
+    the pipe diameter.
 
-    Layout is computed using a simple spring-embedding algorithm
-    implemented with pure numpy (no networkx dependency).
+    Parameters
+    ----------
+    network : :class:`~asymsafety.hydraulic.network.HydraulicNetwork`
+        Network produced by the hydraulic mapping.
+    pressures : dict, optional
+        Override the per-node pressure values used for colouring. If
+        ``None``, the pressures stored on each node are used.
+    ax : :class:`matplotlib.axes.Axes`, optional
+        Axes to draw on; a new figure is created when ``None``.
 
-    Args:
-        network: The network to visualise.
-        pressures: Optional pressure values for colouring nodes.
-            If ``None``, the pressures stored in the nodes are used.
-        ax: Matplotlib axes to draw on.  A new figure is created if
-            ``None``.
+    Returns
+    -------
+    matplotlib.figure.Figure
 
-    Returns:
-        The matplotlib :class:`Figure` containing the plot.
+    References
+    ----------
+    - See README section "Physical Computational Analogues".
+
+    See Also
+    --------
+    :func:`asymsafety.visualization.bridge_diagram.hydraulic_analogy_diagram`
+        Schematic side-by-side RG ↔ hydraulic comparison.
+    :func:`plot_transient_response`
+        Companion time-series plot.
     """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
@@ -162,17 +181,31 @@ def plot_transient_response(
     trajectory: HydraulicTrajectory,
     ax: plt.Axes | None = None,
 ) -> Figure:
-    """Plot pressure vs time at each node.
+    r"""Plot pressure vs time at each node of the hydraulic network.
 
-    One line per node with a legend showing node names.
+    Physics
+    -------
+    Maps RG-time evolution of couplings onto the transient response of
+    pressures in the analogue hydraulic system. Steady-state pressure
+    levels correspond to the fixed-point coordinates ``g_i^*``; the
+    relaxation rate of each pressure curve mirrors the (modulus of
+    the) corresponding critical exponent.
 
-    Args:
-        trajectory: The :class:`HydraulicTrajectory` to plot.
-        ax: Matplotlib axes to draw on.  A new figure is created if
-            ``None``.
+    Parameters
+    ----------
+    trajectory : :class:`~asymsafety.hydraulic.simulator.HydraulicTrajectory`
+    ax : :class:`matplotlib.axes.Axes`, optional
 
-    Returns:
-        The matplotlib :class:`Figure` containing the plot.
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    See Also
+    --------
+    :func:`plot_hydraulic_network`
+        Spatial network view of the same system.
+    :func:`asymsafety.visualization.phase_portrait.flow_diagram`
+        Direct RG-flow analogue: running couplings vs scale.
     """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(10, 6))

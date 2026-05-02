@@ -80,6 +80,16 @@ def analyze_stability(system: BetaFunctionSystem,
 
     Returns:
         Complete StabilityAnalysis.
+
+    See Also:
+        :func:`asymsafety.gui.visualization_3d.fixed_point_stability_3d`
+            3D zoom on a single fixed point with eigenvector arrows
+            consuming this :class:`StabilityAnalysis`.
+        :func:`asymsafety.visualization.fixed_point_plot.plot_critical_exponents`
+            2D plot of ``θ_i`` along a continuation parameter.
+        :func:`asymsafety.visualization.phase_portrait.annotated_eh_phase_portrait`
+            EH phase portrait with eigenvector arrows annotated by
+            ``theta_i`` values.
     """
     # Compute stability matrix
     M = system.jacobian_numerical(fp.location)

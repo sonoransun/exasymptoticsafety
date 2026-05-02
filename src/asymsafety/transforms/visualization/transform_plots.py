@@ -1,4 +1,23 @@
-"""Plotting utilities for transforms: Bode plots, scalograms, pseudospectra."""
+"""Plotting utilities for transforms: Bode plots, scalograms, pseudospectra.
+
+These plots accompany the integral- and linear-transform domain of the
+cross-analogue bridge (see
+:class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`).
+Each transform exposes a different facet of RG flow:
+
+- Bode plots → frequency response of the impedance bridge.
+- Scalograms → wavelet localisation of the running couplings in
+  time-scale space.
+- Pseudospectra → robustness of the spectrum (eigenvalues are critical
+  exponents) under perturbations.
+- Cross-method comparison → critical exponents from every analogue
+  side-by-side; rows must agree at the NGFP for the bridge to commute.
+
+References
+----------
+- See README "Physical Computational Analogues".
+- ``docs/LITERATURE.md`` § resolvent / pseudospectra references.
+"""
 
 from __future__ import annotations
 
@@ -23,18 +42,35 @@ def plot_bode(
     entry: tuple[int, int] = (0, 0),
     ax: matplotlib.axes.Axes | None = None,
 ) -> matplotlib.figure.Figure:
-    """Bode plot (magnitude + phase) for a specific transfer function entry.
+    r"""Bode plot (magnitude + phase) for a transfer-function entry.
 
-    Args:
-        bode_data: Dict from :meth:`ImpedanceBridge.bode_data` with keys
-            ``"omega"``, ``"magnitude"``, ``"phase"``.
-        entry: ``(i, j)`` indices of the transfer function matrix.
-        ax: Optional axes.  When *None*, a new two-subplot figure is
-            created (magnitude on top, phase below).  When provided,
-            magnitude is plotted on *ax* and phase on a twin y-axis.
+    Physics
+    -------
+    The impedance bridge maps the linearised RG flow at a fixed point
+    to a multi-input multi-output transfer function ``H(s)``. Its
+    poles are the eigenvalues of the stability matrix; thus poles in
+    the right half-plane indicate UV-attractive (relevant) directions.
+    The magnitude / phase plot at logarithmic frequency renders the
+    impedance directly.
 
-    Returns:
-        The matplotlib figure containing the plot.
+    Parameters
+    ----------
+    bode_data : dict
+        Result of :meth:`ImpedanceBridge.bode_data` with keys
+        ``"omega"``, ``"magnitude"``, ``"phase"``.
+    entry : tuple, default ``(0, 0)``
+        Matrix entry ``(i, j)``.
+    ax : :class:`matplotlib.axes.Axes`, optional
+        Axes to draw magnitude on; phase goes on a twin axis when
+        provided. When ``None``, a new two-row subplot is created.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    See Also
+    --------
+    :class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`
     """
     i, j = entry
 
@@ -70,16 +106,24 @@ def plot_scalogram(
     coupling_index: int = 0,
     ax: matplotlib.axes.Axes | None = None,
 ) -> matplotlib.figure.Figure:
-    """Plot wavelet scalogram |W(a,b)|^2.
+    r"""Plot wavelet scalogram :math:`|W(a, b)|^2` of a running coupling.
 
-    Args:
-        wavelet_result: :class:`WaveletResult` from
-            ``RGFlowWavelet.transform()``.
-        coupling_index: Which coupling to plot.
-        ax: Optional axes; a new figure is created when *None*.
+    Physics
+    -------
+    A wavelet decomposition localises the running coupling in both
+    RG-time ``b`` and scale ``a``. Sharp horizontal bands at small
+    scales reflect rapid crossover regimes; bright tails at large
+    scales mark the asymptotic plateau toward the fixed point.
 
-    Returns:
-        The matplotlib figure containing the plot.
+    Parameters
+    ----------
+    wavelet_result : :class:`~asymsafety.transforms._types.WaveletResult`
+    coupling_index : int, default ``0``
+    ax : :class:`matplotlib.axes.Axes`, optional
+
+    Returns
+    -------
+    matplotlib.figure.Figure
     """
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -114,18 +158,29 @@ def plot_pseudospectrum(
     n_grid: int = 100,
     ax: matplotlib.axes.Axes | None = None,
 ) -> matplotlib.figure.Figure:
-    """Plot pseudospectrum contours.
+    r"""Plot the resolvent's :math:`\varepsilon`-pseudospectrum.
 
-    Args:
-        resolvent_op: :class:`ResolventOperator` instance.
-        epsilon_values: Contour levels; defaults to ``[1.0, 0.1, 0.01]``.
-        real_range: ``(re_min, re_max)`` bounds on the real axis.
-        imag_range: ``(im_min, im_max)`` bounds on the imaginary axis.
-        n_grid: Grid resolution per axis.
-        ax: Optional axes; a new figure is created when *None*.
+    Physics
+    -------
+    The pseudospectrum
+    ``Lambda_eps(M) = { z : ||(zI - M)^{-1}|| > 1/eps }`` is the set of
+    spectral values that perturbations of size ``eps`` can produce.
+    Thin pseudospectral contours indicate well-conditioned eigenvalues
+    (robust critical exponents); fat contours indicate that small
+    truncation / regulator changes can shift exponents substantially.
 
-    Returns:
-        The matplotlib figure containing the plot.
+    Parameters
+    ----------
+    resolvent_op : :class:`~asymsafety.transforms.linear.resolvent.ResolventOperator`
+    epsilon_values : list of float, optional
+        Contour levels. Defaults to ``[1.0, 0.1, 0.01]``.
+    real_range, imag_range : tuple
+    n_grid : int, default ``100``
+    ax : :class:`matplotlib.axes.Axes`, optional
+
+    Returns
+    -------
+    matplotlib.figure.Figure
     """
     if epsilon_values is None:
         epsilon_values = [1.0, 0.1, 0.01]
@@ -175,16 +230,32 @@ def plot_comparison_table(
     table: dict,
     ax: matplotlib.axes.Axes | None = None,
 ) -> matplotlib.figure.Figure:
-    """Plot critical exponents from all methods side-by-side as bar chart.
+    r"""Cross-method bar chart of critical exponents.
 
-    Args:
-        table: Dict from
-            :meth:`CrossAnalogueBridge.full_comparison_table`, mapping
-            method names to arrays of critical exponents (or *None*).
-        ax: Optional axes; a new figure is created when *None*.
+    Physics
+    -------
+    Side-by-side comparison of ``Re(theta_i)`` computed via different
+    analogues (classical RG, Koopman / quantum, hydraulic / impedance,
+    integral transforms). The cross-analogue bridge requires that all
+    methods agree at the NGFP — the bar groups should align within
+    numerical tolerance, with the relevant / irrelevant shaded bands
+    indicating the sign of each exponent.
 
-    Returns:
-        The matplotlib figure containing the plot.
+    Parameters
+    ----------
+    table : dict
+        Output of
+        :meth:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge.full_comparison_table`,
+        mapping method names to arrays of critical exponents.
+    ax : :class:`matplotlib.axes.Axes`, optional
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    See Also
+    --------
+    :class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`
     """
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 6))

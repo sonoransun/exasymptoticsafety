@@ -3,6 +3,17 @@
 Integrates the RG flow equations using scipy.integrate.solve_ivp,
 storing the trajectory as RGTrajectory objects for analysis and
 visualization.
+
+See Also
+--------
+:func:`asymsafety.visualization.phase_portrait.flow_diagram`
+    2D plot of running couplings vs RG time produced from a list of
+    :class:`RGTrajectory` instances.
+:func:`asymsafety.gui.visualization_3d.flow_trajectories_3d`
+    3D world-line view (``z`` axis = ``t = log(k/k_0)``) of the same
+    trajectories.
+:func:`asymsafety.gui.visualization_3d.flow_basin_3d`
+    Monte-Carlo basin visualisation built on top of this integrator.
 """
 
 from __future__ import annotations

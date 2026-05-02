@@ -5,6 +5,17 @@ asymptotic safety, the Wetterich equation, regulator shape functions,
 and fixed-point stability.  These are *pedagogical* diagrams — they
 do not require running full FRG computations (except
 :func:`regulator_comparison`, which evaluates symbolic shape functions).
+
+References
+----------
+- Weinberg (1979), in *General Relativity: An Einstein Centenary
+  Survey*, 790 — the asymptotic-safety conjecture.
+- Wetterich (1993), Phys. Lett. B 301, 90 — exact RG flow equation.
+- Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030] — first NGFP.
+- Litim (2001), Phys. Rev. D 64, 105007 [hep-th/0103195] — optimised
+  regulator with closed-form beta functions.
+- Bonanno et al. (2020), Front. Phys. 8, 269 [2004.06810] — review.
+- See ``docs/LITERATURE.md`` for the full bibliography.
 """
 
 from __future__ import annotations
@@ -26,7 +37,9 @@ from asymsafety.visualization.style import (
     COLOR_TRAJECTORY,
     COLOR_LITIM,
     COLOR_EXPONENTIAL,
+    add_reference_box,
     apply_style,
+    format_arxiv,
 )
 
 
@@ -72,15 +85,44 @@ def _add_flow_arrow(
 
 def asymptotic_safety_concept(
     figsize: tuple[float, float] = (12, 5),
+    *,
+    show_references: bool = True,
 ) -> Figure:
-    """Two-panel figure explaining the core idea of asymptotic safety.
+    r"""Two-panel figure explaining the core idea of asymptotic safety.
 
-    Left panel: theory space with GFP, NGFP, trajectories, UV-critical
-    surface.  Right panel: running Newton coupling comparing
-    perturbative blow-up and asymptotically safe plateau.
+    Physics
+    -------
+    Left panel: schematic theory space showing the Gaussian (GFP) and
+    non-Gaussian (NGFP) fixed points, RG flow trajectories, and the
+    UV-critical surface — the codimension-``d_irr`` set of trajectories
+    that hit the NGFP in the UV. Right panel: the dimensionless Newton
+    coupling ``g(k) = G(k) k^2`` as a function of scale, contrasting
+    the perturbative Landau-pole divergence (red dashed) with the
+    asymptotically safe plateau ``g -> g^* ≈ 0.7`` (blue).
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Weinberg (1979), in *General Relativity: An Einstein Centenary
+      Survey*, 790 — original asymptotic-safety conjecture.
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030] — first
+      explicit NGFP calculation.
+    - Bonanno et al. (2020), Front. Phys. 8, 269 [2004.06810] — review.
+
+    See Also
+    --------
+    :func:`asymsafety.visualization.phase_portrait.annotated_eh_phase_portrait`
+        Data-driven counterpart on the (g, lambda) plane.
+    :func:`fixed_point_stability_concept`
+        Companion diagram for relevant / irrelevant directions.
     """
     apply_style()
     fig, (ax_left, ax_right) = plt.subplots(
@@ -208,6 +250,17 @@ def asymptotic_safety_concept(
         fontsize=9, color="0.4", va="top", ha="right",
     )
 
+    if show_references:
+        add_reference_box(
+            ax_left,
+            [
+                format_arxiv("Weinberg (1979)", "—"),
+                format_arxiv("Reuter (1998)", "hep-th/9605030"),
+                format_arxiv("Bonanno et al. (2020)", "2004.06810"),
+            ],
+            loc="lower right",
+        )
+
     return fig
 
 
@@ -216,15 +269,41 @@ def asymptotic_safety_concept(
 
 def regulator_comparison(
     figsize: tuple[float, float] = (12, 5),
+    *,
+    show_references: bool = True,
 ) -> Figure:
-    """Two-panel figure comparing Litim and Exponential regulators.
+    r"""Two-panel figure comparing Litim and Exponential regulators.
 
-    Left panel plots the shape functions r(y) from symbolic expressions.
-    Right panel presents a tabular comparison of key properties using
-    matplotlib text and coloured patches.
+    Physics
+    -------
+    The IR regulator ``R_k(z)`` damps low-momentum modes ``z < k^2``
+    and drives the Wetterich flow. The optimised Litim regulator
+    ``R_k(z) = (k^2 - z) Theta(k^2 - z)`` (left panel, blue) has compact
+    support and yields rational, closed-form beta functions, while the
+    smooth ``C^infty`` exponential regulator (orange) requires numerical
+    integration. Their qualitative differences and shared physics
+    content (universal critical exponents) are summarised in the right
+    panel.
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Wetterich (1993), Phys. Lett. B 301, 90 — exact RG equation.
+    - Litim (2001), Phys. Rev. D 64, 105007 [hep-th/0103195] — optimised
+      regulator with rational beta functions.
+
+    See Also
+    --------
+    :func:`asymsafety.visualization.phase_portrait.regulator_comparison_panels`
+        Phase-portrait-level comparison of the same regulators.
     """
     import sympy
     from sympy import Symbol
@@ -342,6 +421,16 @@ def regulator_comparison(
         y = top_y - (i + 0.5) * row_h
         ax.axhline(y, color="0.85", lw=0.6, xmin=0.03, xmax=0.97)
 
+    if show_references:
+        add_reference_box(
+            ax_left,
+            [
+                format_arxiv("Wetterich (1993)", "—"),
+                format_arxiv("Litim (2001)", "hep-th/0103195"),
+            ],
+            loc="upper right",
+        )
+
     return fig
 
 
@@ -350,15 +439,41 @@ def regulator_comparison(
 
 def fixed_point_stability_concept(
     figsize: tuple[float, float] = (12, 5),
+    *,
+    show_references: bool = True,
 ) -> Figure:
-    """Two-panel figure explaining fixed-point stability.
+    r"""Two-panel figure explaining fixed-point stability and predictivity.
 
-    Left panel: linearised 2D phase portrait with relevant / irrelevant
-    eigendirections.  Right panel: bar chart of schematic critical
-    exponents.
+    Physics
+    -------
+    Linearised flow near a fixed point ``g^*`` is governed by the
+    stability matrix ``M_ij = d beta_i / d g_j``; critical exponents
+    ``theta_i = -eig(M)`` separate UV-attractive (relevant,
+    ``Re theta > 0``) from UV-repulsive (irrelevant, ``Re theta < 0``)
+    directions. The number of relevant directions equals the number of
+    free parameters in the asymptotically safe theory — its
+    predictivity. Left panel: schematic linearised flow with shaded
+    UV-critical surface. Right panel: bar chart of representative
+    ``theta_i`` values colour-coded by relevance.
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030]
+    - Bonanno et al. (2020), Front. Phys. 8, 269 [2004.06810]
+
+    See Also
+    --------
+    :func:`asymsafety.gui.visualization_3d.fixed_point_stability_3d`
+        Data-driven 3D counterpart at a real fixed point.
     """
     apply_style()
     fig, (ax_left, ax_right) = plt.subplots(
@@ -513,6 +628,16 @@ def fixed_point_stability_concept(
                   alpha=0.9),
     )
 
+    if show_references:
+        add_reference_box(
+            ax_left,
+            [
+                format_arxiv("Reuter (1998)", "hep-th/9605030"),
+                format_arxiv("Bonanno et al. (2020)", "2004.06810"),
+            ],
+            loc="lower right",
+        )
+
     return fig
 
 
@@ -521,14 +646,35 @@ def fixed_point_stability_concept(
 
 def wetterich_equation_diagram(
     figsize: tuple[float, float] = (10, 4),
+    *,
+    show_references: bool = True,
 ) -> Figure:
-    """Schematic of the Wetterich equation with a one-loop diagram.
+    r"""Schematic of the Wetterich equation with a one-loop diagram.
 
-    Draws the exact RG equation in LaTeX, a Feynman-diagram-style
-    one-loop circle with a regulator insertion, and explanatory labels.
+    Physics
+    -------
+    The Wetterich equation
+    ``d_t Gamma_k = (1/2) Tr [(Gamma_k^(2) + R_k)^{-1} d_t R_k]``
+    is the exact one-loop RG flow equation for the effective average
+    action ``Gamma_k``: the trace runs over the full regularised
+    propagator ``(Gamma_k^(2) + R_k)^{-1}`` with a single regulator
+    insertion ``d_t R_k`` (cross). Only modes near the running scale
+    ``k`` contribute to the flow.
 
-    Returns:
-        Matplotlib :class:`~matplotlib.figure.Figure`.
+    Parameters
+    ----------
+    figsize : tuple, default ``(10, 4)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Wetterich (1993), Phys. Lett. B 301, 90 — exact RG equation.
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030] —
+      application to gravity.
     """
     apply_style()
     fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
@@ -618,6 +764,14 @@ def wetterich_equation_diagram(
         ax.text(
             ann_x, y_pos, text,
             fontsize=10, ha="center", va="center", color="0.2",
+        )
+
+    if show_references:
+        ax.text(
+            5.0, 0.25,
+            "Wetterich (1993), Phys. Lett. B 301, 90",
+            fontsize=8, ha="center", va="center", color="0.45",
+            style="italic",
         )
 
     return fig

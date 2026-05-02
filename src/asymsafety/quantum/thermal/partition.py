@@ -38,6 +38,16 @@ class PartitionFunctionEstimator:
         self._gibbs = gibbs
         self._d = d
 
+    @property
+    def gibbs(self) -> GibbsStatePreparer:
+        """The wrapped Gibbs-state preparer (used by partition-function plots)."""
+        return self._gibbs
+
+    @property
+    def d(self) -> int:
+        """Spacetime dimension."""
+        return self._d
+
     # ------------------------------------------------------------------
     # Coefficient extraction
     # ------------------------------------------------------------------

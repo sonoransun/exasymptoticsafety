@@ -12,7 +12,11 @@ dependencies = [
     "sympy>=1.13",
     "numpy>=1.26",
     "scipy>=1.12",
-    "matplotlib>=3.8",
+    # Pinned upper bound: hash-regression baselines in tests/baselines/
+    # are matplotlib-version-sensitive. Refresh with
+    # `python scripts/generate_figures.py --update-baselines` when
+    # bumping the upper bound.
+    "matplotlib>=3.8,<3.10",
 ]
 
 [project.optional-dependencies]

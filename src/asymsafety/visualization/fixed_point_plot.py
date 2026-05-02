@@ -1,4 +1,24 @@
-"""Fixed point and critical exponent visualization."""
+"""Fixed point and critical exponent visualization.
+
+Public API
+----------
+- :func:`plot_critical_exponents` — two-panel ``Re(theta_i)`` /
+  ``Im(theta_i)`` plot along a continuation parameter, with numeric
+  values shown inline in the legend.
+- :func:`plot_fixed_point_locations` — fixed-point coordinates
+  ``g_i^*`` along a continuation parameter (each coupling on its own
+  axes; shared x).
+- :func:`plot_matter_content_continuation` — specialised plot for
+  matter-content sweeps (``N_s``, ``N_v``, ``N_D``) overlaying the
+  bounds from :mod:`asymsafety.validation.korver_2024`.
+
+References
+----------
+- Codello et al. (2009), Ann. Phys. 324, 414 [0812.0785]
+- Dona et al. (2014), Phys. Rev. D 89, 084035 [1311.2898]
+- Korver, Saueressig & Wang (2024), Phys. Lett. B 855, 138789 [2402.01260]
+- See ``docs/LITERATURE.md``.
+"""
 
 from __future__ import annotations
 
@@ -11,22 +31,63 @@ from asymsafety.analysis.fixed_points import FixedPoint
 from asymsafety.visualization.style import (
     COLOR_RELEVANT,
     COLOR_IRRELEVANT,
+    add_reference_box,
     coupling_label,
+    format_arxiv,
 )
 
 
 def plot_critical_exponents(
     continuation: ContinuationResult,
     figsize: tuple[float, float] = (10, 6),
+    *,
+    show_numeric_legend: bool = True,
+    show_references: bool = False,
 ) -> Figure:
-    """Plot critical exponents as a function of an external parameter.
+    r"""Plot critical exponents along a continuation parameter.
 
-    Args:
-        continuation: Result of parameter continuation.
-        figsize: Figure size.
+    Physics
+    -------
+    The critical exponents ``theta_i = -eig(M)`` (with
+    ``M_ij = d beta_i / d g_j`` evaluated at the fixed point) determine
+    UV relevance: ``Re(theta_i) > 0`` indicates a relevant direction,
+    ``Re(theta_i) < 0`` an irrelevant one. Tracking ``theta_i`` against
+    a continuation parameter (gauge, dimension, matter content)
+    diagnoses when the asymptotic-safety scenario gains or loses
+    relevant directions, and exposes the imaginary parts of complex-
+    conjugate pairs that signal spiral flow at the NGFP.
 
-    Returns:
-        Matplotlib Figure with two panels: Re(θ) and Im(θ).
+    Parameters
+    ----------
+    continuation : :class:`~asymsafety.analysis.continuation.ContinuationResult`
+        Result of a parameter sweep.
+    figsize : tuple, default ``(10, 6)``
+    show_numeric_legend : bool, default ``True``
+        Annotate the legend entries with the mean value of
+        ``Re(theta_i)`` across the continuation.
+    show_references : bool, default ``False``
+        Embed an inline citation box (Codello 2009, Dona 2014).
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Two-panel figure: top ``Re(theta_i)``, bottom ``Im(theta_i)``.
+
+    References
+    ----------
+    - Codello et al. (2009), Ann. Phys. 324, 414 [0812.0785]
+    - Dona et al. (2014), Phys. Rev. D 89, 084035 [1311.2898]
+    - See ``docs/LITERATURE.md``.
+
+    See Also
+    --------
+    :func:`plot_fixed_point_locations`
+        Coordinates ``g_i^*`` along the same continuation.
+    :func:`plot_matter_content_continuation`
+        Specialised plot for matter-content sweeps with reference
+        bounds from Korver et al. (2024).
+    :func:`asymsafety.gui.visualization_3d.fixed_point_stability_3d`
+        3D zoom on a single fixed point.
     """
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, sharex=True)
 
@@ -37,10 +98,21 @@ def plot_critical_exponents(
     colors = plt.cm.tab10(np.linspace(0, 1, n_exponents))
 
     for i in range(n_exponents):
-        ax1.plot(param, thetas[:, i].real, '-o', color=colors[i],
-                markersize=3, label=f"$\\theta_{i+1}$")
-        ax2.plot(param, thetas[:, i].imag, '-o', color=colors[i],
-                markersize=3)
+        re = thetas[:, i].real
+        im = thetas[:, i].imag
+
+        if show_numeric_legend:
+            mean_re = float(np.nanmean(re))
+            label_top = (
+                rf"$\theta_{i+1}$ "
+                rf"($\langle\mathrm{{Re}}\rangle={mean_re:+.2f}$)"
+            )
+        else:
+            label_top = rf"$\theta_{i+1}$"
+
+        ax1.plot(param, re, '-o', color=colors[i],
+                 markersize=3, label=label_top)
+        ax2.plot(param, im, '-o', color=colors[i], markersize=3)
 
     ax1.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
     ax2.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
@@ -67,6 +139,16 @@ def plot_critical_exponents(
     )
     ax1.set_ylim(y_lo, y_hi)
 
+    if show_references:
+        add_reference_box(
+            ax2,
+            [
+                format_arxiv("Codello et al. (2009)", "0812.0785"),
+                format_arxiv("Dona et al. (2014)", "1311.2898"),
+            ],
+            loc="lower right",
+        )
+
     fig.tight_layout()
     return fig
 
@@ -74,10 +156,48 @@ def plot_critical_exponents(
 def plot_fixed_point_locations(
     continuation: ContinuationResult,
     figsize: tuple[float, float] = (10, 4),
+    *,
+    reference_values: dict[str, float] | None = None,
 ) -> Figure:
-    """Plot fixed point coupling values as parameter varies."""
+    r"""Plot fixed-point coordinates as a continuation parameter varies.
+
+    Physics
+    -------
+    The location ``g_i^*(p)`` of the fixed point depends on a control
+    parameter ``p`` (matter content, gauge, dimension). Sudden jumps
+    or NaN segments indicate the NGFP merging with another fixed point
+    or disappearing — bounding the region of theory space compatible
+    with asymptotic safety.
+
+    Parameters
+    ----------
+    continuation : :class:`~asymsafety.analysis.continuation.ContinuationResult`
+    figsize : tuple, default ``(10, 4)``
+    reference_values : dict, optional
+        ``{coupling_name: reference_value}``. When supplied, draws a
+        dotted horizontal line at ``reference_value`` on each panel —
+        useful for overlaying e.g. the Reuter (1998) ``g* ≈ 0.707``
+        coordinate when the continuation is around the canonical EH
+        truncation.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        One panel per coupling; shared x axis.
+
+    References
+    ----------
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030]
+    - Manrique et al. (2011), Phys. Rev. Lett. 106, 251302 [1003.5129]
+    - See ``docs/LITERATURE.md``.
+
+    See Also
+    --------
+    :func:`plot_critical_exponents`
+        Critical exponents along the same continuation.
+    """
     fig, axes = plt.subplots(1, len(continuation.locations),
-                             figsize=figsize, squeeze=False)
+                             figsize=figsize, squeeze=False, sharex=True)
 
     for i, (name, values) in enumerate(continuation.locations.items()):
         ax = axes[0, i]
@@ -85,7 +205,145 @@ def plot_fixed_point_locations(
         ax.set_xlabel(continuation.parameter_name, fontsize=12)
         ax.set_ylabel(coupling_label(name).rstrip("$") + "^*$", fontsize=12)
         ax.grid(True, alpha=0.3)
+        if reference_values and name in reference_values:
+            ref = reference_values[name]
+            ax.axhline(
+                ref, color="0.45", linestyle=":", lw=1.2,
+                label=f"reference: {ref:.3f}",
+            )
+            ax.legend(fontsize=8, loc="best")
 
     fig.suptitle("Fixed Point Location", fontsize=14)
+    fig.tight_layout()
+    return fig
+
+
+def plot_matter_content_continuation(
+    continuation: ContinuationResult,
+    figsize: tuple[float, float] = (12, 7),
+    *,
+    bounds: dict[str, int] | None = None,
+    bounds_label: str = "Korver et al. (2024)",
+    bounds_arxiv: str = "2402.01260",
+) -> Figure:
+    r"""NGFP location and critical exponents vs matter content.
+
+    Physics
+    -------
+    Adding matter fields shifts the gravitational beta functions
+    through the matter-graviton interaction terms and changes the NGFP
+    coordinates. The NGFP ceases to exist beyond certain matter
+    content — Korver, Saueressig & Wang (2024) bound the foliated
+    truncation at roughly ``N_s <= 12`` minimally coupled scalars and
+    ``N_v <= 6`` gauge vectors. This figure plots ``g^*``, ``lambda^*``
+    and ``Re(theta_i)`` against the continuation parameter (typically
+    ``N_s``) and shades the region beyond the published bound.
+
+    Parameters
+    ----------
+    continuation : :class:`~asymsafety.analysis.continuation.ContinuationResult`
+        Result of a sweep against a matter-counting parameter.
+    figsize : tuple, default ``(12, 7)``
+    bounds : dict, optional
+        Per-parameter integer bound, e.g. ``{"N_s": 12}``. Defaults to
+        :data:`asymsafety.validation.korver_2024.FOLIATED_MATTER_BOUNDS`
+        for the parameter named in the continuation.
+    bounds_label : str
+        Citation label drawn near the bound region.
+    bounds_arxiv : str
+        arXiv ID for the citation.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Combined ``g^*``, ``lambda^*``, ``Re(theta_i)`` panels with
+        the matter bound shaded.
+
+    References
+    ----------
+    - Dona, Eichhorn & Percacci (2014), Phys. Rev. D 89, 084035 [1311.2898]
+    - Eichhorn & Schiffer (2022) [2212.07456]
+    - Korver, Saueressig & Wang (2024), Phys. Lett. B 855, 138789 [2402.01260]
+
+    See Also
+    --------
+    :mod:`asymsafety.validation.korver_2024`
+        Foliated and covariant matter bounds.
+    :func:`asymsafety.beta.matter.build_eh_matter_beta_system`
+        Builder for the matter-extended beta-function system.
+    """
+    if bounds is None:
+        try:
+            from asymsafety.validation.korver_2024 import FOLIATED_MATTER_BOUNDS
+            bounds = {
+                "N_s": int(FOLIATED_MATTER_BOUNDS.get("max_N_s", 12)),
+                "N_v": int(FOLIATED_MATTER_BOUNDS.get("max_N_v", 6)),
+            }
+        except Exception:
+            bounds = {}
+
+    locations = continuation.locations
+    thetas = continuation.critical_exponents_array
+    param = continuation.parameter_values
+
+    n_couplings = len(locations)
+    n_panels = n_couplings + 1  # one for theta
+
+    fig, axes = plt.subplots(
+        1, n_panels, figsize=figsize, squeeze=False, sharex=True,
+    )
+    axes = axes[0]
+
+    bound_value = bounds.get(continuation.parameter_name)
+
+    for i, (name, values) in enumerate(locations.items()):
+        ax = axes[i]
+        ax.plot(
+            param, values, 'o-', color=COLOR_RELEVANT,
+            markersize=4, lw=1.4,
+        )
+        ax.set_xlabel(continuation.parameter_name, fontsize=11)
+        ax.set_ylabel(coupling_label(name).rstrip("$") + "^*$", fontsize=12)
+        ax.grid(True, alpha=0.3)
+        if bound_value is not None:
+            ax.axvspan(
+                bound_value, max(np.nanmax(param), bound_value + 0.5),
+                color=COLOR_IRRELEVANT, alpha=0.12,
+                label=f"{bounds_label} bound",
+            )
+            ax.axvline(bound_value, color=COLOR_IRRELEVANT, ls="--", lw=1.2)
+            ax.legend(fontsize=8, loc="best")
+
+    # Theta panel
+    ax_t = axes[-1]
+    n_exponents = thetas.shape[1]
+    colors = plt.cm.tab10(np.linspace(0, 1, max(n_exponents, 1)))
+    for j in range(n_exponents):
+        ax_t.plot(
+            param, thetas[:, j].real, 'o-', color=colors[j],
+            markersize=3, lw=1.2, label=rf"$\theta_{j+1}$",
+        )
+    ax_t.axhline(0, color="gray", lw=0.8, ls="--")
+    ax_t.set_xlabel(continuation.parameter_name, fontsize=11)
+    ax_t.set_ylabel(r"Re($\theta_i$)", fontsize=12)
+    ax_t.legend(fontsize=8)
+    ax_t.grid(True, alpha=0.3)
+    if bound_value is not None:
+        ax_t.axvspan(
+            bound_value, max(np.nanmax(param), bound_value + 0.5),
+            color=COLOR_IRRELEVANT, alpha=0.12,
+        )
+        ax_t.axvline(bound_value, color=COLOR_IRRELEVANT, ls="--", lw=1.2)
+
+    add_reference_box(
+        axes[-1],
+        [format_arxiv(bounds_label, bounds_arxiv)],
+        loc="lower right",
+    )
+
+    fig.suptitle(
+        rf"Matter-content continuation: NGFP vs. ${continuation.parameter_name}$",
+        fontsize=13, fontweight="bold",
+    )
     fig.tight_layout()
     return fig

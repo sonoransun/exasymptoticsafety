@@ -55,6 +55,20 @@ def build_eh_matter_beta_system(
 
     Returns:
         BetaFunctionSystem with β_g and β_λ including matter.
+
+    See Also:
+        :func:`asymsafety.visualization.fixed_point_plot.plot_matter_content_continuation`
+            NGFP-vs-matter-content visualisation with the Korver
+            (2024) bound shaded.
+        :mod:`asymsafety.validation.korver_2024`
+            Foliated and covariant matter bounds.
+
+    References:
+        Dona, Eichhorn & Percacci (2014),
+            Phys. Rev. D 89, 084035 [1311.2898].
+        Eichhorn & Schiffer (2022) [2212.07456].
+        Korver, Saueressig & Wang (2024),
+            Phys. Lett. B 855, 138789 [2402.01260].
     """
     g = Symbol("g", positive=True)
     lam = Symbol("lambda", real=True)

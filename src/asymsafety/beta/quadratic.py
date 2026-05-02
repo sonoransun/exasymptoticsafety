@@ -38,6 +38,18 @@ def build_quadratic_beta_system(d: int = 4) -> BetaFunctionSystem:
 
     Returns:
         BetaFunctionSystem with β_g, β_λ, β_α, β_β.
+
+    See Also:
+        :func:`asymsafety.visualization.phase_portrait.quadratic_pairwise_grid`
+            2x3 grid of pairwise phase portraits over the four
+            coupling axes (with frozen-coupling annotation).
+        :mod:`asymsafety.validation.codello_2009`
+            Benchmark NGFP coordinates and the asymptotic-freedom
+            result for the Weyl-squared coupling β.
+
+    References:
+        Codello, Percacci & Rahmede (2009),
+            Ann. Phys. 324, 414 [0812.0785].
     """
     # Start with the EH system for g and λ
     eh_system = build_eh_beta_system(d)

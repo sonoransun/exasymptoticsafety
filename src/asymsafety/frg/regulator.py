@@ -5,6 +5,20 @@ the scale k. Key properties:
     R_k(z) → k^2     for z → 0   (IR suppression)
     R_k(z) → 0       for z → ∞   (UV modes unchanged)
     R_k → 0          for k → 0   (regulator removed)
+
+See Also
+--------
+:func:`asymsafety.visualization.conceptual.regulator_comparison`
+    Conceptual side-by-side plot of the Litim and Exponential
+    shape functions ``r(y)``.
+:func:`asymsafety.visualization.phase_portrait.regulator_comparison_panels`
+    Phase-portrait-level scheme-dependence comparison.
+
+References
+----------
+- Litim (2001), Phys. Rev. D 64, 105007 [hep-th/0103195] —
+  optimised cutoff with rational beta functions.
+- Wetterich (1993), Phys. Lett. B 301, 90.
 """
 
 from abc import ABC, abstractmethod

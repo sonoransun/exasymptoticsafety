@@ -28,10 +28,17 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class OptimizationResult:
-    """Result of a VQRG optimisation run."""
+    """Result of a VQRG optimisation run.
+
+    ``parameters_history`` records a snapshot of the circuit parameters at
+    every iteration; consumed by
+    ``asymsafety.quantum.visualization.vqrg_plots.plot_vqrg_optimization_trajectory``
+    to draw the parameter-trajectory inset alongside the cost curve.
+    """
 
     parameters: np.ndarray
     cost_history: list[float] = field(default_factory=list)
+    parameters_history: list[np.ndarray] = field(default_factory=list)
     fixed_point: FixedPoint | None = None
     n_iterations: int = 0
     converged: bool = False
@@ -94,12 +101,14 @@ class QuantumNaturalGradient:
         params = np.asarray(initial_parameters, dtype=float).copy()
         n_params = params.size
         cost_history: list[float] = []
+        parameters_history: list[np.ndarray] = []
 
         converged = False
 
         for iteration in range(self._max_iter):
             cost = self._cost_fn.evaluate(params)
             cost_history.append(cost)
+            parameters_history.append(params.copy())
 
             logger.debug(
                 "Iteration %d / %d  |  cost = %.3e",
@@ -137,6 +146,7 @@ class QuantumNaturalGradient:
             # Reached max_iterations without convergence
             cost = self._cost_fn.evaluate(params)
             cost_history.append(cost)
+            parameters_history.append(params.copy())
             converged = cost < self._tol
 
         fixed_point = self._extract_fixed_point(params) if converged else None
@@ -144,6 +154,7 @@ class QuantumNaturalGradient:
         return OptimizationResult(
             parameters=params,
             cost_history=cost_history,
+            parameters_history=parameters_history,
             fixed_point=fixed_point,
             n_iterations=len(cost_history),
             converged=converged,
