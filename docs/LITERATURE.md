@@ -271,4 +271,26 @@ Textbook treatment of the entire asymptotic safety program. Covers the Wetterich
 | `frg/anomalous_dim.py` | Dynamical graviton propagator | Pawlowski & Reichert (2023) |
 | `frg/spectral.py` | CDT spectral dimension comparison | Ambjørn et al. (2024) |
 | `validation/` | Lorentzian benchmarks, foliated matter bounds | D'Angelo et al. (2024), Korver et al. (2024) |
+| `transforms/bridge/gauge_higgs.py` | Charged-FP analogue for 3D AHM | Bonati, Pelissetto & Vicari (2025) |
 | (future) `applications/` | RG-improved black holes, AS cosmology | Platania (2023/2025), Bonanno et al. (2025) |
+
+---
+
+<a id="cross-disciplinary-analogues"></a>
+## 8. Cross-Disciplinary Analogues
+
+Papers from outside quantum gravity whose rigour and methodology can be carried over via the toolkit's `transforms/bridge/` machinery (the *cross-analogue bridge*, which enforces a commutative diagram across classical-RG / hydraulic / quantum / integral-transform representations).
+
+### Bonati, Pelissetto & Vicari (2025)
+
+**"Three-dimensional Abelian and non-Abelian gauge-Higgs theories"**
+Phys. Rep. [[2410.05823](https://arxiv.org/abs/2410.05823)]
+
+Comprehensive Physics Reports review consolidating lattice Monte-Carlo and field-theory results for 3D gauge-Higgs systems (U(1) and SU(N_c) gauge groups, N_f complex scalar flavors in the fundamental representation). The headline result is the rigorous identification of a *charged fixed point* (CFP) controlling Coulomb-to-Higgs transitions when the matter content is large enough (`N_f > N_f^*`). The threshold is regulator-dependent — `N_f^* ≈ 375` in the 4-ε ε-expansion for SU(2) but well below 30 on the d=3 lattice — and the correlation-length exponent follows the large-N_f law `ν = 1 − 9.727/N_f` (SU(2)). Reference MC values at `N_f ∈ {30, 40, 60}` are tabulated.
+
+**Relevance**: Mirrors the asymptotic-safety NGFP from a 3D stat-mech vantage point. Both are interacting UV fixed points whose existence depends on matter content and on the regulator/scheme; the paper documents exactly the kind of scheme-dependence debate that pervades gravity-side FRG. Implemented in `transforms/bridge/gauge_higgs.py` (toolkit-side AHM β-system + `GaugeHiggsAnalogue` wrapper for `CrossAnalogueBridge`) and `validation/bonati_2025.py` (MC reference data, large-N_f coefficient, existence-threshold helper). See [`docs/cross-analogue-gauge-higgs.md`](cross-analogue-gauge-higgs.md) for the full dictionary mapping AS ↔ AHM concepts.
+
+**Figures**: [`ahm_phase_diagram`](images/ahm_phase_diagram.caption.md), [`charged_fp_boundary`](images/charged_fp_boundary.caption.md), [`nu_vs_nf`](images/nu_vs_nf.caption.md), [`ahm_as_bridge`](images/ahm_as_bridge.caption.md).
+
+**Animations**: [`rg_flow_ahm`](animations/rg_flow_ahm.caption.md), [`nu_vs_nf_sweep`](animations/nu_vs_nf_sweep.caption.md).
+

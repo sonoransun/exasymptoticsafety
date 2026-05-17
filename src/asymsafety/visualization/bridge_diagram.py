@@ -277,6 +277,143 @@ def cross_analogue_bridge_diagram(
     return fig
 
 
+# ── AHM ↔ AS analogue ─────────────────────────────────────────────────
+
+
+def ahm_as_bridge_diagram(
+    figsize: tuple[float, float] = (12, 7),
+) -> Figure:
+    r"""Two-column commutative diagram: 3D Abelian-Higgs ↔ Asymptotic Safety.
+
+    Physics
+    -------
+    Maps the *charged fixed point* (CFP) of the 3D Abelian Higgs model
+    onto the *non-Gaussian fixed point* (NGFP) of asymptotic-safe
+    gravity. Both are interacting UV fixed points whose existence and
+    critical-exponent structure depend non-trivially on the matter
+    content and on the regulator/scheme. The left column lists the
+    AS side (graviton + matter, Reuter NGFP); the right column lists
+    the AHM side (gauge + Nf complex scalars, charged FP from
+    Bonati, Pelissetto & Vicari 2025). Horizontal double-headed
+    arrows label the analogue mappings, and the bottom row records
+    the shared invariant — "interacting UV completion under
+    matter-content threshold".
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 7)``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].
+    - Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].
+    - :mod:`asymsafety.transforms.bridge.gauge_higgs` — companion code.
+    """
+    apply_style()
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    ax.set_axis_off()
+    ax.set_xlim(-0.5, 12.5)
+    ax.set_ylim(-0.5, 7.5)
+    ax.set_title(
+        "AHM ↔ Asymptotic Safety: Cross-Analogue Dictionary",
+        fontsize=15, fontweight="bold", pad=10,
+    )
+
+    bw, bh = 4.4, 1.45
+
+    # Asymptotic Safety boxes (left column)
+    as_top_x, as_top_y = 0.5, 5.4
+    as_mid_x, as_mid_y = 0.5, 3.5
+    as_bot_x, as_bot_y = 0.5, 1.6
+
+    _rounded_box(
+        ax, as_top_x, as_top_y, bw, bh,
+        "Asymptotic Safety  (gravity)",
+        [r"NGFP $(g^*, \lambda^*) \approx (0.69, 0.14)$",
+         r"Wetterich FRG, EH truncation"],
+        _CLR_RG,
+    )
+    _rounded_box(
+        ax, as_mid_x, as_mid_y, bw, bh,
+        "Critical exponents",
+        [r"$\theta_i = -\mathrm{eig}(\partial\beta/\partial g)$",
+         r"$\theta_{1,2} \approx 1.5 \pm 3.0\, i$ (2 relevant)"],
+        _CLR_RG,
+    )
+    _rounded_box(
+        ax, as_bot_x, as_bot_y, bw, bh,
+        "Matter / regulator dependence",
+        [r"NGFP shifts with $N_s, N_f, N_v$",
+         r"Litim vs exponential vs sharp"],
+        _CLR_RG,
+    )
+
+    # Gauge-Higgs boxes (right column)
+    gh_top_x, gh_top_y = 7.1, as_top_y
+    gh_mid_x, gh_mid_y = 7.1, as_mid_y
+    gh_bot_x, gh_bot_y = 7.1, as_bot_y
+
+    _rounded_box(
+        ax, gh_top_x, gh_top_y, bw, bh,
+        "3D Abelian Higgs  (charged FP)",
+        [r"$\alpha^* = \varepsilon/N,\;  u^* \approx \varepsilon/(N+4)$",
+         r"One-loop $4\!-\!\varepsilon$ / lattice MC"],
+        _CLR_TRANSFORMS,
+    )
+    _rounded_box(
+        ax, gh_mid_x, gh_mid_y, bw, bh,
+        "Correlation-length exponent",
+        [r"$\nu = 1/\theta_r$ at the CFP",
+         r"$\nu \to 1 - 9.727/N_f$ (large $N_f$, MC)"],
+        _CLR_TRANSFORMS,
+    )
+    _rounded_box(
+        ax, gh_bot_x, gh_bot_y, bw, bh,
+        "Flavor / scheme dependence",
+        [r"CFP exists only for $N_f > N_f^*$",
+         r"$N_f^*\!\approx\!375$ in $4\!-\!\varepsilon$,  $\ll\!30$ in $d\!=\!3$"],
+        _CLR_TRANSFORMS,
+    )
+
+    # Horizontal connecting arrows with mapping labels
+    bridge_labels = [
+        "Interacting UV fixed point",
+        "Stability matrix eigenvalues",
+        "Matter-threshold / scheme",
+    ]
+    for y_box, lbl in zip(
+        (as_top_y, as_mid_y, as_bot_y), bridge_labels,
+    ):
+        y_mid = y_box + bh / 2
+        ax.annotate(
+            "", xy=(gh_top_x, y_mid), xytext=(as_top_x + bw, y_mid),
+            arrowprops=dict(arrowstyle="<->", color="0.35", lw=1.6),
+        )
+        ax.text(
+            (as_top_x + bw + gh_top_x) / 2, y_mid + 0.18,
+            lbl, fontsize=9, ha="center", va="bottom",
+            color="0.25", style="italic",
+            bbox=dict(boxstyle="round,pad=0.18", fc="white", ec="none",
+                      alpha=0.85),
+        )
+
+    # Bottom invariant strip
+    ax.text(
+        6.5, 0.7,
+        r"Shared invariant: an interacting UV completion whose "
+        r"existence depends on matter content and on the regulator scheme.",
+        fontsize=10.5, ha="center", va="center", color="0.2",
+        bbox=dict(boxstyle="round,pad=0.35", fc="lightyellow", ec="0.55",
+                  alpha=0.95),
+    )
+
+    return fig
+
+
 # ── hydraulic analogy ─────────────────────────────────────────────────
 
 

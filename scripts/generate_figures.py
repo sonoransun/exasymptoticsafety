@@ -783,6 +783,89 @@ _CAPTIONS: dict[str, FigureCaption] = {
             "`asymsafety.frg.heat_kernel.SeeleyDeWittCoefficients`",
         ],
     ),
+    # Cross-analogue: 3D gauge-Higgs (Bonati, Pelissetto & Vicari 2025)
+    "ahm_phase_diagram": FigureCaption(
+        title="3D Abelian-Higgs phase diagram",
+        description=(
+            "Schematic of the three phases of the 3D Abelian-Higgs model "
+            "(Coulomb, Higgs, Molecular) meeting at a multicritical point "
+            "with emergent O(2) symmetry. The Coulomb-to-Higgs transition "
+            "is controlled by the *charged fixed point* when `N_f > N_f^*`. "
+            "Cross-analogue companion of `asymptotic_safety_concept`."
+        ),
+        references=[
+            "Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].",
+            "Lattice AHM with noncompact gauge fields [arXiv:2010.06311].",
+        ],
+        see_also=[
+            "[`docs/cross-analogue-gauge-higgs.md`](../cross-analogue-gauge-higgs.md)",
+            "`asymsafety.transforms.bridge.gauge_higgs.GaugeHiggsAnalogue`",
+        ],
+    ),
+    "charged_fp_boundary": FigureCaption(
+        title="Charged fixed point: existence boundary",
+        description=(
+            "Schematic of `N_f^*(d)`, the matter threshold above which "
+            "the charged fixed point of 3D gauge-Higgs theory is stable. "
+            "The 4-ε prediction `N_f^* ≈ 375` (SU(2)) sits far above the "
+            "lattice value (Bonati et al. 2025 place it well below 30 in "
+            "d=3). The shaded region is the stable phase; the green points "
+            "are the published SU(2) MC sample `N_f ∈ {30, 40, 60}`."
+        ),
+        references=[
+            "Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].",
+        ],
+        see_also=[
+            "[`docs/cross-analogue-gauge-higgs.md`](../cross-analogue-gauge-higgs.md)",
+            "`asymsafety.validation.bonati_2025.validate_charged_fp_existence`",
+        ],
+    ),
+    "nu_vs_nf": FigureCaption(
+        title="ν(N_f) at the charged fixed point",
+        description=(
+            "Correlation-length exponent at the charged FP of 3D SU(2) + "
+            "`N_f` gauge-Higgs. Three curves overlaid: the toolkit's "
+            "one-loop 4-ε prediction (approaches the Wilson-Fisher limit "
+            "ν → 1/2), the large-`N_f` field-theory asymptote "
+            "ν = 1 − 9.727/N_f (approaches 1), and Bonati et al.'s lattice "
+            "MC points at `N_f ∈ {30, 40, 60}` with their published error "
+            "bars. The two windows on the physics agree qualitatively on "
+            "FP existence but live in different quantitative regimes — "
+            "a faithful echo of the regulator/scheme debate around the "
+            "gravitational NGFP in asymptotic safety."
+        ),
+        references=[
+            "Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].",
+            "Halperin, Lubensky & Ma (1974), Phys. Rev. Lett. 32, 292.",
+        ],
+        see_also=[
+            "[`docs/cross-analogue-gauge-higgs.md`](../cross-analogue-gauge-higgs.md)",
+            "`asymsafety.transforms.bridge.gauge_higgs.correlation_length_exponent`",
+            "`asymsafety.validation.bonati_2025.BONATI_SU2_MC`",
+        ],
+    ),
+    "ahm_as_bridge": FigureCaption(
+        title="AHM ↔ asymptotic safety: cross-analogue dictionary",
+        description=(
+            "Two-column commutative diagram mapping the 3D Abelian-Higgs "
+            "charged fixed point onto the asymptotic-safety NGFP. Three "
+            "rows of correspondences (interacting UV fixed point; "
+            "stability-matrix eigenvalues; matter/regulator dependence) "
+            "are joined by double-headed arrows. The shared invariant in "
+            "the bottom strip is: an interacting UV completion whose "
+            "existence depends on matter content and on the regulator "
+            "scheme."
+        ),
+        references=[
+            "Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].",
+            "Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].",
+        ],
+        see_also=[
+            "[`docs/cross-analogue-gauge-higgs.md`](../cross-analogue-gauge-higgs.md)",
+            "`asymsafety.transforms.bridge.gauge_higgs.GaugeHiggsAnalogue`",
+            "`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`",
+        ],
+    ),
 }
 
 
@@ -1650,6 +1733,35 @@ def gen_heat_kernel_coefficients(out: Path, fmt: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Cross-analogue: 3D gauge-Higgs (Bonati, Pelissetto & Vicari 2025)
+# ---------------------------------------------------------------------------
+
+
+def gen_ahm_phase_diagram(out: Path, fmt: str) -> None:
+    from asymsafety.visualization.conceptual import ahm_phase_diagram
+    _run("AHM phase diagram", ahm_phase_diagram,
+         "ahm_phase_diagram", out, fmt)
+
+
+def gen_charged_fp_boundary(out: Path, fmt: str) -> None:
+    from asymsafety.visualization.conceptual import charged_fp_boundary
+    _run("Charged FP boundary", charged_fp_boundary,
+         "charged_fp_boundary", out, fmt)
+
+
+def gen_nu_vs_nf(out: Path, fmt: str) -> None:
+    from asymsafety.visualization.fixed_point_plot import nu_vs_Nf
+    _run("nu(Nf) at the charged FP", nu_vs_Nf,
+         "nu_vs_nf", out, fmt)
+
+
+def gen_ahm_as_bridge(out: Path, fmt: str) -> None:
+    from asymsafety.visualization.bridge_diagram import ahm_as_bridge_diagram
+    _run("AHM ↔ AS bridge", ahm_as_bridge_diagram,
+         "ahm_as_bridge", out, fmt)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -1699,6 +1811,11 @@ ALL_GENERATORS = [
     # Spectral / heat-kernel
     gen_spectral_sum_convergence,
     gen_heat_kernel_coefficients,
+    # Cross-analogue: gauge-Higgs (Bonati 2025)
+    gen_ahm_phase_diagram,
+    gen_charged_fp_boundary,
+    gen_nu_vs_nf,
+    gen_ahm_as_bridge,
 ]
 
 # Names whose output is byte-deterministic enough to support sha256

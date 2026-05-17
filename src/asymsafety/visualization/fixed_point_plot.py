@@ -347,3 +347,130 @@ def plot_matter_content_continuation(
     )
     fig.tight_layout()
     return fig
+
+
+def nu_vs_Nf(
+    figsize: tuple[float, float] = (9, 6),
+    *,
+    Nf_min: int = 10,
+    Nf_max: int = 120,
+    show_references: bool = True,
+) -> Figure:
+    r"""Correlation-length exponent ``ν`` at the charged FP vs. ``N_f``.
+
+    Overlays three curves:
+
+    * the toolkit's one-loop ``4-ε`` prediction (computed via
+      :func:`asymsafety.transforms.bridge.gauge_higgs.correlation_length_exponent`,
+      using the simplified Abelian case with ``Nc = 1``);
+    * the large-``N_f`` field-theory asymptote
+      ``ν = 1 - 9.727 / N_f`` (Bonati et al. 2025, SU(2));
+    * the three lattice Monte-Carlo points at
+      ``N_f ∈ {30, 40, 60}`` with their published error bars.
+
+    The visual purpose is to make explicit that the perturbative
+    one-loop scheme used inside the toolkit reaches the *Wilson-Fisher*
+    limit ``ν → 1/2`` from below, while the d=3 lattice numbers
+    instead approach ``ν → 1`` — the two pictures share the same
+    qualitative existence of a charged fixed point but disagree
+    quantitatively, exactly the regulator/scheme story discussed in
+    the gravity-side asymptotic-safety literature.
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(9, 6)``
+    Nf_min, Nf_max : int
+        Range of ``N_f`` swept for the smooth curves.
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    from asymsafety.transforms.bridge.gauge_higgs import (
+        correlation_length_exponent,
+    )
+    from asymsafety.validation.bonati_2025 import (
+        BONATI_LARGE_NF,
+        BONATI_SU2_MC,
+    )
+
+    Nfs = np.arange(Nf_min, Nf_max + 1)
+
+    # Toolkit one-loop prediction (Nc = 1, ε = 1). Below the perturbative
+    # threshold N* (where the (α, u) quadratic's discriminant goes
+    # negative), the charged FP merges with the Gaussian branch and ν
+    # is ill-defined in this scheme — so we restrict the curve to the
+    # perturbatively-stable regime and annotate N* on the figure.
+    nu_toolkit_all = np.array(
+        [correlation_length_exponent(int(n), epsilon=1.0) for n in Nfs]
+    )
+    # Detect the perturbative threshold: find the smallest Nf for which
+    # the closed-form ν is monotonically decreasing toward 1/2 from above
+    # (above N* the gauge correction dominates and ν drops).
+    diffs = np.diff(nu_toolkit_all)
+    n_star_idx = int(np.argmax(diffs < -1e-3)) if any(diffs < -1e-3) else 0
+    n_star = int(Nfs[n_star_idx + 1]) if n_star_idx + 1 < len(Nfs) else Nf_min
+    mask = Nfs >= n_star
+    nu_toolkit = np.where(mask, nu_toolkit_all, np.nan)
+
+    # Large-Nf asymptote from the paper
+    C = BONATI_LARGE_NF["nu_coeff"]
+    nu_large_nf = 1.0 - C / Nfs
+
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    ax.plot(
+        Nfs, nu_toolkit, color=COLOR_IRRELEVANT, lw=2.2,
+        label=rf"toolkit one-loop 4-$\varepsilon$ (Nc=1, $N_f \geq {n_star}$)",
+    )
+    ax.plot(
+        Nfs, nu_large_nf, color="0.25", lw=2.0, ls="--",
+        label=r"large-$N_f$:  $\nu = 1 - 9.727 / N_f$",
+    )
+    ax.axvline(n_star, color=COLOR_IRRELEVANT, ls=":", lw=1.0, alpha=0.7)
+    ax.annotate(
+        rf"perturbative $N^* \approx {n_star}$",
+        xy=(n_star, 0.55), xytext=(n_star + 8, 0.43),
+        fontsize=8.5, color=COLOR_IRRELEVANT,
+        arrowprops=dict(arrowstyle="-|>", color=COLOR_IRRELEVANT, lw=0.8),
+    )
+
+    # Bonati MC points with error bars
+    mc_Nf = sorted(BONATI_SU2_MC)
+    mc_nu = [BONATI_SU2_MC[n]["nu"] for n in mc_Nf]
+    mc_err = [BONATI_SU2_MC[n]["nu_err"] for n in mc_Nf]
+    ax.errorbar(
+        mc_Nf, mc_nu, yerr=mc_err,
+        fmt="o", color=COLOR_RELEVANT, ms=9, mec="black", mew=1.0,
+        elinewidth=1.2, capsize=4, zorder=5,
+        label="Bonati 2025 lattice MC (SU(2))",
+    )
+
+    # Asymptotes (1/2 and 1) for orientation
+    ax.axhline(0.5, color="0.5", lw=0.8, ls=":")
+    ax.axhline(1.0, color="0.5", lw=0.8, ls=":")
+    ax.text(Nf_max - 2, 0.51, "Wilson-Fisher (1/2)",
+            fontsize=8, color="0.5", ha="right")
+    ax.text(Nf_max - 2, 1.01, "large-$N_f$ asymptote (1)",
+            fontsize=8, color="0.5", ha="right")
+
+    ax.set_xlabel(r"Flavor count $N_f$", fontsize=12)
+    ax.set_ylabel(r"Correlation-length exponent $\nu$", fontsize=12)
+    ax.set_title(
+        r"$\nu(N_f)$ at the charged fixed point: "
+        r"perturbative vs lattice",
+        fontsize=13, fontweight="bold",
+    )
+    ax.set_xlim(Nf_min, Nf_max)
+    ax.set_ylim(0.4, 1.1)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="center right", fontsize=9.5, framealpha=0.92)
+
+    if show_references:
+        add_reference_box(
+            ax,
+            [format_arxiv("Bonati, Pelissetto & Vicari 2025", "2410.05823")],
+            loc="lower right",
+        )
+
+    return fig

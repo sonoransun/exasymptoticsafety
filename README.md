@@ -695,6 +695,33 @@ bh = RGImprovedSchwarzschild(trajectory=eh_trajectory, M=2.0)
 fig = plot_lapse_with_horizons(bh)
 ```
 
+### 3D gauge-Higgs (cross-disciplinary)
+
+The same bridge admits cross-disciplinary nodes. The most direct stat-mech analogue of the gravitational NGFP is the *charged fixed point* (CFP) of 3D Abelian-Higgs / SU(N_c) gauge-Higgs theories — an interacting UV fixed point whose existence depends on matter content (`N_f > N_f^*`) and on the regulator/scheme, exactly mirroring the regulator-dependence debate around the NGFP in asymptotic safety.
+
+```mermaid
+flowchart LR
+    AS["**Asymptotic Safety**\nNGFP (g*, λ*)\nCritical exponents θᵢ\nMatter / regulator shift"]
+    AHM["**3D Abelian-Higgs**\nCharged FP (α*, u*)\nν = 1/θᵣ\nN_f threshold N_f*"]
+    AS <-->|"interacting UV FP"| AHM
+    AS <-->|"stability eigenvalues"| AHM
+    AS <-->|"matter / scheme dependence"| AHM
+```
+
+![AHM ↔ AS bridge](docs/images/ahm_as_bridge.png)
+
+*Two-column commutative diagram mapping the charged FP of 3D Abelian-Higgs onto the gravitational NGFP. Reference paper: Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823]. Toolkit-side implementation: `asymsafety.transforms.bridge.gauge_higgs`. Full concept dictionary in [`docs/cross-analogue-gauge-higgs.md`](docs/cross-analogue-gauge-higgs.md).*
+
+```python
+from asymsafety.transforms.bridge import GaugeHiggsAnalogue
+analogue = GaugeHiggsAnalogue(N=60, Nc=1, epsilon=1.0)
+analogue.fixed_point.location  # {'alpha': 0.0167, 'u': 0.00269, 'r': 0.0}
+analogue.nu                     # 0.5174 (one-loop, → 1/2 in WF limit)
+analogue.bridge.verify_commutativity(tol=0.2)  # RG ↔ transfer matrix ↔ resolvent agree
+```
+
+Animations: [`rg_flow_ahm.mp4`](docs/animations/rg_flow_ahm.mp4) shows trajectories spiralling into the CFP on the critical surface; [`nu_vs_nf_sweep.mp4`](docs/animations/nu_vs_nf_sweep.mp4) sweeps `N_f` and traces `ν(N_f)` against the large-`N_f` asymptote.
+
 ---
 
 ## Project Structure

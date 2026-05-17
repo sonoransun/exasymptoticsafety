@@ -775,3 +775,222 @@ def wetterich_equation_diagram(
         )
 
     return fig
+
+
+# ── 3D gauge-Higgs (Bonati 2025) ─────────────────────────────────────
+
+
+def ahm_phase_diagram(
+    figsize: tuple[float, float] = (9, 6.5),
+    *,
+    show_references: bool = True,
+) -> Figure:
+    r"""Schematic phase diagram of the 3D Abelian-Higgs model.
+
+    Physics
+    -------
+    Three phases meet at a multicritical point (MCP) in the
+    ``(\kappa, \beta_g)`` plane, where ``\kappa`` is the scalar
+    hopping parameter and ``\beta_g = 1/e^2`` is the gauge inverse
+    coupling: a *Coulomb* phase with a gapless photon, a *Higgs*
+    phase with a gapped photon and a condensed scalar, and a
+    *Molecular* phase where the gauge field is irrelevant and the
+    transition is governed by Landau-Ginzburg-Wilson universality.
+    The Coulomb-to-Higgs line is a continuous transition controlled
+    by the *charged fixed point* when ``N_f`` is large enough.
+
+    This is a *schematic* figure, intended as the cross-analogue
+    companion to ``asymptotic_safety_concept`` for the gravity side.
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(9, 6.5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].
+    - Lattice AHM with noncompact gauge fields [arXiv:2010.06311].
+    """
+    apply_style()
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_xlabel(r"$\kappa$  (scalar hopping)", fontsize=12)
+    ax.set_ylabel(r"$\beta_g = 1/e^2$  (inverse gauge coupling)",
+                  fontsize=12)
+    ax.set_title("3D Abelian-Higgs phase diagram",
+                 fontsize=14, fontweight="bold")
+
+    # Multicritical point
+    mcp_x, mcp_y = 0.45, 0.55
+
+    # Phase regions — shaded translucent polygons
+    coulomb_poly = plt.Polygon(
+        [(0, 1), (0, mcp_y), (mcp_x, mcp_y), (0.65, 1)],
+        closed=True, fc=COLOR_RELEVANT, ec="none", alpha=0.18, zorder=1,
+    )
+    higgs_poly = plt.Polygon(
+        [(0.65, 1), (mcp_x, mcp_y), (1, 0.7), (1, 1)],
+        closed=True, fc=COLOR_NGFP, ec="none", alpha=0.20, zorder=1,
+    )
+    molecular_poly = plt.Polygon(
+        [(0, mcp_y), (0, 0), (1, 0), (1, 0.7), (mcp_x, mcp_y)],
+        closed=True, fc=COLOR_IRRELEVANT, ec="none", alpha=0.18, zorder=1,
+    )
+    for p in (coulomb_poly, higgs_poly, molecular_poly):
+        ax.add_patch(p)
+
+    # Phase labels
+    ax.text(0.18, 0.85, "Coulomb\n(gapless photon)",
+            fontsize=11, ha="center", va="center",
+            color=COLOR_RELEVANT, fontweight="bold")
+    ax.text(0.83, 0.88, "Higgs\n(gapped, broken)",
+            fontsize=11, ha="center", va="center",
+            color=COLOR_NGFP, fontweight="bold")
+    ax.text(0.55, 0.18,
+            "Molecular\n(gauge field irrelevant, LGW)",
+            fontsize=11, ha="center", va="center",
+            color="#666", fontweight="bold")
+
+    # Transition lines — Coulomb↔Higgs (charged FP)
+    ax.plot([0.65, mcp_x], [1.0, mcp_y], color="0.2", lw=2.4,
+            solid_capstyle="round", zorder=3)
+    # Coulomb↔Molecular (LGW / O(2))
+    ax.plot([0, mcp_x], [mcp_y, mcp_y], color="0.2", lw=2.4,
+            ls=(0, (5, 2)), zorder=3)
+    # Higgs↔Molecular (first-order portion → Ising line)
+    ax.plot([mcp_x, 1.0], [mcp_y, 0.7], color="0.2", lw=2.4,
+            ls=(0, (1, 1.5)), zorder=3)
+
+    # Multicritical point
+    ax.plot(mcp_x, mcp_y, "o", ms=14,
+            mfc=COLOR_SEPARATRIX, mec="black", mew=1.2, zorder=5)
+    ax.annotate(
+        "MCP\n(emergent O(2))",
+        xy=(mcp_x, mcp_y), xytext=(mcp_x - 0.22, mcp_y - 0.18),
+        fontsize=10, ha="center", fontweight="bold",
+        color=COLOR_SEPARATRIX,
+        arrowprops=dict(arrowstyle="-|>", color=COLOR_SEPARATRIX, lw=1.2),
+    )
+
+    # "Charged FP governs this line" callout
+    ax.annotate(
+        r"charged FP" "\n" r"(for $N_f > N_f^*$)",
+        xy=(0.55, 0.78),
+        xytext=(0.78, 0.55),
+        fontsize=9.5, ha="center", color="0.2",
+        bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="0.5",
+                  lw=0.8, alpha=0.92),
+        arrowprops=dict(arrowstyle="-|>", color="0.4", lw=1.0,
+                        connectionstyle="arc3,rad=-0.25"),
+    )
+
+    # Legend stub for line types
+    legend_y = 0.04
+    ax.text(0.02, legend_y + 0.06,
+            "── continuous (charged FP)   ----  LGW   "
+            "······  first-order / Ising",
+            fontsize=8, color="0.35", style="italic", va="bottom")
+
+    if show_references:
+        add_reference_box(
+            ax,
+            [format_arxiv("Bonati, Pelissetto & Vicari 2025", "2410.05823")],
+            loc="upper right",
+        )
+
+    return fig
+
+
+def charged_fp_boundary(
+    figsize: tuple[float, float] = (8.5, 5.5),
+    *,
+    show_references: bool = True,
+) -> Figure:
+    r"""Schematic existence boundary of the charged FP in (d, N_f) space.
+
+    Physics
+    -------
+    Shows the region of (spacetime dimension ``d``, flavor count
+    ``N_f``) in which the charged fixed point is *stable*. In the
+    one-loop ε-expansion at ``d = 4 - ε``, the perturbative threshold
+    is large (``N_f^* \approx 375`` for SU(2)); in the physical
+    ``d = 3``, lattice Monte Carlo shows the true threshold is much
+    smaller (Bonati et al. 2025 place it well below 30). The figure
+    plots a schematic curve interpolating between the two regimes
+    and shades the *stable* region; the Bonati MC sample points at
+    ``(d=3, N_f \in \{30, 40, 60\})`` are overlaid as green markers.
+
+    The exact functional form of ``N_f^*(d)`` is not known
+    analytically; the curve is a smooth interpolation purely for
+    pedagogical purposes.
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(8.5, 5.5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823].
+    """
+    apply_style()
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+
+    # Schematic interpolation: Nf*(d) = 4 + 0.4 * exp(8 * (d - 3))
+    # — passes through ~ (3, 5) and grows to several hundred near d → 4.
+    d = np.linspace(3.0, 4.0, 200)
+    nf_star = 4.0 + 0.4 * np.exp(8.0 * (d - 3.0))
+
+    # Shaded "stable" region above the curve
+    ax.fill_between(d, nf_star, 500, color=COLOR_NGFP,
+                    alpha=0.22, label="Charged FP stable")
+    ax.fill_between(d, 0, nf_star, color=COLOR_IRRELEVANT,
+                    alpha=0.18, label="No charged FP")
+    ax.plot(d, nf_star, color="0.2", lw=2.2, zorder=4,
+            label=r"$N_f^*(d)$ (schematic)")
+
+    # Bonati MC sample points at d=3
+    bonati_Nf = [30, 40, 60]
+    ax.plot([3.0] * len(bonati_Nf), bonati_Nf,
+            "o", ms=10, mfc=COLOR_NGFP, mec="black", mew=1.0,
+            zorder=6, label="Bonati 2025 MC (SU(2), d=3)")
+
+    # 4D ε-expansion threshold annotation
+    ax.axhline(375, color=COLOR_LITIM, ls=":", lw=1.2, alpha=0.8)
+    ax.annotate(
+        r"$N_f^* \approx 375$  (4-$\varepsilon$, SU(2))",
+        xy=(3.5, 375), xytext=(3.05, 410),
+        fontsize=9.5, color=COLOR_LITIM, fontweight="bold",
+        arrowprops=dict(arrowstyle="-|>", color=COLOR_LITIM, lw=1.0),
+    )
+
+    ax.set_xlabel("Spacetime dimension $d$", fontsize=12)
+    ax.set_ylabel(r"Flavor count $N_f$", fontsize=12)
+    ax.set_title(
+        "Charged fixed point: existence boundary $N_f^*(d)$",
+        fontsize=13, fontweight="bold",
+    )
+    ax.set_xlim(2.95, 4.0)
+    ax.set_ylim(0, 500)
+    ax.legend(loc="center right", fontsize=9, framealpha=0.92)
+    ax.grid(True, alpha=0.25)
+
+    if show_references:
+        add_reference_box(
+            ax,
+            [format_arxiv("Bonati, Pelissetto & Vicari 2025", "2410.05823")],
+            loc="upper left",
+        )
+
+    return fig

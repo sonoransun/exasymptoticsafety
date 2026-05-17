@@ -50,6 +50,12 @@ notebooks = [
     "jupyter>=1.0",
     "nbmake>=1.5",
 ]
+animations = [
+    # PillowWriter ships with matplotlib but Pillow itself is the encoder
+    # for the .gif fallback. FFMpegWriter (.mp4) needs system ffmpeg
+    # and is not added here as a Python dependency.
+    "pillow>=10.0",
+]
 dev = [
     "pytest>=8.0",
     "pytest-timeout",

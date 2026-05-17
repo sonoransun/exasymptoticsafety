@@ -43,6 +43,13 @@ from asymsafety.validation.manrique_2011 import (
     FOLIATED_EH_FP,
     LORENTZIAN_FP,
 )
+from asymsafety.validation.bonati_2025 import (
+    BONATI_LARGE_NF,
+    BONATI_SU2_MC,
+    CHARGED_FP_THRESHOLDS,
+    large_nf_nu,
+    validate_charged_fp_existence,
+)
 from asymsafety.validation.reuter_1998 import (
     REUTER_FP,
     VALIDATION_TOL as REUTER_TOL,
@@ -250,3 +257,75 @@ class TestGravityMatterFixedPoint:
                                      0.14185513513554493, rtol=1e-6)
         np.testing.assert_allclose(fp.location["lambda_phi"],
                                      0.011174696554990685, rtol=1e-6)
+
+
+# ---------------------------------------------------------------------------
+# Bonati, Pelissetto & Vicari 2025 / 3D gauge-Higgs cross-analogue
+# ---------------------------------------------------------------------------
+
+
+class TestBonati2025GaugeHiggs:
+    """Cross-analogue: AHM charged FP as a stat-mech mirror of the NGFP.
+
+    The toolkit's one-loop 4-ε β-system (built in
+    ``transforms/bridge/gauge_higgs.py``) is a perturbative proxy for
+    the 3D physics and is NOT expected to reproduce Bonati et al.'s
+    high-precision lattice MC values quantitatively. The tests here
+    therefore check (a) reference-data integrity, (b) qualitative
+    claims (FP existence, monotonicity), and (c) the published large-
+    ``N_f`` field-theory formula.
+    """
+
+    def test_reference_table_has_three_Nf(self):
+        assert set(BONATI_SU2_MC.keys()) == {30, 40, 60}
+
+    def test_reference_values_monotone_in_Nf(self):
+        nus = [BONATI_SU2_MC[n]["nu"] for n in sorted(BONATI_SU2_MC)]
+        assert all(nus[i] <= nus[i + 1] for i in range(len(nus) - 1)), \
+            f"Bonati MC ν should grow with N_f, got {nus}"
+
+    def test_large_nf_formula_matches_table(self):
+        """At N_f = 60 the 1/N_f formula and MC agree to ≲ 15%."""
+        nu_formula = large_nf_nu(60, Nc=2)
+        nu_mc = BONATI_SU2_MC[60]["nu"]
+        rel = abs(nu_formula - nu_mc) / nu_mc
+        assert rel < 0.15, (
+            f"Large-N_f formula ν = {nu_formula:.3f} vs MC ν = {nu_mc:.3f} "
+            f"(rel error {rel:.3f})"
+        )
+
+    def test_charged_fp_existence_threshold(self):
+        # Below the 4D ε-expansion threshold the FP should not exist
+        assert not validate_charged_fp_existence(Nf=100, d=4)
+        assert validate_charged_fp_existence(Nf=400, d=4)
+        # In 3D the threshold is much lower; Bonati's sample is above it
+        assert validate_charged_fp_existence(Nf=30, d=3)
+
+    def test_toolkit_ahm_finds_charged_fp(self):
+        """The toolkit can locate the charged FP at all Bonati N_f."""
+        from asymsafety.transforms.bridge.gauge_higgs import (
+            GaugeHiggsAnalogue,
+        )
+        for Nf in sorted(BONATI_SU2_MC):
+            analogue = GaugeHiggsAnalogue(N=Nf, Nc=1, epsilon=1.0)
+            # FP location should be physical: α* > 0, |u*| small
+            assert analogue.fixed_point.location["alpha"] > 0
+            assert abs(analogue.fixed_point.location["u"]) < 1.0
+            # ν should be finite and well below the spurious unitarity limit
+            assert 0 < analogue.nu < 2.0
+
+    def test_toolkit_nu_is_monotone_in_Nf(self):
+        """One-loop ν(N_f) is monotone — important sanity for the bridge."""
+        from asymsafety.transforms.bridge.gauge_higgs import (
+            correlation_length_exponent,
+        )
+        Nfs = [20, 30, 50, 80, 120]
+        nus = [correlation_length_exponent(n, epsilon=1.0) for n in Nfs]
+        # Toolkit one-loop ν decreases monotonically toward the WF limit
+        # (the *opposite* direction from Bonati MC, which grows toward 1).
+        # Either monotone direction is acceptable; flag breakage if it
+        # oscillates.
+        diffs = [nus[i + 1] - nus[i] for i in range(len(nus) - 1)]
+        assert all(d <= 0 for d in diffs) or all(d >= 0 for d in diffs), (
+            f"ν(N_f) not monotone in the toolkit: {nus}"
+        )
