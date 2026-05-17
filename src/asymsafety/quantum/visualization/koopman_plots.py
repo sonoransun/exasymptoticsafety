@@ -101,11 +101,19 @@ def plot_koopman_spectrum(
     ax.set_xlim(-max_extent, max_extent)
     ax.set_ylim(-max_extent, max_extent)
     ax.set_aspect("equal")
-    ax.set_xlabel(r"$\mathrm{Re}(\mu)$")
-    ax.set_ylabel(r"$\mathrm{Im}(\mu)$")
-    ax.set_title("Koopman spectrum (EDMD)")
+    ax.set_xlabel(r"$\mathrm{Re}(\mu)$", fontsize=11)
+    ax.set_ylabel(r"$\mathrm{Im}(\mu)$", fontsize=11)
+    ax.set_title("Koopman spectrum (EDMD)", fontsize=13, fontweight="bold")
     ax.grid(True, alpha=0.25)
-    ax.legend(loc="upper right", framealpha=0.85)
+    # Annotate the marker-size encoding alongside the (decaying/growing)
+    # legend — readers otherwise can't tell why the dots vary in size.
+    legend = ax.legend(loc="upper right", framealpha=0.85, title=None)
+    ax.text(
+        0.02, 0.02,
+        r"marker size $\propto$ $\|\mathrm{mode}\|$ in coupling basis",
+        transform=ax.transAxes, fontsize=8, color="0.35", style="italic",
+        bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="0.7", alpha=0.85),
+    )
     add_reference_box(
         ax,
         [

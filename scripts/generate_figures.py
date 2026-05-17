@@ -1162,26 +1162,31 @@ def gen_matter_continuation(out: Path, fmt: str) -> None:
 
         from asymsafety.actions.matter import MatterContent
         from asymsafety.analysis.continuation import continuation
-        from asymsafety.beta.matter import build_eh_matter_beta_system
+        from asymsafety.beta.matter import build_gravity_matter_fp_system
         from asymsafety.visualization.fixed_point_plot import (
             plot_matter_content_continuation,
         )
 
-        # Each step rebuilds a heavy symbolic matter system, so we
-        # sample a coarse grid that still straddles the Korver (2024)
-        # foliated bound at N_s = 12.
-        n_values = np.array([0, 4, 8, 12, 14], dtype=float)
+        # ``build_eh_matter_beta_system`` (the 2-coupling matter system
+        # without a running scalar quartic) currently produces β
+        # functions whose only root in the physical region is the
+        # Gaussian FP, so a naive continuation collapses to ``(0, 0)``.
+        # ``build_gravity_matter_fp_system`` (3-coupling, scalar quartic
+        # promoted to a running variable) has the pinned NGFP exercised
+        # by ``tests/test_benchmarks_published.py::TestGravityMatterFP``
+        # and produces a smoothly-varying continuation in ``N_s``.
+        n_values = np.array([0, 1, 2, 8, 10, 12], dtype=float)
 
         def builder(n: float):
-            return build_eh_matter_beta_system(
-                MatterContent(n_scalars=int(n)), d=4
+            return build_gravity_matter_fp_system(
+                MatterContent(n_scalars=int(n)), scalar_quartic=True,
             )
 
         result = continuation(
             system_builder=builder,
             parameter_name="N_s",
             parameter_values=n_values,
-            initial_guess={"g": 0.7, "lambda": 0.14},
+            initial_guess={"g": 0.69, "lambda": 0.142, "lambda_phi": 0.012},
         )
         return plot_matter_content_continuation(result)
     _run("Matter continuation", _make, "matter_continuation", out, fmt)
@@ -1222,14 +1227,28 @@ def gen_quadratic_pairwise(out: Path, fmt: str) -> None:
 
 
 def _eh_trajectory_for_cosmology():
-    """Build a representative EH trajectory used by the cosmology figures."""
+    """Build a representative EH trajectory used by the cosmology figures.
+
+    We need a trajectory that interpolates between the UV NGFP and the
+    Gaussian (classical) FP in the IR — required by ``G(r) = g/k²``
+    so the dimensional Newton constant is bounded at small ``k`` (large
+    ``r``). Starting AT the NGFP gives a flat trajectory whose ``G(r)``
+    blows up; instead we start *slightly* off the NGFP and integrate
+    backward in RG time (UV → IR), mirroring the test fixture in
+    ``tests/test_cosmology.py::eh_trajectory``.
+    """
+    from asymsafety.analysis.fixed_points import FixedPointFinder
     from asymsafety.analysis.flow import FlowIntegrator
     from asymsafety.beta.einstein_hilbert import build_eh_beta_system
 
     system = build_eh_beta_system(d=4)
-    integrator = FlowIntegrator(system)
-    return integrator.integrate(
-        {"g": 0.5, "lambda": 0.1}, t_span=(-6.0, 6.0),
+    fp = FixedPointFinder(system).find_fixed_point({"g": 0.7, "lambda": 0.14})
+    ic_uv = {
+        "g": fp.location["g"] - 0.001,
+        "lambda": fp.location["lambda"] + 0.001,
+    }
+    return FlowIntegrator(system).integrate(
+        ic_uv, t_span=(10.0, -10.0), max_step=0.05,
     )
 
 
@@ -1298,12 +1317,17 @@ def gen_scalogram(out: Path, fmt: str) -> None:
         from asymsafety.transforms.visualization.transform_plots import plot_scalogram
 
         system = build_eh_beta_system(d=4)
+        # Wider RG-time window so the scalogram captures both the
+        # crossover region near the NGFP and the asymptotic IR plateau.
         traj = FlowIntegrator(system).integrate(
-            {"g": 0.5, "lambda": 0.1}, t_span=(-4.0, 4.0),
+            {"g": 0.5, "lambda": 0.1}, t_span=(-6.0, 6.0),
         )
         scales = np.geomspace(0.05, 5.0, 32)
         wavelet = RGFlowWavelet(traj).transform(scales, wavelet_type="morlet")
-        return plot_scalogram(wavelet, coupling_index=0)
+        coupling_name = system.coupling_names[0]  # 'g'
+        return plot_scalogram(
+            wavelet, coupling_index=0, coupling_name=coupling_name,
+        )
     _run("Wavelet scalogram", _make, "scalogram", out, fmt)
 
 

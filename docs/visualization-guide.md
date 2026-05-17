@@ -212,12 +212,12 @@ fig = plot_bode(bode, entry=(0, 0))
 
 *When to use*: control-theory view of the linearised RG flow. Magnitude / phase along the imaginary frequency axis; resonances flag the locations of critical exponents.
 
-### `plot_scalogram(wavelet_result, coupling_index=0, ...)`
+### `plot_scalogram(wavelet_result, coupling_index=0, *, coupling_name=None, ...)`
 ```python
 from asymsafety.transforms.integral.wavelet import RGFlowWavelet
 from asymsafety.transforms.visualization.transform_plots import plot_scalogram
 wavelet = RGFlowWavelet(traj).transform(np.geomspace(0.05, 5, 32))
-fig = plot_scalogram(wavelet, coupling_index=0)
+fig = plot_scalogram(wavelet, coupling_index=0, coupling_name="g")
 ```
 ![Scalogram](images/scalogram.png)
 
@@ -233,16 +233,17 @@ fig = plot_pseudospectrum(ResolventOperator(stab), epsilon_values=[1.0, 0.1, 0.0
 
 *When to use*: robustness audit of `theta_i`. Thin contours = robust eigenvalues; broad contours = non-normal sensitivity that small truncation/regulator changes amplify.
 
-### `plot_comparison_table(table, ...)`
+### `plot_comparison_table(table, *, include_hydraulic=False, ...)`
 ```python
 from asymsafety.transforms.bridge.cross_analogue import CrossAnalogueBridge
 from asymsafety.transforms.visualization.transform_plots import plot_comparison_table
 table = CrossAnalogueBridge(system, fp, sa).full_comparison_table()
 fig = plot_comparison_table(table)
+# fig = plot_comparison_table(table, include_hydraulic=True)  # optional sanity check
 ```
 ![Comparison table](images/comparison_table.png)
 
-*When to use*: side-by-side bars of `Re(theta_i)` from every analogue path. The cross-analogue bridge requires bars within each group to align.
+*When to use*: side-by-side bars of `Re(theta_i)` from the three perturbative paths through the bridge (direct RG stability, transfer-matrix exponentiation, resolvent poles). These three agree at the NGFP within numerical tolerance. The hydraulic path is excluded by default because it returns impedance eigenvalues of the generated pipe network rather than the RG critical exponents themselves (different dimensionality and order of magnitude); pass `include_hydraulic=True` to add it as an overlay.
 
 ---
 
@@ -348,11 +349,13 @@ fig = plot_flrw_evolution(RGImprovedFLRW(trajectory=traj))
 
 *When to use*:
 - `plot_running_newton_constant` — see `G(r)` vs the classical reference.
-- `plot_lapse_with_horizons` — locate Cauchy / event horizons; spot the de Sitter core.
+- `plot_lapse_with_horizons` — show the de Sitter core (`f → 1` at `r → 0`) and locate the event horizon `r_+` (also the Cauchy horizon `r_-` for super-critical mass, when both exist). The default `r_range=(1e-3, 5)` and `y_clip=(-2, 1.3)` restrict to the regime where the trajectory-based `G(r)` is physical.
 - `plot_classical_vs_rg_lapse` — visualise the critical-mass remnant.
-- `plot_hawking_temperature` — show that `T_H` peaks and then vanishes (vs the classical `1/M` divergence).
+- `plot_hawking_temperature` — RG-improved `T_H` vs the classical `1/(8πM)` asymptote. The surface-gravity sign is taken in absolute value to recover physical (positive) `T_H` regardless of how the central-difference of the trajectory-based lapse falls.
 - `plot_scale_identification` — pick a `k(r)` prescription with eyes open about how each regularises the origin.
 - `plot_flrw_evolution` — three-panel FLRW summary `(a(t), H(t), G(t)/Λ(t))`.
+
+**Note**: the cosmology figures use a trajectory of the pure-EH β-functions integrated from a small perturbation off the NGFP backward in RG time. The toolkit's EH system has a non-trivial IR fixed point at roughly `(g, λ) = (0.058, 0.343)` rather than running cleanly to the Gaussian FP, so the dimensional Newton constant `G(r) = g(k)/k²` grows in the deep IR and the asymptotic-classical Schwarzschild regime cannot be shown without restricting the plot's r-range. The shipped figures show the de-Sitter core and the horizon structure faithfully.
 
 ---
 

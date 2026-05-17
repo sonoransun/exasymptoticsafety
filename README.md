@@ -659,7 +659,7 @@ The toolkit provides three novel physical mappings — hydraulic networks, quant
 
 ![Cross-method comparison](docs/images/comparison_table.png)
 
-*Side-by-side critical exponents from RG stability, transfer-matrix exponentiation, resolvent poles, and the hydraulic-impedance steady state — the cross-analogue bridge requires within-group bars to align.*
+*Side-by-side critical exponents from the three perturbative paths through the cross-analogue bridge — direct RG stability, transfer-matrix exponentiation, and resolvent poles. All three agree at the NGFP within numerical tolerance. The hydraulic path is excluded by default because it returns impedance eigenvalues of the generated pipe network rather than the RG exponents themselves; pass `include_hydraulic=True` to `plot_comparison_table` to overlay it as a sanity check.*
 
 ### Quantum domain
 
@@ -686,7 +686,7 @@ RG-improved Schwarzschild geometry and FLRW cosmology with the running couplings
 | | | |
 |:---:|:---:|:---:|
 | ![Lapse with horizons](docs/images/lapse_with_horizons.png) | ![Hawking temperature](docs/images/hawking_temperature.png) | ![FLRW evolution](docs/images/flrw_evolution.png) |
-| RG-improved Schwarzschild lapse with $r_\pm$ | Hawking $T_H(M)$ — peak then zero at $M_{\text{crit}}$ | $a(t)$, $H(t)$, and running couplings |
+| RG-improved Schwarzschild lapse with the de Sitter core and the event horizon $r_+$ marked | Hawking $T_H(M)$ vs the classical $1/(8\pi M)$ asymptote — the RG-improved curve avoids the small-$M$ Landau pole | Scale factor $a(t)$, Hubble rate $H(t)$, and the normalized running couplings $G(t)$, $\Lambda(t)$ |
 
 ```python
 from asymsafety.cosmology.rg_improved_bh import RGImprovedSchwarzschild

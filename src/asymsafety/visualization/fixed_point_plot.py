@@ -314,19 +314,47 @@ def plot_matter_content_continuation(
             ax.axvline(bound_value, color=COLOR_IRRELEVANT, ls="--", lw=1.2)
             ax.legend(fontsize=8, loc="best")
 
-    # Theta panel
+    # Theta panel — focus on the relevant directions and annotate the
+    # strongly-irrelevant outliers separately. In 3-coupling systems
+    # (e.g. gravity + scalar quartic), one eigenvalue is typically
+    # ~ -30 and would crush the [0, 1] relevant band to a flat line if
+    # all three were plotted on a common axis.
     ax_t = axes[-1]
     n_exponents = thetas.shape[1]
     colors = plt.cm.tab10(np.linspace(0, 1, max(n_exponents, 1)))
+    re_all = thetas.real
+    finite_mask = np.isfinite(re_all)
+    if finite_mask.any():
+        finite_max = float(np.nanmax(re_all)) + 0.5
+        finite_min_of_relevant = float(np.nanmin(re_all[finite_mask & (re_all > -5)])
+                                       if (finite_mask & (re_all > -5)).any()
+                                       else -2.0) - 0.5
+        lo = max(-3.5, finite_min_of_relevant)
+        hi = max(finite_max, 1.5)
+    else:
+        lo, hi = -3.5, 1.5
+
+    strongly_irrelevant_idx: list[int] = []
     for j in range(n_exponents):
-        ax_t.plot(
-            param, thetas[:, j].real, 'o-', color=colors[j],
-            markersize=3, lw=1.2, label=rf"$\theta_{j+1}$",
-        )
+        col = re_all[:, j]
+        if np.nanmin(col) < lo - 0.1:
+            strongly_irrelevant_idx.append(j)
+            # Plot off-axis with arrow so the reader knows it exists
+            ax_t.plot(
+                param, np.clip(col, lo + 0.05, hi),
+                'v', color=colors[j], markersize=6, mfc='white',
+                label=rf"$\theta_{j+1}$ $\ll 0$ (clipped)",
+            )
+        else:
+            ax_t.plot(
+                param, col, 'o-', color=colors[j],
+                markersize=5, lw=1.4, label=rf"$\theta_{j+1}$",
+            )
     ax_t.axhline(0, color="gray", lw=0.8, ls="--")
     ax_t.set_xlabel(continuation.parameter_name, fontsize=11)
     ax_t.set_ylabel(r"Re($\theta_i$)", fontsize=12)
-    ax_t.legend(fontsize=8)
+    ax_t.set_ylim(lo, hi)
+    ax_t.legend(fontsize=8, loc="best")
     ax_t.grid(True, alpha=0.3)
     if bound_value is not None:
         ax_t.axvspan(

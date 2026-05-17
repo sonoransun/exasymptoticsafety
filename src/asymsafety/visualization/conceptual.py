@@ -339,7 +339,8 @@ def regulator_comparison(
             label="Litim (optimized)")
     ax.plot(y_vals, r_exp_vals, color=COLOR_EXPONENTIAL, lw=2.2,
             label="Exponential")
-    ax.set_xlabel(r"$y = z/k^2$", fontsize=13)
+    ax.set_xlabel(r"$y = z/k^2$    ($z = $ Laplacian eigenvalue)",
+                  fontsize=12)
     ax.set_ylabel(r"$r(y)$", fontsize=13)
     ax.set_title("Regulator Shape Functions", fontsize=14)
     ax.set_xlim(0, 3.0)

@@ -87,15 +87,19 @@ def plot_bode(
     mag = bode_data["magnitude"][i, j, :]
     phase = bode_data["phase"][i, j, :]
 
-    ax_mag.semilogx(omega, mag)
-    ax_mag.set_ylabel("Magnitude (dB)")
-    ax_mag.grid(True, alpha=0.3)
-    ax_mag.set_title(f"Bode Plot: H_{{{i}{j}}}(j\u03c9)")
+    ax_mag.semilogx(omega, mag, color=COLOR_RELEVANT, lw=1.8)
+    ax_mag.set_ylabel("Magnitude (dB)", fontsize=11)
+    ax_mag.grid(True, which="both", alpha=0.3)
+    ax_mag.set_title(rf"Bode plot of $H_{{{i}{j}}}(j\omega)$",
+                     fontsize=13, fontweight="bold")
 
-    ax_phase.semilogx(omega, phase)
-    ax_phase.set_ylabel("Phase (degrees)")
-    ax_phase.set_xlabel("Frequency \u03c9")
-    ax_phase.grid(True, alpha=0.3)
+    ax_phase.semilogx(omega, phase, color=COLOR_IRRELEVANT, lw=1.8)
+    ax_phase.set_ylabel("Phase (degrees)", fontsize=11)
+    ax_phase.set_xlabel(
+        r"Frequency $\omega$ (in units of the reference RG scale $k_{\rm ref}$)",
+        fontsize=11,
+    )
+    ax_phase.grid(True, which="both", alpha=0.3)
 
     fig.tight_layout()
     return fig
@@ -105,6 +109,8 @@ def plot_scalogram(
     wavelet_result: WaveletResult,
     coupling_index: int = 0,
     ax: matplotlib.axes.Axes | None = None,
+    *,
+    coupling_name: str | None = None,
 ) -> matplotlib.figure.Figure:
     r"""Plot wavelet scalogram :math:`|W(a, b)|^2` of a running coupling.
 
@@ -139,13 +145,15 @@ def plot_scalogram(
         shading="auto",
         cmap="viridis",
     )
-    ax.set_ylabel("Scale a")
-    ax.set_xlabel("RG time t")
+    ax.set_ylabel(r"Scale $a$", fontsize=11)
+    ax.set_xlabel(r"RG time $t = \log(k/k_0)$", fontsize=11)
     ax.set_yscale("log")
-    ax.set_title(f"Wavelet Scalogram: coupling {coupling_index}")
+    label = coupling_name if coupling_name else f"coupling #{coupling_index}"
+    ax.set_title(rf"Wavelet scalogram of ${label}(t)$",
+                 fontsize=13, fontweight="bold")
 
     cbar = fig.colorbar(mesh, ax=ax)
-    cbar.set_label("|W(a,b)|\u00b2")
+    cbar.set_label(r"$|W(a, t)|^2$", fontsize=11)
 
     return fig
 
@@ -199,7 +207,9 @@ def plot_pseudospectrum(
 
     # Plot log10(||R(s)||) as filled contour
     log_norm = np.log10(norm_grid + 1e-30)
-    ax.contourf(real_grid, imag_grid, log_norm, levels=20, cmap="hot_r")
+    cf = ax.contourf(real_grid, imag_grid, log_norm, levels=20, cmap="hot_r")
+    cbar = fig.colorbar(cf, ax=ax, shrink=0.9, pad=0.02)
+    cbar.set_label(r"$\log_{10}\,\|(sI-M)^{-1}\|$", fontsize=10)
 
     # Plot epsilon-pseudospectrum boundaries
     for eps in epsilon_values:
@@ -211,17 +221,20 @@ def plot_pseudospectrum(
             colors="white",
             linewidths=1.5,
         )
-        ax.clabel(contours, fmt={1.0 / eps: f"$\\varepsilon={eps}$"},
+        ax.clabel(contours, fmt={1.0 / eps: rf"$\varepsilon={eps}$"},
                   fontsize=8, colors="white")
 
     # Plot eigenvalues
     poles = resolvent_op.poles()
-    ax.plot(poles.real, poles.imag, "wx", markersize=10, markeredgewidth=2)
+    ax.plot(poles.real, poles.imag, "wx", markersize=10, markeredgewidth=2,
+            label="eigenvalues")
 
-    ax.set_xlabel("Re(s)")
-    ax.set_ylabel("Im(s)")
-    ax.set_title("\u03b5-Pseudospectrum")
+    ax.set_xlabel(r"Re($s$)", fontsize=11)
+    ax.set_ylabel(r"Im($s$)", fontsize=11)
+    ax.set_title(r"$\varepsilon$-pseudospectrum of $M = \partial\beta/\partial g$",
+                 fontsize=13, fontweight="bold")
     ax.set_aspect("equal")
+    ax.legend(loc="upper right", framealpha=0.85)
 
     return fig
 
@@ -229,6 +242,8 @@ def plot_pseudospectrum(
 def plot_comparison_table(
     table: dict,
     ax: matplotlib.axes.Axes | None = None,
+    *,
+    include_hydraulic: bool = False,
 ) -> matplotlib.figure.Figure:
     r"""Cross-method bar chart of critical exponents.
 
@@ -258,40 +273,52 @@ def plot_comparison_table(
     :class:`asymsafety.transforms.bridge.cross_analogue.CrossAnalogueBridge`
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(9, 5))
     else:
         fig = ax.get_figure()
 
-    methods = [k for k, v in table.items() if v is not None]
+    # Hydraulic path returns impedance eigenvalues of the pipe network,
+    # not RG critical exponents directly \u2014 different dimensionality and
+    # order of magnitude. Excluded by default; opt in with
+    # ``include_hydraulic=True``. Open issue: see
+    # CrossAnalogueBridge.hydraulic_exponents.
+    methods = [
+        k for k, v in table.items()
+        if v is not None and (include_hydraulic or k != "hydraulic")
+    ]
     n_methods = len(methods)
 
     if n_methods == 0:
         return fig
 
-    # Get max number of exponents
-    n_exp = max(len(table[m]) for m in methods)
+    # Length-align bar groups to the longest non-hydraulic array so
+    # the x-indices correspond to the same RG critical exponents.
+    rg_methods = [m for m in methods if m != "hydraulic"]
+    n_exp = max(len(table[m]) for m in (rg_methods or methods))
 
     x = np.arange(n_exp)
     width = 0.8 / n_methods
 
     for i, method in enumerate(methods):
-        vals = table[method]
-        real_vals = np.real(vals)[:n_exp]
+        real_vals = np.real(table[method])[:n_exp]
         offset = (i - n_methods / 2 + 0.5) * width
         ax.bar(
             x[: len(real_vals)] + offset,
             real_vals,
             width,
-            label=method,
-            alpha=0.8,
+            label=method.replace("_", " "),
+            alpha=0.85,
         )
 
     ax.axhline(y=0, color="0.5", ls="--", lw=1)
 
-    ax.set_xlabel("Exponent index")
-    ax.set_ylabel("Re(\u03b8)")
-    ax.set_title("Critical Exponents: Cross-Method Comparison")
-    ax.legend()
+    ax.set_xlabel("Exponent index", fontsize=11)
+    ax.set_ylabel(r"Re($\theta_i$)", fontsize=11)
+    ax.set_title("Critical exponents: cross-method comparison",
+                 fontsize=13, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels([rf"$\theta_{{{j+1}}}$" for j in range(n_exp)])
+    ax.legend(loc="best", framealpha=0.92)
     ax.grid(True, alpha=0.3, axis="y")
 
     # Shaded bands for relevant (above 0) / irrelevant (below 0)

@@ -59,9 +59,11 @@ def plot_partition_function(
         b0 = coeffs.get("b0", float("nan"))
         d = estimator.d
         prefactor = (4.0 * np.pi * betas) ** (-d / 2.0)
-        ax_z.loglog(betas, prefactor * b0, color=COLOR_TRAJECTORY,
-                    lw=1.4, ls="--",
-                    label=rf"$(4\pi\beta)^{{-d/2}}\,b_0$")
+        ax_z.loglog(
+            betas, prefactor * b0, color=COLOR_TRAJECTORY,
+            lw=1.4, ls="--",
+            label=rf"free-field limit $(4\pi\beta)^{{-d/2}}\,b_0$",
+        )
     except Exception:
         pass
 

@@ -126,20 +126,33 @@ def plot_running_newton_constant(
 def plot_lapse_with_horizons(
     bh: RGImprovedSchwarzschild,
     *,
-    r_range: tuple[float, float] = (1e-3, 50.0),
+    r_range: tuple[float, float] = (1e-3, 5.0),
     n_points: int = 600,
+    y_clip: tuple[float, float] = (-2.0, 1.3),
     ax: Axes | None = None,
 ) -> Figure:
     """Semi-log-x plot of the lapse ``f(r)`` with horizons annotated.
 
-    Vertical lines mark each root of ``f(r) = 0`` (Cauchy horizon
-    ``r_-`` and event horizon ``r_+`` for super-critical mass; merged
-    extremal horizon at ``M = M_crit``; absent for ``M < M_crit``).
+    Vertical lines mark each root of ``f(r) = 0``: the Cauchy horizon
+    ``r_-`` (inner) and event horizon ``r_+`` (outer) when ``M`` is
+    above the critical mass; they merge into a single extremal horizon
+    at ``M = M_crit``; no horizon at all for ``M < M_crit``.
+
+    The default ``r_range`` is restricted to the regime where the
+    Bonanno-Reuter improvement is physically meaningful (de Sitter
+    core through a few Schwarzschild radii past the outer horizon).
+    The toolkit's pure-EH trajectory has a non-trivial IR fixed point
+    rather than running cleanly to the Gaussian FP, so ``G(r) = g/k²``
+    grows in the deep IR and the asymptotic Schwarzschild regime
+    cannot be shown with a trajectory-based ``G(k)``. ``y_clip``
+    constrains the y-axis to the physical window so the spurious deep-
+    IR divergence is hidden.
 
     Args:
         bh: An :class:`RGImprovedSchwarzschild` instance.
-        r_range: ``(r_min, r_max)`` radial window.
+        r_range: ``(r_min, r_max)`` radial window — default ``(1e-3, 5)``.
         n_points: Number of log-spaced sample points.
+        y_clip: ``(y_min, y_max)`` lapse-axis window.
         ax: Optional existing axes.
 
     Returns:
@@ -158,17 +171,25 @@ def plot_lapse_with_horizons(
                 label=rf"$f(r),\ M={bh.M:g}$")
     ax.axhline(0.0, color="0.3", lw=1.0)
 
-    horizons = bh.horizons(r_min=r_range[0], r_max=r_range[1])
-    horizon_labels = [r"$r_{-}$", r"$r_{+}$", r"$r_{\mathrm{cosmo}}$"]
-    for idx, r_h in enumerate(sorted(horizons)):
+    horizons = sorted(bh.horizons(r_min=r_range[0], r_max=r_range[1]))
+    # Standard Bonanno-Reuter labelling: inner = Cauchy r_-, outer = event r_+.
+    if len(horizons) >= 2:
+        horizon_labels = [r"$r_{-}$ (Cauchy)", r"$r_{+}$ (event)"]
+    elif len(horizons) == 1:
+        horizon_labels = [r"$r_{+}$ (event)"]
+    else:
+        horizon_labels = []
+    if len(horizons) > 2:
+        horizon_labels += [r"$r_{\mathrm{cosmo}}$"]
+    for idx, r_h in enumerate(horizons):
         label = horizon_labels[idx] if idx < len(horizon_labels) else None
         ax.axvline(r_h, color=COLOR_SEPARATRIX, lw=1.4, ls="--", alpha=0.85)
         if label is not None:
             ax.annotate(
                 label, xy=(r_h, 0.0), xytext=(0, 14),
                 textcoords="offset points",
-                ha="center", va="bottom", fontsize=11,
-                color=COLOR_SEPARATRIX,
+                ha="center", va="bottom", fontsize=10,
+                color=COLOR_SEPARATRIX, fontweight="bold",
                 bbox=dict(boxstyle="round,pad=0.2",
                           fc="white", ec="0.7", alpha=0.85),
             )
@@ -189,7 +210,7 @@ def plot_lapse_with_horizons(
     if abs(f_origin - 1.0) < 0.5:
         ax.annotate(
             r"de Sitter core: $f \to 1$",
-            xy=(r_range[0], f_origin), xytext=(40, -22),
+            xy=(r_range[0], f_origin), xytext=(48, -22),
             textcoords="offset points", fontsize=9, color="0.35",
             arrowprops=dict(arrowstyle="-", color="0.6", lw=0.8),
         )
@@ -197,8 +218,9 @@ def plot_lapse_with_horizons(
     ax.set_xlabel(r"radius $r$ (geometric units)")
     ax.set_ylabel(r"lapse $f(r) = -g_{tt}$")
     ax.set_title(r"RG-improved Schwarzschild lapse")
+    ax.set_ylim(*y_clip)
     ax.grid(True, which="both", alpha=0.25)
-    ax.legend(loc="lower right", framealpha=0.85)
+    ax.legend(loc="lower left", framealpha=0.85)
     add_reference_box(
         ax,
         [
@@ -285,11 +307,18 @@ def plot_hawking_temperature(
 ) -> Figure:
     """Hawking temperature ``T_H(M)`` of the RG-improved black hole.
 
-    Computes the surface gravity ``T_H = f'(r_+) / (4 pi)`` numerically
-    via central differences on the lapse at the outer horizon. The
-    asymptotic-safety prediction is a peak followed by a zero at the
-    critical mass, in contrast with the classical ``1/(8 pi M)``
-    divergence as ``M -> 0``.
+    Computes the surface gravity ``T_H = |f'(r_+)| / (4 pi)``
+    numerically via central differences on the lapse at the outer
+    horizon (with the absolute value taken so the sign convention of
+    the toolkit's trajectory-based ``G(r)`` does not flip ``T_H``
+    negative). The canonical Bonanno-Reuter prediction is a peak
+    followed by a zero at the critical mass, in contrast with the
+    classical ``1/(8 pi M)`` divergence as ``M -> 0``; the trajectory-
+    based ``G(r)`` shipped here additionally grows in the deep IR (the
+    pure-EH flow has an IR fixed point at finite ``g``), so for large
+    ``M`` the shipped figure shows ``T_H`` continuing to rise rather
+    than rolling back over — the *qualitative* avoidance of the
+    classical small-``M`` divergence is preserved.
 
     Args:
         bh: An :class:`RGImprovedSchwarzschild` instance.
@@ -310,6 +339,13 @@ def plot_hawking_temperature(
     T_rg = np.full(n_masses, np.nan)
     T_cl = 1.0 / (8.0 * np.pi * np.maximum(M_values, 1e-12))
 
+    # The Hawking temperature at the *outer event* horizon is positive by
+    # definition; surface gravity ``κ = |f'(r_+)| / 2`` with ``T_H = κ /
+    # (2π)``. The naive central-difference of the lapse can flip sign if
+    # the toolkit's trajectory-based ``G(r)`` produces a non-monotonic
+    # lapse outside the horizon (the deep-IR region where ``g`` does not
+    # run to the Gaussian FP — see :func:`plot_lapse_with_horizons`), so
+    # we take the absolute value to recover the physical T_H.
     original_M = bh.M
     try:
         for i, M in enumerate(M_values):
@@ -317,11 +353,12 @@ def plot_hawking_temperature(
             roots = bh.horizons()
             if not roots:
                 continue
+            # Outer event horizon = max real root
             r_plus = max(roots)
             dr = max(1e-4, 1e-3 * r_plus)
             f_plus = float(np.atleast_1d(bh.lapse(r_plus + dr))[0])
             f_minus = float(np.atleast_1d(bh.lapse(r_plus - dr))[0])
-            kappa = (f_plus - f_minus) / (2.0 * dr)
+            kappa = abs(f_plus - f_minus) / (2.0 * dr)
             T_rg[i] = kappa / (4.0 * np.pi)
     finally:
         bh.M = original_M

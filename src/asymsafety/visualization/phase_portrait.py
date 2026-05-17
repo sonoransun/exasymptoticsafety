@@ -34,6 +34,7 @@ from typing import Sequence
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 from matplotlib.figure import Figure
 
 from asymsafety.analysis.fixed_points import FixedPoint
@@ -497,21 +498,28 @@ def annotated_eh_phase_portrait(
                 arrowprops=dict(arrowstyle="->", color=color, lw=2.5),
                 zorder=4,
             )
-            # Inline theta value near the positive arrow tip
+            # Inline theta value near the positive arrow tip — pushed
+            # further from the FP and outlined with a white stroke so
+            # the label remains readable against dense streamplot
+            # foliations.
             relevance_word = "rel." if is_relevant else "irrel."
-            ax.text(
-                fp_g + dx * 1.15, fp_lam + dy * 1.15,
+            txt = ax.text(
+                fp_g + dx * 1.45, fp_lam + dy * 1.45,
                 f"{theta_label(theta)}\n({relevance_word})",
-                fontsize=8,
+                fontsize=9,
                 color=color,
+                fontweight="bold",
                 ha="center",
                 va="center",
-                zorder=7,
+                zorder=8,
                 bbox=dict(
-                    boxstyle="round,pad=0.18",
-                    fc="white", ec="0.85", alpha=0.85,
+                    boxstyle="round,pad=0.22",
+                    fc="white", ec=color, lw=0.9, alpha=0.93,
                 ),
             )
+            txt.set_path_effects([
+                pe.withStroke(linewidth=2.5, foreground="white"),
+            ])
 
     # ------------------------------------------------------------------
     # 8. Overlay trajectories
@@ -1056,7 +1064,7 @@ def quadratic_pairwise_grid(
         (couplings[2], couplings[3]),
     ]
 
-    fig, axes = plt.subplots(2, 3, figsize=figsize)
+    fig, axes = plt.subplots(2, 3, figsize=figsize, constrained_layout=True)
     axes_flat = axes.flatten()
     rhs = system.rhs_vector()
     names = system.coupling_names
@@ -1128,7 +1136,6 @@ def quadratic_pairwise_grid(
         [format_arxiv("Codello et al. (2009)", "0812.0785")],
         loc="lower right",
     )
-    fig.tight_layout()
     return fig
 
 

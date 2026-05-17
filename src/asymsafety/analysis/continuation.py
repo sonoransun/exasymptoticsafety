@@ -58,7 +58,14 @@ class ContinuationResult:
 
     @property
     def critical_exponents_array(self) -> np.ndarray:
-        """Critical exponents as 2D array (parameter × exponent index)."""
+        """Critical exponents as 2D array (parameter × exponent index).
+
+        Within each row the exponents are sorted by descending ``Re(θ)``
+        so that ``θ_1`` is consistently the *most relevant* direction
+        across the continuation — ``np.linalg.eig`` does not order
+        eigenvalues by default, which otherwise causes spurious
+        crossings in the plotted curves as the parameter varies.
+        """
         max_dim = 0
         for fp in self.fixed_points:
             if fp is not None and len(fp.critical_exponents) > max_dim:
@@ -67,8 +74,11 @@ class ContinuationResult:
         result = np.full((len(self.parameter_values), max_dim), np.nan + 0j)
         for i, fp in enumerate(self.fixed_points):
             if fp is not None and len(fp.critical_exponents) > 0:
-                n = len(fp.critical_exponents)
-                result[i, :n] = fp.critical_exponents
+                ce = np.asarray(fp.critical_exponents)
+                order = np.argsort(-ce.real)  # descending Re
+                ce_sorted = ce[order]
+                n = len(ce_sorted)
+                result[i, :n] = ce_sorted
         return result
 
 

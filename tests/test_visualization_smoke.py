@@ -478,7 +478,7 @@ class TestTransformPlotters:
             real_range=(-3, 3), imag_range=(-3, 3), n_grid=10,
         )
         assert isinstance(fig, Figure)
-        assert "Pseudospectrum" in fig.axes[0].get_title()
+        assert "pseudospectrum" in fig.axes[0].get_title().lower()
         plt.close(fig)
 
     def test_plot_comparison_table(self, eh_comparison_table):
