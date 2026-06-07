@@ -97,6 +97,24 @@ Shows that momentum-dependent field redefinitions can eliminate ghost poles that
 
 **Figures**: [`quadratic_pairwise`](images/quadratic_pairwise.caption.md).
 
+### Draper, Knorr, Ripken & Saueressig (2020)
+
+**"Graviton-Mediated Scattering Amplitudes from the Quantum Effective Action"**
+Phys. Rev. Lett. **125**, 181301 [[2007.04396](https://arxiv.org/abs/2007.04396)]
+
+Constructs gauge-invariant graviton-mediated scattering amplitudes for non-minimally coupled scalars from a curvature/form-factor expansion of the effective action. The amplitude reduces to general relativity in the infrared and, once the asymptotically safe scale-invariant regime is reached, approaches a constant in the ultraviolet — UV-finite, unitary and causal without extra degrees of freedom.
+
+**Relevance**: The physics target of `scattering/` (the `GravitonMediatedAmplitude` IR→GR / UV-constant limits and the no-ghost causality check). Validated by `validation/draper_2020.py`.
+
+### Knorr (2026)
+
+**"Asymptotically (un)safe scattering amplitudes from scratch: a deep dive into the IR jungle"**
+[[2602.21285](https://arxiv.org/abs/2602.21285)]
+
+Computes leading quantum-gravity contributions to a scalar scattering amplitude in asymptotic safety and shows that the existence of a fixed point does **not** by itself guarantee a bounded amplitude (the "safe vs unsafe" dichotomy); naive RG-improvement / derivative expansion can fail quantitatively, so genuine momentum-dependent form factors are required.
+
+**Relevance**: The central caveat documented throughout `scattering/`; realised as the safe-vs-unsafe diagnostic in `validation/knorr_2026.py`.
+
 ---
 
 <a id="matter-coupling"></a>
@@ -293,4 +311,15 @@ Comprehensive Physics Reports review consolidating lattice Monte-Carlo and field
 **Figures**: [`ahm_phase_diagram`](images/ahm_phase_diagram.caption.md), [`charged_fp_boundary`](images/charged_fp_boundary.caption.md), [`nu_vs_nf`](images/nu_vs_nf.caption.md), [`ahm_as_bridge`](images/ahm_as_bridge.caption.md).
 
 **Animations**: [`rg_flow_ahm`](animations/rg_flow_ahm.caption.md), [`nu_vs_nf_sweep`](animations/nu_vs_nf_sweep.caption.md).
+
+### Cheung, Remmen, Sciotti & Tarquini (2025)
+
+**"Strings from Almost Nothing"**
+Phys. Rev. Lett. (DOI `cw4p-cqh7`) [[2508.09246](https://arxiv.org/abs/2508.09246)]
+
+A physical-scattering bootstrap: from analyticity, crossing, ultrasoft (faster-than-power-law) high-energy behaviour, and an infinite sequence of momentum-transfer values at which higher-spin exchanges cancel, the space of minimally consistent four-point amplitudes collapses onto the Veneziano and Virasoro–Shapiro string amplitudes — with the Regge mass spectrum as an output of the bootstrap.
+
+**Relevance**: The "physical scattering" half of the combined analysis. The toolkit implements the bootstrap amplitudes and their defining properties (`scattering/bootstrap.py`) and runs the *same* physical-consistency battery on both the asymptotically-safe and the string amplitudes via `scattering/bridge.py` (`ScatteringBridge`), establishing that asymptotic safety and strings are distinct, mutually consistent points in the space of physical amplitudes. Validated by `validation/cheung_2025.py`. See [`docs/scattering-amplitudes.md`](scattering-amplitudes.md).
+
+**Figures**: [`regge_trajectory`](images/regge_trajectory.caption.md), [`as_vs_string`](images/as_vs_string.caption.md), [`amplitude_vs_energy`](images/amplitude_vs_energy.caption.md), [`partial_wave_unitarity`](images/partial_wave_unitarity.caption.md), [`graviton_form_factor`](images/graviton_form_factor.caption.md).
 

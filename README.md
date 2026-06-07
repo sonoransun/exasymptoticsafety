@@ -724,6 +724,32 @@ Animations: [`rg_flow_ahm.mp4`](docs/animations/rg_flow_ahm.mp4) shows trajector
 
 ---
 
+## Physical Scattering Amplitudes
+
+The first **observable** built from the RG flow: graviton-mediated $2\to2$ scalar scattering, RG-improved by the fixed point. The running couplings become a momentum-dependent graviton form factor via a momentum-scale identification $k(p^2)=\xi\sqrt{|p^2|}$ — the scattering analogue of the RG-improved black holes. The amplitude reproduces **Newtonian gravity in the IR** and tends to a **finite UV constant** at the fixed point, so classical gravity's runaway partial-wave growth (tree unitarity violation near the Planck scale) is tamed.
+
+This is then **combined with physical scattering** in the sense of *Strings from Almost Nothing* (Cheung, Remmen, Sciotti & Tarquini, PRL [arXiv:2508.09246](https://arxiv.org/abs/2508.09246)): the same physical-consistency battery (crossing, unitarity/boundedness, causality/no-ghosts, UV finiteness, Regge/ultrasoft behaviour) is run on both the asymptotically-safe amplitude and the Veneziano/Virasoro–Shapiro string amplitudes. The `ScatteringBridge` shows they are **distinct, mutually consistent** points in the space of physical amplitudes — asymptotic safety softens the coupling (UV-constant), strings are ultrasoft with an infinite higher-spin tower.
+
+```python
+from asymsafety.scattering.form_factor import GravitonFormFactor
+from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
+from asymsafety.scattering.bridge import ScatteringBridge
+
+amp = GravitonMediatedAmplitude(GravitonFormFactor(eh_trajectory))
+amp.ir_limit()["ratio"]   # → 1   (recovers classical GR)
+amp.uv_limit()["bounded"] # → True (finite UV amplitude)
+print(ScatteringBridge(amp).verify()["summary"])
+```
+
+```bash
+asymsafety amplitude --truncation eh --guess g=0.7,lambda=0.14 \
+    --s-range 1e-2:1e8:200 --checks --compare-string --output amp.npz
+```
+
+> RG-improvement at the level of an observable (the same standing as the cosmology module), **not** a first-principles form factor — a safe fixed point alone does not guarantee a bounded amplitude (Knorr [arXiv:2602.21285]). Full reference: [`docs/scattering-amplitudes.md`](docs/scattering-amplitudes.md).
+
+---
+
 ## Project Structure
 
 ```
@@ -734,7 +760,9 @@ src/asymsafety/
 ├── frg/                # Regulators, heat kernel, spectral sums, threshold functions
 ├── beta/               # Beta function systems (EH, quadratic, foliated, matter)
 ├── analysis/           # Fixed points, stability, flow integration, continuation
-├── visualization/      # 2D phase portraits, critical exponent plots
+├── scattering/         # Graviton-mediated amplitudes, form factors, string bootstrap bridge
+├── cosmology/          # RG-improved Schwarzschild & FLRW
+├── visualization/      # 2D phase portraits, critical exponent + amplitude plots
 ├── validation/         # Literature benchmark values
 ├── gui/                # PySide6 desktop app: panels, views, 3D visualization
 │   ├── panels/         #   System, FP finder, flow, continuation config

@@ -329,3 +329,87 @@ class TestBonati2025GaugeHiggs:
         assert all(d <= 0 for d in diffs) or all(d >= 0 for d in diffs), (
             f"ν(N_f) not monotone in the toolkit: {nus}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Scattering amplitudes: physical scattering + asymptotic safety
+# ---------------------------------------------------------------------------
+
+class TestDraper2020GravitonAmplitude:
+    """Graviton-mediated amplitude reproduces the Draper et al. (2020) limits.
+
+    IR → classical Newtonian, UV → finite/bounded, no ghost poles.
+    """
+
+    @pytest.fixture(scope="class")
+    def amplitude(self):
+        from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
+        from asymsafety.scattering.form_factor import GravitonFormFactor
+        from tests.conftest import make_as_trajectory
+
+        return GravitonMediatedAmplitude(
+            GravitonFormFactor(make_as_trajectory())
+        )
+
+    def test_validate_runs_and_passes(self, amplitude):
+        from asymsafety.validation.draper_2020 import validate_graviton_amplitude
+
+        result = validate_graviton_amplitude(amplitude)
+        assert "all_passed" in result
+        assert result["ir_newtonian_limit"]["passed"]
+        assert result["uv_finite"]["passed"]
+        assert result["ghost_free"]["passed"]
+        assert result["all_passed"]
+
+
+class TestKnorr2026SafeVsUnsafe:
+    """A fixed point alone does not guarantee a bounded amplitude."""
+
+    def test_safe_bounded_unsafe_grows(self):
+        from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
+        from asymsafety.scattering.form_factor import GravitonFormFactor
+        from asymsafety.validation.knorr_2026 import (
+            make_unsafe_amplitude,
+            validate_safe_vs_unsafe,
+        )
+        from tests.conftest import make_as_trajectory
+
+        traj = make_as_trajectory()
+        safe = GravitonMediatedAmplitude(GravitonFormFactor(traj))
+        unsafe = make_unsafe_amplitude(traj)
+        result = validate_safe_vs_unsafe(safe, unsafe)
+        assert result["safe_bounded"]["passed"]
+        assert result["unsafe_grows"]["passed"]
+        assert result["dichotomy_holds"]
+
+
+class TestCheung2025Bootstrap:
+    """The string bootstrap reproduces the Strings-from-Almost-Nothing facts."""
+
+    def test_validate_bootstrap(self):
+        from asymsafety.validation.cheung_2025 import validate_bootstrap
+
+        result = validate_bootstrap()
+        assert result["regge_spectrum"]["passed"]
+        assert result["veneziano_crossing"]["passed"]
+        assert result["virasoro_shapiro_crossing"]["passed"]
+        assert result["higher_spin_cancellation"]["passed"]
+        assert result["ultrasoft_falloff"]["passed"]
+        assert result["all_passed"]
+
+
+class TestScatteringBridge:
+    """The AS amplitude is a distinct, consistent point vs the string bootstrap."""
+
+    def test_bridge_verdict(self):
+        from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
+        from asymsafety.scattering.bridge import ScatteringBridge
+        from asymsafety.scattering.form_factor import GravitonFormFactor
+        from tests.conftest import make_as_trajectory
+
+        amp = GravitonMediatedAmplitude(
+            GravitonFormFactor(make_as_trajectory())
+        )
+        verdict = ScatteringBridge(amp).verify()
+        assert verdict["as_physically_consistent"]
+        assert verdict["distinct_from_strings"]

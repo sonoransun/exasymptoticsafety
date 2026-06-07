@@ -1789,6 +1789,129 @@ def gen_ahm_as_bridge(out: Path, fmt: str) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Scattering amplitudes (physical scattering + asymptotic safety)
+# ---------------------------------------------------------------------------
+
+def _scattering_amplitude():
+    """AS graviton-mediated amplitude on the representative EH trajectory."""
+    from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
+    from asymsafety.scattering.form_factor import GravitonFormFactor
+
+    return GravitonMediatedAmplitude(
+        GravitonFormFactor(_eh_trajectory_for_cosmology())
+    )
+
+
+def gen_amplitude_vs_energy(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.visualization.amplitude_plot import (
+            plot_amplitude_vs_energy,
+        )
+        return plot_amplitude_vs_energy(_scattering_amplitude())
+    _run("Amplitude vs energy", _make, "amplitude_vs_energy", out, fmt)
+
+
+def gen_graviton_form_factor(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.scattering.form_factor import GravitonFormFactor
+        from asymsafety.visualization.amplitude_plot import plot_form_factor
+        return plot_form_factor(
+            GravitonFormFactor(_eh_trajectory_for_cosmology())
+        )
+    _run("Graviton form factor", _make, "graviton_form_factor", out, fmt)
+
+
+def gen_partial_wave_unitarity(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.visualization.amplitude_plot import (
+            plot_partial_wave_unitarity,
+        )
+        return plot_partial_wave_unitarity(_scattering_amplitude())
+    _run("Partial-wave unitarity", _make, "partial_wave_unitarity", out, fmt)
+
+
+def gen_regge_trajectory(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.visualization.amplitude_plot import plot_regge_trajectory
+        return plot_regge_trajectory()
+    _run("Regge trajectory", _make, "regge_trajectory", out, fmt)
+
+
+def gen_as_vs_string(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.scattering.bridge import ScatteringBridge
+        from asymsafety.visualization.amplitude_plot import plot_as_vs_string
+        return plot_as_vs_string(ScatteringBridge(_scattering_amplitude()))
+    _run("AS vs string bridge", _make, "as_vs_string", out, fmt)
+
+
+_CAPTIONS.update({
+    "amplitude_vs_energy": FigureCaption(
+        title="Graviton-mediated scattering: GR vs asymptotic safety",
+        description=(
+            "Magnitude of the tree-level graviton-mediated 2->2 scalar "
+            "amplitude at fixed angle. Classical general relativity grows "
+            "with energy, while the asymptotically-safe form factor softens "
+            "the graviton coupling G(p^2) ~ g*/p^2 and the amplitude tends "
+            "to a finite ultraviolet constant."
+        ),
+        references=["Draper, Knorr, Ripken & Saueressig (2020) [2007.04396]"],
+        see_also=["asymsafety.visualization.amplitude_plot.plot_amplitude_vs_energy"],
+    ),
+    "graviton_form_factor": FigureCaption(
+        title="Graviton form factor f(p^2)",
+        description=(
+            "The momentum-dependent dressing f(p^2)=G_N/G(p^2) and the "
+            "running G(p^2)/G_N. In the infrared f->1 (Newtonian limit); at "
+            "the fixed point f ~ p^2 so G ~ 1/p^2 (ultraviolet softening)."
+        ),
+        references=[
+            "Draper, Knorr, Ripken & Saueressig (2020) [2007.04396]",
+            "Knorr (2026) [2602.21285]",
+        ],
+        see_also=["asymsafety.visualization.amplitude_plot.plot_form_factor"],
+    ),
+    "partial_wave_unitarity": FigureCaption(
+        title="Partial-wave growth and unitarity",
+        description=(
+            "The s-wave partial amplitude |a_0(s)|. Classical gravity runs "
+            "past the |a_l|=1 unitarity line near the Planck scale; the "
+            "asymptotically-safe amplitude stays bounded."
+        ),
+        references=["Knorr (2026) [2602.21285]"],
+        see_also=[
+            "asymsafety.visualization.amplitude_plot.plot_partial_wave_unitarity"
+        ],
+    ),
+    "regge_trajectory": FigureCaption(
+        title="Regge trajectory and string mass spectrum",
+        description=(
+            "Chew-Frautschi plot of the linear Regge trajectory and the "
+            "string mass tower m_n^2=(n-alpha0)/alpha', the bootstrap output "
+            "of Strings from Almost Nothing."
+        ),
+        references=["Cheung, Remmen, Sciotti & Tarquini (2025) [2508.09246]"],
+        see_also=["asymsafety.visualization.amplitude_plot.plot_regge_trajectory"],
+    ),
+    "as_vs_string": FigureCaption(
+        title="Two routes to UV completeness",
+        description=(
+            "Normalised fixed-angle amplitudes: asymptotic safety reaches a "
+            "UV-constant amplitude by softening the graviton coupling, while "
+            "the string bootstrap enforces ultrasoft (super-polynomial) "
+            "falloff via an infinite higher-spin Regge tower. Both are "
+            "physically consistent, but distinct."
+        ),
+        references=[
+            "Cheung, Remmen, Sciotti & Tarquini (2025) [2508.09246]",
+            "Draper, Knorr, Ripken & Saueressig (2020) [2007.04396]",
+        ],
+        see_also=["asymsafety.visualization.amplitude_plot.plot_as_vs_string"],
+    ),
+})
+
+
 ALL_GENERATORS = [
     gen_asymptotic_safety_concept,
     gen_wetterich_equation,
@@ -1840,6 +1963,12 @@ ALL_GENERATORS = [
     gen_charged_fp_boundary,
     gen_nu_vs_nf,
     gen_ahm_as_bridge,
+    # Scattering amplitudes (physical scattering + asymptotic safety)
+    gen_amplitude_vs_energy,
+    gen_graviton_form_factor,
+    gen_partial_wave_unitarity,
+    gen_regge_trajectory,
+    gen_as_vs_string,
 ]
 
 # Names whose output is byte-deterministic enough to support sha256
