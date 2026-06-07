@@ -995,3 +995,140 @@ def charged_fp_boundary(
         )
 
     return fig
+
+
+# ── scattering amplitudes ─────────────────────────────────────────────
+
+
+def scattering_concept(
+    figsize: tuple[float, float] = (12, 5),
+    *,
+    show_references: bool = True,
+) -> Figure:
+    r"""Two-panel schematic of graviton-mediated scattering in asymptotic safety.
+
+    Physics
+    -------
+    Left panel: the tree-level graviton exchange between two scalars, with
+    the quantum corrections packaged into a momentum-dependent form factor
+    ``f(p^2)`` dressing the propagator. In the infrared ``f -> 1`` and the
+    Newton coupling is the measured ``G_N`` (classical gravity); in the
+    ultraviolet the asymptotically-safe fixed point drives ``f ~ p^2`` so
+    ``G(p^2) -> g^*/p^2`` (softening). Right panel: the resulting amplitude
+    ``|M|`` versus energy ``sqrt(s)`` at fixed angle. All three curves track
+    Newtonian gravity in the IR; classical GR then grows without bound
+    (tree-unitarity violation near the Planck scale), asymptotic safety
+    approaches a finite UV constant, and the string bootstrap amplitude
+    falls off ultrasoftly.
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 5)``
+    show_references : bool, default ``True``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Draper, Knorr, Ripken & Saueressig (2020), PRL 125, 181301
+      [2007.04396].
+    - Knorr (2026) [2602.21285] — safe vs unsafe amplitudes.
+    - Cheung, Remmen, Sciotti & Tarquini (2025), PRL [2508.09246].
+
+    See Also
+    --------
+    :func:`asymsafety.visualization.amplitude_plot.plot_amplitude_vs_energy`
+        Data-driven counterpart computed from an RG trajectory.
+    :func:`asymsafety.visualization.bridge_diagram.scattering_bridge_diagram`
+        Companion AS-vs-string consistency diagram.
+    """
+    apply_style()
+    fig, (ax_left, ax_right) = plt.subplots(
+        1, 2, figsize=figsize, constrained_layout=True,
+    )
+
+    # ── Left panel: graviton-exchange diagram with form-factor blob ────
+    ax = ax_left
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_axis_off()
+    ax.set_title("Graviton-mediated scalar scattering", fontsize=14)
+
+    v_top, v_bot = (0.5, 0.70), (0.5, 0.30)
+    # external scalar legs
+    for x0, y0 in [(0.10, 0.92), (0.90, 0.92)]:
+        ax.plot([x0, v_top[0]], [y0, v_top[1]],
+                color=COLOR_TRAJECTORY, lw=2.2, zorder=2)
+    for x0, y0 in [(0.10, 0.08), (0.90, 0.08)]:
+        ax.plot([x0, v_bot[0]], [y0, v_bot[1]],
+                color=COLOR_TRAJECTORY, lw=2.2, zorder=2)
+    # graviton exchange drawn as a wavy line
+    yy = np.linspace(v_bot[1], v_top[1], 120)
+    xx = 0.5 + 0.02 * np.sin((yy - v_bot[1]) / (v_top[1] - v_bot[1]) * np.pi * 9)
+    ax.plot(xx, yy, color=COLOR_RELEVANT, lw=1.6, zorder=2)
+    # form-factor blob
+    ax.add_patch(mpatches.Circle(
+        (0.5, 0.5), 0.075, fc=COLOR_NGFP, ec="black", lw=1.2,
+        alpha=0.92, zorder=4,
+    ))
+    ax.text(0.5, 0.5, r"$f(p^2)$", ha="center", va="center",
+            fontsize=11, fontweight="bold", zorder=5)
+    for vx, vy in (v_top, v_bot):
+        ax.plot(vx, vy, "o", color="black", ms=5, zorder=5)
+    # leg labels
+    for lx, ly, va in [(0.08, 0.94, "bottom"), (0.92, 0.94, "bottom"),
+                       (0.08, 0.06, "top"), (0.92, 0.06, "top")]:
+        ax.text(lx, ly, r"$\phi$", fontsize=12, ha="center", va=va)
+    ax.text(0.595, 0.5, "graviton", fontsize=9, color=COLOR_RELEVANT,
+            rotation=90, va="center")
+    # IR / UV evolution captions
+    ax.text(0.5, 0.95, r"IR:  $f\to 1$,  $G\to G_N$  (Newtonian)",
+            ha="center", va="center", fontsize=9, color="0.3",
+            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6",
+                      alpha=0.9))
+    ax.text(0.5, 0.05, r"UV:  $f\sim p^2$,  $G\to g^*/p^2$  (softened)",
+            ha="center", va="center", fontsize=9, color="0.3",
+            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="0.6",
+                      alpha=0.9))
+
+    # ── Right panel: |M| vs energy ────────────────────────────────────
+    ax = ax_right
+    x = np.logspace(-0.5, 2.0, 400)        # sqrt(s)
+    x_pl = 3.0                              # schematic Planck scale
+    M_gr = 0.12 * x ** 2                    # classical: grows like s
+    M_as = 0.12 * x_pl ** 2 * x ** 2 / (x_pl ** 2 + x ** 2)  # plateau
+    M_str = 0.12 * x ** 2 * np.exp(-(x / (1.7 * x_pl)) ** 2)  # ultrasoft
+
+    ax.loglog(x, M_gr, color=COLOR_SEPARATRIX, lw=2.0, ls="--",
+              label="classical GR (grows)")
+    ax.loglog(x, M_as, color=COLOR_NGFP, lw=2.4,
+              label="asymptotic safety (UV-constant)")
+    ax.loglog(x, M_str, color=COLOR_RELEVANT, lw=2.0,
+              label="string bootstrap (ultrasoft)")
+    ax.axvline(x_pl, color="0.5", ls=":", lw=1.0)
+    ax.text(x_pl * 1.05, 0.02, "Planck scale", rotation=90, fontsize=8,
+            color="0.4", va="bottom")
+    ax.set_xlabel(r"$\sqrt{s}$  (energy)", fontsize=13)
+    ax.set_ylabel(r"$|\mathcal{M}(s)|$  (fixed angle)", fontsize=13)
+    ax.set_title("Two routes to a finite UV amplitude", fontsize=14)
+    ax.set_ylim(1e-2, 2e3)
+    ax.legend(fontsize=9, loc="upper left")
+    ax.annotate(r"IR $\leftarrow$", xy=(0.02, 0.04), xycoords="axes fraction",
+                fontsize=9, color="0.4")
+    ax.annotate(r"$\rightarrow$ UV", xy=(0.98, 0.04), xycoords="axes fraction",
+                fontsize=9, color="0.4", ha="right")
+
+    if show_references:
+        add_reference_box(
+            ax_right,
+            [
+                format_arxiv("Draper et al. (2020)", "2007.04396"),
+                format_arxiv("Knorr (2026)", "2602.21285"),
+                format_arxiv("Cheung et al. (2025)", "2508.09246"),
+            ],
+            loc="lower right",
+        )
+
+    return fig

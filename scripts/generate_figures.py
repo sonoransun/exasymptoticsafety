@@ -1846,6 +1846,61 @@ def gen_as_vs_string(out: Path, fmt: str) -> None:
     _run("AS vs string bridge", _make, "as_vs_string", out, fmt)
 
 
+def gen_scattering_concept(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.visualization.conceptual import scattering_concept
+        return scattering_concept()
+    _run("Scattering concept", _make, "scattering_concept", out, fmt)
+
+
+def gen_scattering_bridge(out: Path, fmt: str) -> None:
+    def _make():
+        from asymsafety.visualization.bridge_diagram import (
+            scattering_bridge_diagram,
+        )
+        return scattering_bridge_diagram()
+    _run("Scattering bridge", _make, "scattering_bridge", out, fmt)
+
+
+_CAPTIONS.update({
+    "scattering_concept": FigureCaption(
+        title="Graviton-mediated scattering in asymptotic safety (concept)",
+        description=(
+            "Schematic of the tree-level graviton exchange between two "
+            "scalars, with quantum corrections packaged into a "
+            "momentum-dependent form factor f(p^2) that is 1 in the infrared "
+            "(Newtonian gravity) and grows like p^2 in the ultraviolet "
+            "(softening G(p^2) -> g*/p^2). The right panel shows |M| vs "
+            "energy: classical GR grows without bound, asymptotic safety "
+            "reaches a finite UV constant, and the string bootstrap amplitude "
+            "falls off ultrasoftly."
+        ),
+        references=[
+            "Draper, Knorr, Ripken & Saueressig (2020) [2007.04396]",
+            "Cheung, Remmen, Sciotti & Tarquini (2025) [2508.09246]",
+        ],
+        see_also=["asymsafety.visualization.conceptual.scattering_concept"],
+    ),
+    "scattering_bridge": FigureCaption(
+        title="Asymptotic safety vs the string bootstrap (consistency)",
+        description=(
+            "Two-column physical-scattering consistency table. Both the "
+            "asymptotically-safe and the Veneziano/Virasoro-Shapiro string "
+            "amplitudes satisfy the foundational requirements (crossing, UV "
+            "finiteness, bounded partial waves, no ghosts); they differ in "
+            "the ultraviolet, where asymptotic safety softens to a "
+            "UV-constant amplitude while strings are ultrasoft with an "
+            "infinite higher-spin Regge tower. Distinct but mutually "
+            "consistent points in amplitude space."
+        ),
+        references=["Cheung, Remmen, Sciotti & Tarquini (2025) [2508.09246]"],
+        see_also=[
+            "asymsafety.visualization.bridge_diagram.scattering_bridge_diagram"
+        ],
+    ),
+})
+
+
 _CAPTIONS.update({
     "amplitude_vs_energy": FigureCaption(
         title="Graviton-mediated scattering: GR vs asymptotic safety",
@@ -1964,11 +2019,13 @@ ALL_GENERATORS = [
     gen_nu_vs_nf,
     gen_ahm_as_bridge,
     # Scattering amplitudes (physical scattering + asymptotic safety)
+    gen_scattering_concept,
     gen_amplitude_vs_energy,
     gen_graviton_form_factor,
     gen_partial_wave_unitarity,
     gen_regge_trajectory,
     gen_as_vs_string,
+    gen_scattering_bridge,
 ]
 
 # Names whose output is byte-deterministic enough to support sha256
@@ -1983,6 +2040,8 @@ _HASH_TESTED = (
     "hydraulic_analogy",
     "heat_kernel_coefficients",
     "scale_identification",
+    "scattering_concept",
+    "scattering_bridge",
 )
 
 

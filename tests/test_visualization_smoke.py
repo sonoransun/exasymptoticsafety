@@ -248,6 +248,7 @@ class TestConceptualPlots:
         "regulator_comparison",
         "fixed_point_stability_concept",
         "wetterich_equation_diagram",
+        "scattering_concept",
     ])
     def test_conceptual(self, fn_name):
         import asymsafety.visualization.conceptual as mod
@@ -269,6 +270,14 @@ class TestConceptualPlots:
             hydraulic_analogy_diagram,
         )
         fig = hydraulic_analogy_diagram()
+        assert isinstance(fig, Figure)
+        plt.close(fig)
+
+    def test_scattering_bridge(self):
+        from asymsafety.visualization.bridge_diagram import (
+            scattering_bridge_diagram,
+        )
+        fig = scattering_bridge_diagram()
         assert isinstance(fig, Figure)
         plt.close(fig)
 

@@ -14,6 +14,7 @@ A one-stop reference for every plotting function in `asymsafety`. Each entry sho
 6. [Quantum](#6-quantum)
 7. [Cosmology](#7-cosmology)
 8. [Spectral / heat-kernel](#8-spectral--heat-kernel)
+9. [Scattering amplitudes](#9-scattering-amplitudes)
 
 ---
 
@@ -56,6 +57,24 @@ fig = fixed_point_stability_concept()
 ![FP stability concept](images/fp_stability_concept.png)
 
 *When to use*: explaining what "relevant directions" mean — the linearised flow with eigenvectors and the critical-exponent table.
+
+### `scattering_concept()`
+```python
+from asymsafety.visualization.conceptual import scattering_concept
+fig = scattering_concept()
+```
+![Scattering concept](images/scattering_concept.png)
+
+*When to use*: introducing the scattering observable. Two panels — the graviton-exchange diagram with the form-factor blob, and `|M|` vs energy showing GR growth, the asymptotic-safety UV plateau, and the ultrasoft string falloff.
+
+### `scattering_bridge_diagram()`
+```python
+from asymsafety.visualization.bridge_diagram import scattering_bridge_diagram
+fig = scattering_bridge_diagram()
+```
+![Scattering bridge](images/scattering_bridge.png)
+
+*When to use*: the AS-vs-string consistency comparison. A two-column table of physical-scattering criteria with ✓/✗ per column — both satisfy the foundational ones; only strings are ultrasoft with a Regge tower.
 
 ---
 
@@ -380,6 +399,57 @@ fig = plot_heat_kernel_coefficients(sdw, field_types=("scalar", "vector", "TT"))
 - `plot_spectral_sum_convergence` — pick a defensible `l_max` for spectral-sum truncations.
 - `plot_heat_kernel_coefficients` — quick sanity check on per-field-type Seeley-DeWitt expansions.
 - `plot_beta_norm_grid(arrays)` — heatmap of `|beta|` from an `asymsafety eval` `.npz` payload (used by notebook 05).
+
+---
+
+## 9. Scattering amplitudes
+
+Graviton-mediated scattering observables (physics + API in [`scattering-amplitudes.md`](scattering-amplitudes.md)). All live in `asymsafety.visualization.amplitude_plot` and take objects built in `asymsafety.scattering`; the conceptual schematics `scattering_concept()` / `scattering_bridge_diagram()` are in [section 1](#1-conceptual-diagrams).
+
+### `plot_amplitude_vs_energy(amplitude, *, cos_theta=0.3, s_range=(1e-2, 1e8, 200))`
+```python
+from asymsafety.visualization.amplitude_plot import plot_amplitude_vs_energy
+fig = plot_amplitude_vs_energy(amp)   # amp: GravitonMediatedAmplitude
+```
+![Amplitude vs energy](images/amplitude_vs_energy.png)
+
+*When to use*: the headline result — classical GR grows with energy while the asymptotically-safe amplitude approaches a finite UV constant.
+
+### `plot_partial_wave_unitarity(amplitude, *, ell=0, s_range=...)`
+```python
+from asymsafety.visualization.amplitude_plot import plot_partial_wave_unitarity
+fig = plot_partial_wave_unitarity(amp)
+```
+![Partial-wave unitarity](images/partial_wave_unitarity.png)
+
+*When to use*: showing that classical gravity's `|a_0(s)|` runs past the `|a_l|=1` unitarity line near the Planck scale while asymptotic safety stays bounded.
+
+### `plot_form_factor(form_factor, *, p2_range=...)`
+```python
+from asymsafety.visualization.amplitude_plot import plot_form_factor
+fig = plot_form_factor(ff)            # ff: GravitonFormFactor
+```
+![Graviton form factor](images/graviton_form_factor.png)
+
+*When to use*: the dressing itself — `f(p^2)` (IR `-> 1`, UV `~ p^2`) and the softening `G(p^2)/G_N`.
+
+### `plot_regge_trajectory(*, alpha0=1.0, alphap=1.0, n_max=5)`
+```python
+from asymsafety.visualization.amplitude_plot import plot_regge_trajectory
+fig = plot_regge_trajectory()
+```
+![Regge trajectory](images/regge_trajectory.png)
+
+*When to use*: the string-bootstrap side — a Chew–Frautschi plot of the linear Regge trajectory and the mass tower `m_n^2=(n-alpha0)/alpha'`.
+
+### `plot_as_vs_string(bridge, *, cos_theta=0.3, s_range=...)`
+```python
+from asymsafety.visualization.amplitude_plot import plot_as_vs_string
+fig = plot_as_vs_string(bridge)       # bridge: ScatteringBridge
+```
+![AS vs string](images/as_vs_string.png)
+
+*When to use*: the comparison — normalised fixed-angle amplitudes contrasting asymptotic safety (UV-constant via softening) with the ultrasoft string amplitude.
 
 ---
 

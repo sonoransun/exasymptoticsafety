@@ -4,7 +4,7 @@
 
 ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Tests: 78 passing](https://img.shields.io/badge/tests-78%20passing-brightgreen)
+![Tests: 480 passing](https://img.shields.io/badge/tests-480%20passing-brightgreen)
 
 Computes functional renormalization group (FRG) beta functions, locates non-Gaussian UV fixed points, determines critical exponents, and integrates RG flows for gravitational theories — with interactive 3D visualization, GPU acceleration, and distributed cloud computing.
 
@@ -33,6 +33,37 @@ where $t = \log(k/k_0)$ is the RG time, $\Gamma_{k}^{(2)}$ is the second functio
 ![The Wetterich equation](docs/images/wetterich_equation.png)
 
 *The Wetterich equation: an exact one-loop functional RG equation. The circle represents the trace over the full regularised propagator $(\Gamma_{k}^{(2)} + R_k)^{-1}$, with a single regulator insertion $\partial_t R_k$ (cross). Only modes near the scale $k$ contribute to the flow.*
+
+### From the idea to observables
+
+The toolkit follows a single thread: the obstruction (perturbative non-renormalizability) motivates Weinberg's conjecture, the Wetterich equation turns it into computable beta functions, their **non-Gaussian fixed point** fixes the UV behaviour, its **critical exponents** set how predictive the theory is — and those running couplings then feed *physical observables* (RG-improved cosmology and scattering amplitudes) and a family of *cross-analogue bridges* that re-derive the same physics in other languages.
+
+```mermaid
+flowchart TD
+    PNR["Perturbative non-renormalizability\nof general relativity"]
+    ASC["Weinberg asymptotic-safety conjecture\ninteracting UV fixed point"]
+    FRG["Wetterich FRG\nexact one-loop flow of the effective action"]
+    BETA["Beta functions\nbeta_i(g) per coupling"]
+    NGFP["Non-Gaussian UV fixed point\n(g*, lambda*) ~ (0.69, 0.14)"]
+    THETA["Critical exponents theta_i\npredictivity = number of relevant directions"]
+
+    subgraph OBS["Physical observables"]
+        COSMO["RG-improved cosmology\nblack holes, FLRW"]
+        SCAT["Scattering amplitudes\ngraviton-mediated, form factors"]
+    end
+
+    subgraph BRIDGES["Cross-analogue bridges"]
+        HYD["Hydraulic networks"]
+        QUA["Quantum circuits"]
+        TRA["Integral transforms"]
+        STR["String bootstrap"]
+    end
+
+    PNR --> ASC --> FRG --> BETA --> NGFP --> THETA
+    THETA --> OBS
+    THETA --> BRIDGES
+    SCAT --> STR
+```
 
 ---
 
@@ -72,13 +103,29 @@ flowchart TD
         cloud["Cloud Deployment\nDocker, Kubernetes\nRay autoscaling"]
     end
 
+    subgraph observables["Physical Observables"]
+        fp["Fixed Points and Flows\nNGFP, critical exponents theta_i"]
+        cosmo["RG-improved Cosmology\nblack holes, FLRW"]
+        scat["Scattering Amplitudes\ngraviton-mediated, form factors"]
+    end
+
+    subgraph bridges["Cross-Analogue Bridges"]
+        hyd["Hydraulic networks"]
+        qua["Quantum circuits"]
+        tra["Integral transforms"]
+        boot["String bootstrap"]
+    end
+
     subgraph ui["Interactive GUI and Visualization"]
         gui["Desktop GUI\nPySide6 cross-platform\n4 config panels"]
         viz3d["3D Visualization\nFlow trajectories\nPhase portraits, Stability"]
         viz2d["2D Visualization\nStreamplots\nRunning couplings, theta_i plots"]
     end
 
-    truncations --> matter --> methods --> accel --> ui
+    truncations --> matter --> methods --> accel
+    methods --> observables --> bridges
+    observables --> ui
+    scat --> boot
 ```
 
 ### At a Glance
@@ -90,7 +137,8 @@ flowchart TD
 - **GPU acceleration**: JAX-based batch evaluation with `vmap` + `jit` for GPU/TPU
 - **Distributed computing**: Ray clusters, Dask, and BOINC crowd computing with REST task server
 - **Cloud deployment**: Docker, Ray autoscaling clusters, Kubernetes via KubeRay
-- **Literature validation**: benchmarked against Reuter (1998), Codello et al. (2009), Manrique et al. (2011)
+- **Physical observables**: RG-improved black holes / FLRW cosmology, and graviton-mediated scattering amplitudes with a string-bootstrap consistency bridge
+- **Literature validation**: benchmarked against Reuter (1998), Codello et al. (2009), Manrique et al. (2011), Draper et al. (2020), Cheung et al. (2025)
 
 ---
 
@@ -153,6 +201,13 @@ flowchart TD
         K8S[KubeRay / Kubernetes]
     end
 
+    subgraph Observables["Physical Observables"]
+        COSMO[RG-improved BH / FLRW]
+        FF[Graviton Form Factor]
+        AMP[GravitonMediatedAmplitude]
+        SBRIDGE[ScatteringBridge\nvs string bootstrap]
+    end
+
     TRUNC --> Actions
     Geometry --> Actions
     Actions --> FRG
@@ -179,6 +234,11 @@ flowchart TD
     V2D --> APP
     SERIAL --> BACKENDS
     BACKENDS --> Deploy
+    FLOW --> COSMO
+    FLOW --> FF
+    FP --> FF
+    FF --> AMP
+    AMP --> SBRIDGE
 ```
 
 | Layer | Purpose | Key modules |
@@ -726,9 +786,44 @@ Animations: [`rg_flow_ahm.mp4`](docs/animations/rg_flow_ahm.mp4) shows trajector
 
 ## Physical Scattering Amplitudes
 
-The first **observable** built from the RG flow: graviton-mediated $2\to2$ scalar scattering, RG-improved by the fixed point. The running couplings become a momentum-dependent graviton form factor via a momentum-scale identification $k(p^2)=\xi\sqrt{|p^2|}$ — the scattering analogue of the RG-improved black holes. The amplitude reproduces **Newtonian gravity in the IR** and tends to a **finite UV constant** at the fixed point, so classical gravity's runaway partial-wave growth (tree unitarity violation near the Planck scale) is tamed.
+Beyond cosmology, the toolkit builds a **second physical observable** directly from the RG flow: graviton-mediated $2\to2$ scalar scattering, RG-improved by the fixed point. The running couplings become a momentum-dependent **graviton form factor** through a momentum-scale identification $k(p^2)=\xi\sqrt{|p^2|}$ — the scattering analogue of the RG-improved black holes. The amplitude reproduces **Newtonian gravity in the IR** and tends to a **finite UV constant** at the fixed point, taming classical gravity's runaway partial-wave growth (the well-known tree-level unitarity violation near the Planck scale).
 
-This is then **combined with physical scattering** in the sense of *Strings from Almost Nothing* (Cheung, Remmen, Sciotti & Tarquini, PRL [arXiv:2508.09246](https://arxiv.org/abs/2508.09246)): the same physical-consistency battery (crossing, unitarity/boundedness, causality/no-ghosts, UV finiteness, Regge/ultrasoft behaviour) is run on both the asymptotically-safe amplitude and the Veneziano/Virasoro–Shapiro string amplitudes. The `ScatteringBridge` shows they are **distinct, mutually consistent** points in the space of physical amplitudes — asymptotic safety softens the coupling (UV-constant), strings are ultrasoft with an infinite higher-spin tower.
+![Graviton-mediated scattering concept](docs/images/scattering_concept.png)
+
+*Left: tree-level graviton exchange between two scalars, with quantum corrections packaged into the form factor $f(p^2)$. Right: $|\mathcal{M}|$ vs energy — classical GR grows without bound, asymptotic safety reaches a finite UV constant, and the string-bootstrap amplitude falls off ultrasoftly.*
+
+**Pipeline.** An `RGTrajectory` is promoted to a form factor and an amplitude, then run through the physical-consistency battery and the string-bootstrap bridge:
+
+```mermaid
+flowchart LR
+    TRAJ["RGTrajectory\ng(k), lambda(k), xi(k)"]
+    SCALE["MomentumScale\nk(p^2) = xi sqrt(|p^2|)"]
+    FF["GravitonFormFactor\nG(p^2), f(p^2)"]
+    AMP["GravitonMediatedAmplitude\nA(s,t,u)"]
+    CONS["Consistency battery\nunitarity, UV-finite, causality, crossing"]
+    BOOT["String bootstrap\nVeneziano / Virasoro-Shapiro"]
+    BRIDGE["ScatteringBridge.verify()\nAS vs strings"]
+
+    TRAJ --> SCALE --> FF --> AMP
+    AMP --> CONS --> BRIDGE
+    AMP --> BOOT --> BRIDGE
+```
+
+| | | |
+|:---:|:---:|:---:|
+| ![Amplitude vs energy](docs/images/amplitude_vs_energy.png) | ![Partial-wave unitarity](docs/images/partial_wave_unitarity.png) | ![Graviton form factor](docs/images/graviton_form_factor.png) |
+| Classical GR grows with energy; the asymptotically-safe amplitude approaches a finite UV constant | The $s$-wave $\|a_0(s)\|$: classical gravity runs past the $\|a_\ell\|=1$ line, asymptotic safety stays bounded | The form factor $f(p^2)$ and the softening $G(p^2)/G_N \sim 1/p^2$ |
+
+**Combined with physical scattering.** Following *Strings from Almost Nothing* (Cheung, Remmen, Sciotti & Tarquini, PRL [arXiv:2508.09246](https://arxiv.org/abs/2508.09246)), a handful of physical-scattering assumptions — analyticity, crossing, **ultrasoft** high-energy falloff, and **higher-spin residue cancellation** (an infinite Regge tower) — uniquely select the Veneziano and Virasoro–Shapiro string amplitudes, with the Regge mass spectrum as an *output*. The toolkit runs the *same* consistency battery on both the asymptotically-safe amplitude and those string amplitudes. The verdict: they are **distinct but mutually consistent** points in amplitude space — asymptotic safety reaches UV completeness by *softening* the graviton coupling ($G(p^2)\to g^*/p^2$, a UV-constant amplitude), while strings are *ultrasoft* with a higher-spin tower.
+
+| | |
+|:---:|:---:|
+| ![Regge trajectory](docs/images/regge_trajectory.png) | ![AS vs string](docs/images/as_vs_string.png) |
+| The string mass tower $m_n^2=(n-\alpha_0)/\alpha'$ — an output of the bootstrap | Two routes to UV completeness: softening (AS, UV-constant) vs ultrasoft (strings) |
+
+![AS vs string bootstrap consistency](docs/images/scattering_bridge.png)
+
+*Both amplitudes satisfy the foundational physical-scattering requirements (crossing, UV finiteness, bounded partial waves, no ghosts); they differ only in the ultraviolet, where asymptotic safety softens to a UV-constant amplitude and strings are ultrasoft with an infinite higher-spin Regge tower.*
 
 ```python
 from asymsafety.scattering.form_factor import GravitonFormFactor
@@ -746,7 +841,7 @@ asymsafety amplitude --truncation eh --guess g=0.7,lambda=0.14 \
     --s-range 1e-2:1e8:200 --checks --compare-string --output amp.npz
 ```
 
-> RG-improvement at the level of an observable (the same standing as the cosmology module), **not** a first-principles form factor — a safe fixed point alone does not guarantee a bounded amplitude (Knorr [arXiv:2602.21285]). Full reference: [`docs/scattering-amplitudes.md`](docs/scattering-amplitudes.md).
+> **Safe ≠ bounded.** This is RG-improvement at the level of an observable (the same standing as the cosmology module), **not** a first-principles momentum-dependent form factor: a non-Gaussian fixed point alone does not guarantee a bounded amplitude — genuine momentum dependence is required, and naive RG-improvement can fail quantitatively (Knorr [arXiv:2602.21285]). The toolkit ships a safe-vs-unsafe diagnostic rather than over-claiming. Full reference: [`docs/scattering-amplitudes.md`](docs/scattering-amplitudes.md).
 
 ---
 
@@ -774,10 +869,10 @@ src/asymsafety/
 │   ├── accelerated/    #   Accelerated FP finder, flow integrator, continuation
 │   └── distributed/    #   Serialization, REST task server, work units
 └── deploy/             # Docker, Ray cluster YAML, KubeRay specs
-tests/                  # 78 tests across 11 files
+tests/                  # 480 tests across 47 files
 ```
 
-**88 source files | ~9,260 lines | 78 tests passing**
+**178 source files | ~26,800 lines | 480 tests passing**
 
 ---
 
@@ -789,6 +884,9 @@ tests/                  # 78 tests across 11 files
 | Quadratic gravity | Codello et al. (2009) | Asymptotic freedom of $C^2$ coupling | Implemented |
 | Foliated EH | Manrique et al. (2011) | $\lambda_{\text{ADM}}^{*} = 1$ (full-Diff restoration) | Implemented |
 | Lorentzian foliated | Biemans et al. (2017) | Lorentzian signature effects on NGFP | Implemented |
+| Graviton amplitude | Draper et al. (2020) | IR → Newtonian, UV-finite, ghost-free | Implemented |
+| Amplitude boundedness | Knorr (2026) | Safe-vs-unsafe dichotomy (a fixed point ≠ bounded amplitude) | Implemented |
+| String bootstrap | Cheung et al. (2025) | Regge spectrum, crossing, higher-spin residue cancellation | Verified |
 
 ---
 
@@ -826,6 +924,9 @@ tests/                  # 78 tests across 11 files
 15. F. Saueressig et al., *Foliated Asymptotically Safe Gravity: Lorentzian Signature Fluctuations from the Wick Rotation*, Phys. Rev. D **111**, 106007 (2025) [[2501.03752](https://arxiv.org/abs/2501.03752)]
 16. T. Draper, B. Knorr, C. Ripken & F. Saueressig, *$e^+e^- \to \mu^+\mu^-$ in the Asymptotically Safe Standard Model*, Phys. Rev. D **111**, 106005 (2025) [[2412.13800](https://arxiv.org/abs/2412.13800)]
 17. A. Platania, *Black Holes in Asymptotically Safe Gravity*, in Handbook of Quantum Gravity, Springer (2023) [[2302.04272](https://arxiv.org/abs/2302.04272)]
+18. T. Draper, B. Knorr, C. Ripken & F. Saueressig, *Graviton-Mediated Scattering Amplitudes from the Quantum Effective Action*, Phys. Rev. Lett. **125**, 181301 (2020) [[2007.04396](https://arxiv.org/abs/2007.04396)]
+19. B. Knorr, *Asymptotically (un)safe scattering amplitudes from scratch: a deep dive into the IR jungle* (2026) [[2602.21285](https://arxiv.org/abs/2602.21285)]
+20. C. Cheung, G.N. Remmen, F. Sciotti & M. Tarquini, *Strings from Almost Nothing*, Phys. Rev. Lett. (2025) [[2508.09246](https://arxiv.org/abs/2508.09246)]
 
 For a comprehensive review of recent literature organized by topic, see [docs/LITERATURE.md](docs/LITERATURE.md).
 

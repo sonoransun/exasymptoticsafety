@@ -658,3 +658,119 @@ def hydraulic_analogy_diagram(
     )
 
     return fig
+
+
+# ── asymptotic safety ↔ string bootstrap ──────────────────────────────
+
+_CLR_SCATTER = "#EF476F"   # string side — red-pink
+
+
+def scattering_bridge_diagram(
+    figsize: tuple[float, float] = (12, 7),
+) -> Figure:
+    r"""Two-column diagram: asymptotically-safe amplitude ↔ string bootstrap.
+
+    Physics
+    -------
+    The "combined physical scattering + asymptotic safety" picture. The
+    *Strings from Almost Nothing* bootstrap (Cheung, Remmen, Sciotti &
+    Tarquini 2025) shows that physical-scattering consistency — once the
+    ultrasoft high-energy assumption and the higher-spin residue
+    cancellation (an infinite Regge tower) are imposed — singles out the
+    Veneziano / Virasoro-Shapiro string amplitudes. The graviton-mediated
+    amplitude of asymptotic safety satisfies the *foundational* physical
+    requirements (crossing, UV finiteness, bounded partial waves, no
+    ghosts) but reaches UV completeness by *softening* the graviton
+    coupling, ``G(p^2) -> g^*/p^2`` — a UV-constant amplitude rather than
+    an ultrasoft one. The two are distinct, mutually consistent points in
+    the space of physical amplitudes. Each row is a physical-consistency
+    criterion with a check / cross per column.
+
+    Parameters
+    ----------
+    figsize : tuple, default ``(12, 7)``
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+
+    References
+    ----------
+    - Cheung, Remmen, Sciotti & Tarquini (2025), PRL [arXiv:2508.09246].
+    - Draper, Knorr, Ripken & Saueressig (2020), PRL [arXiv:2007.04396].
+    - :mod:`asymsafety.scattering.bridge` — companion ``ScatteringBridge``.
+    """
+    apply_style()
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    ax.set_axis_off()
+    ax.set_xlim(-0.5, 12.5)
+    ax.set_ylim(-0.5, 7.8)
+    ax.set_title(
+        "Asymptotic Safety ↔ String Bootstrap: physical-scattering consistency",
+        fontsize=14.5, fontweight="bold", pad=8,
+    )
+
+    bw, bh = 4.4, 1.15
+    as_x, str_x = 0.5, 7.1
+    head_y = 6.3
+
+    # Column headers
+    _rounded_box(
+        ax, as_x, head_y, bw, bh,
+        "Asymptotic Safety amplitude",
+        [r"graviton exchange, $G(p^2)\!\to\! g^*/p^2$"],
+        _CLR_RG,
+    )
+    _rounded_box(
+        ax, str_x, head_y, bw, bh,
+        "String bootstrap amplitude",
+        [r"Veneziano / Virasoro-Shapiro"],
+        _CLR_SCATTER,
+    )
+
+    # Consistency-criterion rows: (label, AS satisfies, string satisfies)
+    rows = [
+        ("Crossing symmetry", True, True),
+        ("UV finiteness", True, True),
+        ("Bounded partial waves", True, True),
+        ("No ghost poles", True, True),
+        ("Ultrasoft high-energy falloff", False, True),
+        ("Infinite Regge tower", False, True),
+    ]
+    y0, dy = 5.4, 0.78
+
+    def _mark(ax, x, y, ok):
+        ax.text(x, y, "✓" if ok else "✗",
+                fontsize=15, fontweight="bold", ha="center", va="center",
+                color=(COLOR_NGFP if ok else COLOR_SEPARATRIX), zorder=4)
+
+    for i, (label, as_ok, str_ok) in enumerate(rows):
+        y = y0 - i * dy
+        ax.text(6.5, y, label, fontsize=10, ha="center", va="center",
+                color="0.2",
+                bbox=dict(boxstyle="round,pad=0.25", fc="#f5f5f5", ec="0.7",
+                          alpha=0.95))
+        _mark(ax, as_x + 0.55, y, as_ok)
+        _mark(ax, str_x + bw - 0.55, y, str_ok)
+
+    # Foundational bracket (first four rows shared)
+    ax.annotate(
+        "", xy=(as_x + 0.05, y0 + 0.3), xytext=(as_x + 0.05, y0 - 3 * dy - 0.1),
+        arrowprops=dict(arrowstyle="-", color="0.55", lw=1.2),
+    )
+    ax.text(as_x - 0.15, y0 - 1.5 * dy, "foundational", rotation=90,
+            fontsize=8.5, ha="center", va="center", color="0.45",
+            style="italic")
+
+    # Bottom verdict banner
+    ax.text(
+        6.5, 0.45,
+        "Distinct but mutually consistent points in amplitude space: "
+        "asymptotic safety SOFTENS (UV-constant); strings are ULTRASOFT "
+        "with a higher-spin tower.",
+        fontsize=10.5, ha="center", va="center", color="0.2",
+        bbox=dict(boxstyle="round,pad=0.35", fc="lightyellow", ec="0.55",
+                  alpha=0.95),
+    )
+
+    return fig
