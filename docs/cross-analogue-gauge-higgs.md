@@ -86,18 +86,21 @@ factors are absorbed into `α` and `u`:
 
 At one loop:
 
-- charged FP at `α* = ε/N`, `u* ≈ ε/(N+4)`, `r* = 0`;
+- charged FP at `α* = ε/N`, `u* = (B + √disc)/(2A)` — the root
+  continuously connected to Wilson–Fisher as the gauge coupling is
+  switched off — with `r* = 0`;
 - one strongly-relevant direction (mass), correlation-length exponent
-  `ν = 1/(2 − (N+2) u* + 6 α*) → 1/2 + O(1/N)`;
-- approaches the **Wilson-Fisher** limit `ν → 1/2` from below.
+  `ν = 1/(2 − (N+2) u* + 6 α*)`;
+- grows with `N_f` toward the large-`N_f` limit `ν → 1` from below.
 
-This is **deliberately qualitative**: the perturbative 4-ε expansion
-at `ε = 1` is far from convergent. The Bonati lattice MC values
-instead approach `ν → 1` from below, following `ν = 1 − 9.727/N_f`
-(SU(2)). The disagreement is precisely the regulator/scheme picture
-the toolkit is built to expose — the cross-analogue figure
-[`nu_vs_nf`](images/nu_vs_nf.caption.md) overlays both curves and the
-lattice points side-by-side as a pedagogical contrast.
+The one-loop 4-ε values at `ε = 1` track the Bonati lattice MC points
+(`ν = 0.64, 0.745, 0.81` at `N_f = 30, 40, 60`) to a few percent and
+the published large-`N_f` formula `ν = 1 − 9.727/N_f` (SU(2)) to
+≈1.5%. Below the one-loop threshold `N* ≈ 28` the charged FP does not
+exist and the builder falls back to the Wilson–Fisher root. The
+cross-analogue figure [`nu_vs_nf`](images/nu_vs_nf.caption.md)
+overlays the one-loop curve, the large-`N_f` asymptote, and the
+lattice points.
 
 ## What the validation module does
 

@@ -161,15 +161,51 @@ def _fp_coords(
 
     When ``z_coupling`` is the time-axis sentinel, the z coordinate is
     set to ``0`` — fixed points are at constant t in the (x, y, t) view.
+
+    A coupling name absent from ``fp.location`` (e.g. a typo such as
+    ``"lambda_adm"`` vs the system key ``"lambda_ADM"``) raises a loud
+    warning instead of silently drawing the marker at 0 in that axis.
     """
-    z = (
-        0.0 if z_coupling == _TIME_AXIS
-        else fp.location.get(z_coupling, 0.0)
-    )
-    return (
-        fp.location.get(x_coupling, 0.0),
-        fp.location.get(y_coupling, 0.0),
-        z,
+
+    def _get(name: str) -> float:
+        if name == _TIME_AXIS:
+            return 0.0
+        if name not in fp.location:
+            warnings.warn(
+                f"Fixed point has no coupling {name!r} "
+                f"(available: {sorted(fp.location)}); drawing its "
+                "marker at 0 along that axis. Check the coupling "
+                "name's spelling/case.",
+                stacklevel=3,
+            )
+            return 0.0
+        return float(fp.location[name])
+
+    return _get(x_coupling), _get(y_coupling), _get(z_coupling)
+
+
+def _is_gaussian_on_plane(
+    fp: FixedPoint,
+    fixed_plane: dict[str, float] | None,
+    tol: float = 1e-5,
+) -> bool:
+    """Gaussian-FP test that tolerates couplings pinned on a fixed plane.
+
+    ``FixedPoint.is_gaussian`` requires *all* couplings to vanish, which
+    misses the free theory of truncations with a flow-invariant plane:
+    e.g. the foliated EH system has ``beta_lambda_ADM ∝ g(lambda_ADM-1)``,
+    so its Gaussian fixed point sits at ``g = lambda = 0`` ON the plane
+    ``lambda_ADM = 1``. This display-level helper treats a fixed point
+    as Gaussian when every coupling is ~0 except those named in
+    *fixed_plane*, which must sit at their plane value instead.
+    """
+    if fp.is_gaussian:
+        return True
+    if not fixed_plane:
+        return False
+    return all(
+        abs(value - fixed_plane.get(name, 0.0)) < tol
+        for name, value in fp.location.items()
     )
 
 
@@ -217,11 +253,17 @@ def _draw_fixed_points(
     z_coupling: str,
     *,
     paper_label_for: dict[str, str] | None = None,
+    fixed_plane: dict[str, float] | None = None,
 ) -> None:
-    """Mark fixed points using the project's marker conventions."""
+    """Mark fixed points using the project's marker conventions.
+
+    ``fixed_plane`` (e.g. ``{"lambda_ADM": 1.0}``) lets callers flag a
+    flow-invariant plane so the free theory living on it is labelled
+    GFP rather than NGFP — see :func:`_is_gaussian_on_plane`.
+    """
     for fp in fixed_points:
         xv, yv, zv = _fp_coords(fp, x_coupling, y_coupling, z_coupling)
-        if fp.is_gaussian:
+        if _is_gaussian_on_plane(fp, fixed_plane):
             ax.plot(
                 [xv], [yv], [zv],
                 marker='o', color=COLOR_GFP, markersize=12,
@@ -524,6 +566,7 @@ def phase_portrait_3d(
     fixed_points: list[FixedPoint] | None = None,
     *,
     show_singularity_planes: bool = True,
+    fixed_plane: dict[str, float] | None = None,
     figsize: tuple[float, float] = (10, 8),
 ) -> Figure:
     r"""Create a 3D quiver phase portrait of the RG flow.
@@ -540,8 +583,9 @@ def phase_portrait_3d(
     (small ``k``) to UV (large ``k``); fixed points are zeros of
     ``beta``. For the Einstein-Hilbert truncation the line
     ``lambda = 1/2`` is a propagator-pole singularity; for foliated
-    truncations the plane ``lambda_ADM = 1`` marks full-Diff
-    restoration (Manrique 2011).
+    truncations the plane ``lambda_ADM = 1`` is a flow-invariant
+    (full-Diff) plane (Manrique 2011; in this toolkit's schematic
+    foliated truncation it is UV-repulsive at physical couplings).
 
     Parameters
     ----------
@@ -560,6 +604,10 @@ def phase_portrait_3d(
     show_singularity_planes : bool, default ``True``
         Draw the ``lambda = 1/2`` and / or ``lambda_ADM = 1`` planes
         when the corresponding coupling appears among the three axes.
+    fixed_plane : dict, optional
+        Flow-invariant plane (e.g. ``{"lambda_ADM": 1.0}``) used when
+        classifying fixed-point markers: the free theory pinned on the
+        plane is labelled GFP (see :func:`_is_gaussian_on_plane`).
     figsize : tuple, default ``(10, 8)``
         Figure size in inches.
 
@@ -671,7 +719,10 @@ def phase_portrait_3d(
         )
 
     if fixed_points:
-        _draw_fixed_points(ax, fixed_points, x_coupling, y_coupling, z_coupling)
+        _draw_fixed_points(
+            ax, fixed_points, x_coupling, y_coupling, z_coupling,
+            fixed_plane=fixed_plane,
+        )
 
     add_colorbar(
         fig, ax, mappable=None,
@@ -1046,16 +1097,28 @@ def foliated_phase_portrait_3d(
     Specialisation of :func:`phase_portrait_3d` to the
     ``(g, lambda, lambda_ADM)`` coupling triple of the foliated EH
     truncation on ``S^1 x S^3`` (Manrique 2011). Marks the
-    ``lambda_ADM = 1`` plane that signals full-Diff restoration at the
-    NGFP and embeds an inline citation box.
+    ``lambda_ADM = 1`` fixed plane and embeds an inline citation box.
 
     Physics
     -------
     The ADM decomposition splits the metric into lapse, shift, and
     spatial part; the additional coupling ``lambda_ADM`` measures
-    foliation anisotropy. At the NGFP ``lambda_ADM -> 1``, recovering
-    the covariant (full-Diff) limit, in agreement with Manrique 2011
-    and confirmed under Wick rotation by Saueressig 2025.
+    foliation anisotropy. In this toolkit's *schematic* one-loop
+    truncation (see :mod:`asymsafety.beta.foliated`):
+
+    - ``lambda_ADM = 1`` is a fixed plane by construction
+      (``beta_lambda_ADM ∝ g (lambda_ADM - 1)``), UV-repulsive /
+      IR-attractive at physical couplings — full-Diff restoration is
+      *not* dynamically achieved toward the UV here.
+    - The (g, lambda) sector admits **no non-Gaussian fixed point with
+      g > 0**; the only root is the Gaussian fixed point at
+      ``g = lambda = 0`` on the ``lambda_ADM = 1`` plane, which this
+      figure marks as GFP (via the ``fixed_plane`` classification).
+    - The published foliated NGFP of Manrique et al. (2011)
+      (Euclidean ``g* ≈ 0.19, lambda* ≈ 0.31``, with
+      ``lambda_ADM = 1`` imposed by the ansatz) is a literature
+      reference, not a root of this system; see
+      :mod:`asymsafety.validation.manrique_2011`.
 
     Parameters
     ----------
@@ -1063,7 +1126,7 @@ def foliated_phase_portrait_3d(
         A foliated-EH beta-function system, typically built via
         :func:`asymsafety.beta.foliated.build_foliated_eh_beta_system`.
     x_range, y_range, z_range : tuple
-        Plotting bounds for ``g``, ``lambda``, ``lambda_adm``.
+        Plotting bounds for ``g``, ``lambda``, ``lambda_ADM``.
     n_grid : int, default ``6``
         Grid points per axis.
     fixed_points : list, optional
@@ -1087,17 +1150,19 @@ def foliated_phase_portrait_3d(
     See Also
     --------
     :mod:`asymsafety.validation.manrique_2011`
-        Benchmark fixed-point coordinates ``g* ≈ 0.96, lambda* ≈ 0.20,
-        lambda_ADM* = 1.0``.
+        Literature fixed-point coordinates (MRS Eq. (10): Euclidean
+        ``g* ≈ 0.19, lambda* ≈ 0.31``; ``lambda_ADM = 1`` imposed).
     :func:`asymsafety.beta.foliated.build_foliated_eh_beta_system`
         Builder for the foliated beta-function system.
     """
     fig = phase_portrait_3d(
         system,
-        x_coupling="g", y_coupling="lambda", z_coupling="lambda_adm",
+        x_coupling="g", y_coupling="lambda", z_coupling="lambda_ADM",
         x_range=x_range, y_range=y_range, z_range=z_range,
         n_grid=n_grid, fixed_points=fixed_points,
-        show_singularity_planes=True, figsize=figsize,
+        show_singularity_planes=True,
+        fixed_plane={"lambda_ADM": 1.0},
+        figsize=figsize,
     )
     ax = fig.axes[0]
     ax.set_title(

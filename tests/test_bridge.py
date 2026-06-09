@@ -60,13 +60,21 @@ def test_resolvent_poles(bridge):
 
 
 def test_verify_commutativity(bridge):
-    result = bridge.verify_commutativity(tol=0.1)
+    # Default tol is 1e-9: the three paths are algebraic re-expressions
+    # of the same Jacobian eigendecomposition (linear-algebra regression
+    # check), so they agree to ~1e-13, not merely 0.1.
+    result = bridge.verify_commutativity()
     assert "critical_exponents" in result
     assert "agreements" in result
     assert "all_agree" in result
     # Transfer matrix and resolvent should agree with direct RG
     assert result["agreements"]["transfer_matrix"]["agrees"]
     assert result["agreements"]["resolvent"]["agrees"]
+    # The resolvent path is definitionally identical to the RG path
+    # (poles() returns the stability eigenvalues verbatim).
+    assert result["agreements"]["resolvent"]["max_deviation"] == 0.0
+    assert result["agreements"]["transfer_matrix"]["max_deviation"] < 1e-9
+    assert result["all_agree"]
 
 
 def test_impedance_bridge(stability):

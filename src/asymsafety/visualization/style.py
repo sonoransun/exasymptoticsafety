@@ -292,8 +292,10 @@ def add_reference_box(
         refs: List of citation strings, typically produced by
             :func:`format_arxiv`. Each entry renders on its own line.
         loc: One of ``"lower right"``, ``"lower left"``,
-            ``"upper right"``, ``"upper left"``. Determines the corner
-            of *ax* that anchors the box.
+            ``"upper right"``, ``"upper left"``, ``"center right"``,
+            ``"center left"``. Determines the corner (or mid-edge) of
+            *ax* that anchors the box. Unknown values fall back to
+            ``"lower right"``.
         fontsize: Font size for the citation lines.
         title: Header label drawn in bold above the citations. Pass an
             empty string to suppress the header.
@@ -309,6 +311,8 @@ def add_reference_box(
         "lower left": (0.02, 0.02, "left", "bottom"),
         "upper right": (0.98, 0.98, "right", "top"),
         "upper left": (0.02, 0.98, "left", "top"),
+        "center right": (0.98, 0.50, "right", "center"),
+        "center left": (0.02, 0.50, "left", "center"),
     }
     if loc not in anchors:
         loc = "lower right"

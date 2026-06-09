@@ -90,17 +90,19 @@ class SpectralSumEvaluator:
         # S³ spectrum (d=3 sphere)
         a_sq_S3 = 6.0 / R3_val  # R^(3) = 6/a² for S³
         l_min = self.spectrum.min_l(field_type)
+        spec_S3 = ModeSpectrum(d=3)
 
         total = 0.0
         for n in range(-n_matsubara, n_matsubara + 1):
             omega_sq = (2 * np.pi * n / beta_period)**2
 
             for l in range(l_min, self.l_max + 1):
-                # S³ eigenvalue for the given field type
-                # Need to use d=3 spectrum for S³
-                spec_S3 = ModeSpectrum(d=3)
+                # S³ eigenvalue for the given field type (the eigenvalue
+                # formula is generic in d; the d=3 multiplicities are
+                # implemented locally since ModeSpectrum.multiplicity is
+                # hardcoded to d=4).
                 lam_l = float(spec_S3.eigenvalue(field_type, l, a_sq_S3))
-                d_l = spec_S3.multiplicity(field_type, l) if hasattr(spec_S3, '_scalar_mult_S4') else self._S3_multiplicity(field_type, l)
+                d_l = self._S3_multiplicity(field_type, l)
 
                 try:
                     w_val = W_func(lam_l, omega_sq)
@@ -114,9 +116,11 @@ class SpectralSumEvaluator:
     def _S3_multiplicity(field_type: str, l: int) -> int:
         """Multiplicities on S³ (3-sphere).
 
-        Scalars: (l+1)²           l ≥ 0
-        Vectors: l(l+2) × 2       l ≥ 1  (transverse, 2 components)
-        TT tensors: (l²-1)(2l+1)/... l ≥ 2 (3 independent components)
+        Scalars:     d_l = (l+1)²,          l ≥ 0
+        Trans. vec:  d_l = 2l(l+2),         l ≥ 1
+        TT tensors:  d_l = 2(l-1)(l+3),     l ≥ 2
+
+        Reference: Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888 (d=3).
         """
         if field_type == "scalar":
             return (l + 1)**2
@@ -127,9 +131,7 @@ class SpectralSumEvaluator:
         elif field_type == "TT":
             if l < 2:
                 return 0
-            # TT tensors on S³: d_l = (2l+1)(l²-1)/3 × 5/3 ...
-            # Simplified: for l ≥ 2 on S³
-            return (l - 1) * (l + 3) * (2 * l + 1) // 3
+            return 2 * (l - 1) * (l + 3)
         return 0
 
     def euler_maclaurin_acceleration(

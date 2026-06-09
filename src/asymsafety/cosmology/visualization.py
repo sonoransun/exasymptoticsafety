@@ -138,15 +138,19 @@ def plot_lapse_with_horizons(
     above the critical mass; they merge into a single extremal horizon
     at ``M = M_crit``; no horizon at all for ``M < M_crit``.
 
-    The default ``r_range`` is restricted to the regime where the
-    Bonanno-Reuter improvement is physically meaningful (de Sitter
-    core through a few Schwarzschild radii past the outer horizon).
-    The toolkit's pure-EH trajectory has a non-trivial IR fixed point
-    rather than running cleanly to the Gaussian FP, so ``G(r) = g/k²``
-    grows in the deep IR and the asymptotic Schwarzschild regime
-    cannot be shown with a trajectory-based ``G(k)``. ``y_clip``
-    constrains the y-axis to the physical window so the spurious deep-
-    IR divergence is hidden.
+    The default ``r_range`` covers the regime where the Bonanno-Reuter
+    improvement acts (the softened core through a few Schwarzschild
+    radii past the outer horizon). The trajectory should reach a
+    classical IR regime ``g ≈ G_N k²`` so that ``G(r) = g/k²`` is
+    constant at large ``r`` (see
+    ``scripts/generate_figures._eh_trajectory_for_cosmology`` for the
+    IR-upward construction); ``y_clip`` merely constrains the y-axis
+    so a deep inter-horizon dip does not dominate the frame.
+
+    When ``f(r)`` has no root *inside the plotted window*, the function
+    re-searches a wider radial range before declaring the geometry a
+    sub-critical naked-mass remnant, so the in-figure label is only
+    drawn when no horizon exists at all.
 
     Args:
         bh: An :class:`RGImprovedSchwarzschild` instance.
@@ -195,22 +199,39 @@ def plot_lapse_with_horizons(
             )
 
     if not horizons:
+        # Distinguish a genuinely horizonless (sub-critical) geometry
+        # from horizons that merely sit outside the plotted window.
+        wide = bh.horizons(
+            r_min=r_range[0], r_max=max(100.0, 10.0 * r_range[1]),
+        )
+        if wide:
+            note = (
+                "no horizon inside plotted window\n"
+                f"(roots at r = {', '.join(f'{w:.3g}' for w in wide)})"
+            )
+        else:
+            note = (
+                "naked-mass remnant\n"
+                r"$M < M_{\mathrm{crit}}$: no horizon"
+            )
         ax.text(
-            0.5, 0.5,
-            "naked-mass remnant\n"
-            r"$M < M_{\mathrm{crit}}$: no horizon",
+            0.5, 0.5, note,
             transform=ax.transAxes, ha="center", va="center",
             fontsize=11, color="0.3",
             bbox=dict(boxstyle="round,pad=0.4",
                       fc="white", ec="0.7", alpha=0.85),
         )
 
-    # Annotate the de Sitter core: f(r) -> 1 as r -> 0
+    # Annotate the softened core: f(r) -> 1 (linearly) as r -> 0.
+    # NOT a regular de Sitter core — with the k = xi/r identification
+    # the curvature still diverges (mildly); see the module docstring
+    # of :mod:`asymsafety.cosmology.rg_improved_bh`.
     f_origin = float(np.atleast_1d(bh.lapse(r_range[0]))[0])
     if abs(f_origin - 1.0) < 0.5:
         ax.annotate(
-            r"de Sitter core: $f \to 1$",
-            xy=(r_range[0], f_origin), xytext=(48, -22),
+            "softened core: $f \\to 1$ (linear,\nsingularity milder, "
+            "not removed)",
+            xy=(r_range[0], f_origin), xytext=(48, -30),
             textcoords="offset points", fontsize=9, color="0.35",
             arrowprops=dict(arrowstyle="-", color="0.6", lw=0.8),
         )
@@ -232,19 +253,37 @@ def plot_lapse_with_horizons(
     return fig
 
 
+def _estimate_G_newton(
+    bh: RGImprovedSchwarzschild,
+    r_probe: tuple[float, float] = (1e-2, 100.0),
+    n_probe: int = 128,
+) -> float:
+    """Estimate the IR Newton constant of the trajectory behind ``bh``.
+
+    Takes the maximum of ``G(r)`` over a log-spaced radial probe — for
+    a trajectory with classical IR scaling ``g = G_N k²``, ``G(r)``
+    increases monotonically toward the IR and saturates at ``G_N``.
+    """
+    r = np.geomspace(r_probe[0], r_probe[1], n_probe)
+    return float(np.max(np.atleast_1d(bh.G(r))))
+
+
 def plot_classical_vs_rg_lapse(
     bh: RGImprovedSchwarzschild,
     *,
     M_values: Sequence[float] = (0.5, 1.0, 2.0),
     r_range: tuple[float, float] = (1e-3, 30.0),
     n_points: int = 500,
+    G_N: float | None = None,
     ax: Axes | None = None,
 ) -> Figure:
     """Overlay RG-improved vs. classical Schwarzschild lapse for several masses.
 
-    For each ``M``, draws the classical lapse ``1 - 2M/r`` (dashed) and
-    the RG-improved lapse (solid). Visualises how the asymptotic-safety
-    correction lifts the singularity and produces the ``M_crit`` remnant.
+    For each ``M``, draws the classical lapse ``1 - 2 G_N M / r``
+    (dashed, with ``G_N`` the trajectory's IR Newton constant) and the
+    RG-improved lapse (solid). Visualises how the asymptotic-safety
+    correction lifts the singularity and produces the ``M_crit``
+    remnant.
 
     The bound BH instance is mutated during evaluation and restored on
     exit (try/finally guarantee), so the call is non-destructive.
@@ -254,6 +293,9 @@ def plot_classical_vs_rg_lapse(
         M_values: Sequence of ADM masses to plot.
         r_range: ``(r_min, r_max)`` radial window.
         n_points: Number of log-spaced sample points.
+        G_N: IR Newton constant used for the classical reference
+            curves. ``None`` (default) estimates it from the
+            trajectory via :func:`_estimate_G_newton`.
         ax: Optional existing axes.
 
     Returns:
@@ -265,6 +307,9 @@ def plot_classical_vs_rg_lapse(
     else:
         fig = ax.get_figure()
 
+    if G_N is None:
+        G_N = _estimate_G_newton(bh)
+
     r = np.geomspace(r_range[0], r_range[1], n_points)
     original_M = bh.M
 
@@ -274,7 +319,7 @@ def plot_classical_vs_rg_lapse(
             color = palette[i % len(palette)]
             bh.M = float(M)
             f_rg = np.atleast_1d(bh.lapse(r))
-            f_cl = 1.0 - 2.0 * M / r
+            f_cl = 1.0 - 2.0 * G_N * M / r
             ax.plot(r, f_rg, color=color, lw=2.0,
                     label=rf"RG, $M={M:g}$")
             ax.plot(r, f_cl, color=color, lw=1.2, ls="--", alpha=0.65,
@@ -286,7 +331,7 @@ def plot_classical_vs_rg_lapse(
     ax.set_xscale("log")
     ax.set_xlabel(r"radius $r$ (geometric units)")
     ax.set_ylabel(r"lapse $f(r)$")
-    ax.set_title(r"RG-improved vs.\ classical Schwarzschild lapse")
+    ax.set_title("RG-improved vs. classical Schwarzschild lapse")
     ax.set_ylim(-1.0, 1.4)
     ax.grid(True, which="both", alpha=0.25)
     ax.legend(loc="lower right", fontsize=9, framealpha=0.85, ncol=2)
@@ -303,27 +348,30 @@ def plot_hawking_temperature(
     *,
     M_range: tuple[float, float] = (0.5, 5.0),
     n_masses: int = 60,
+    G_N: float | None = None,
     ax: Axes | None = None,
 ) -> Figure:
     """Hawking temperature ``T_H(M)`` of the RG-improved black hole.
 
     Computes the surface gravity ``T_H = |f'(r_+)| / (4 pi)``
     numerically via central differences on the lapse at the outer
-    horizon (with the absolute value taken so the sign convention of
-    the toolkit's trajectory-based ``G(r)`` does not flip ``T_H``
-    negative). The canonical Bonanno-Reuter prediction is a peak
-    followed by a zero at the critical mass, in contrast with the
-    classical ``1/(8 pi M)`` divergence as ``M -> 0``; the trajectory-
-    based ``G(r)`` shipped here additionally grows in the deep IR (the
-    pure-EH flow has an IR fixed point at finite ``g``), so for large
-    ``M`` the shipped figure shows ``T_H`` continuing to rise rather
-    than rolling back over — the *qualitative* avoidance of the
-    classical small-``M`` divergence is preserved.
+    horizon (the absolute value guards against numerical sign flips
+    near extremality). For a trajectory with a classical IR regime
+    (``G(r) -> G_N`` at large ``r``) the canonical Bonanno-Reuter
+    shape emerges: ``T_H`` tracks the classical ``1/(8 pi G_N M)``
+    curve at large ``M``, peaks at a few times the critical mass, and
+    drops to zero at ``M_crit`` where the inner and outer horizons
+    merge (extremal remnant) — in contrast with the classical
+    divergence as ``M -> 0``. No point is drawn for masses without a
+    horizon (``M < M_crit``).
 
     Args:
         bh: An :class:`RGImprovedSchwarzschild` instance.
         M_range: ``(M_min, M_max)`` mass sweep.
         n_masses: Number of sample masses (linear).
+        G_N: IR Newton constant used for the classical reference
+            curve ``1/(8 pi G_N M)``. ``None`` (default) estimates it
+            from the trajectory via :func:`_estimate_G_newton`.
         ax: Optional existing axes.
 
     Returns:
@@ -335,17 +383,18 @@ def plot_hawking_temperature(
     else:
         fig = ax.get_figure()
 
+    if G_N is None:
+        G_N = _estimate_G_newton(bh)
+
     M_values = np.linspace(M_range[0], M_range[1], n_masses)
     T_rg = np.full(n_masses, np.nan)
-    T_cl = 1.0 / (8.0 * np.pi * np.maximum(M_values, 1e-12))
+    T_cl = 1.0 / (8.0 * np.pi * G_N * np.maximum(M_values, 1e-12))
 
     # The Hawking temperature at the *outer event* horizon is positive by
     # definition; surface gravity ``κ = |f'(r_+)| / 2`` with ``T_H = κ /
-    # (2π)``. The naive central-difference of the lapse can flip sign if
-    # the toolkit's trajectory-based ``G(r)`` produces a non-monotonic
-    # lapse outside the horizon (the deep-IR region where ``g`` does not
-    # run to the Gaussian FP — see :func:`plot_lapse_with_horizons`), so
-    # we take the absolute value to recover the physical T_H.
+    # (2π)``. The absolute value guards against the central difference
+    # flipping sign from finite-step noise close to extremality (where
+    # ``f'(r_+) -> 0``).
     original_M = bh.M
     try:
         for i, M in enumerate(M_values):
@@ -364,17 +413,22 @@ def plot_hawking_temperature(
         bh.M = original_M
 
     ax.plot(M_values, T_cl, color=COLOR_TRAJECTORY, lw=1.4, ls="--",
-            label=r"classical $1/(8\pi M)$")
+            label=r"classical $1/(8\pi G_N M)$")
     ax.plot(M_values, T_rg, color=COLOR_RELEVANT, lw=2.2,
             label="RG-improved $T_H$")
 
     valid = ~np.isnan(T_rg)
     if valid.any():
         peak_idx = int(np.nanargmax(T_rg))
-        ax.plot(M_values[peak_idx], T_rg[peak_idx],
-                marker="*", markersize=14,
-                color=COLOR_NGFP, markeredgecolor="black",
-                label="peak temperature", zorder=5)
+        valid_idx = np.where(valid)[0]
+        # Only mark a *genuine* interior maximum — a curve that is
+        # monotone over the sampled window has its argmax on the
+        # boundary, and starring that point would be dishonest.
+        if valid_idx[0] < peak_idx < valid_idx[-1]:
+            ax.plot(M_values[peak_idx], T_rg[peak_idx],
+                    marker="*", markersize=14,
+                    color=COLOR_NGFP, markeredgecolor="black",
+                    label="peak temperature", zorder=5)
 
     # Mark the critical mass: smallest M with no horizon
     crit_idx = np.where(np.isnan(T_rg))[0]
@@ -385,18 +439,20 @@ def plot_hawking_temperature(
                 r"$M_{\mathrm{crit}}$", color=COLOR_SEPARATRIX,
                 rotation=90, ha="right", va="top", fontsize=10)
 
-    ax.set_xlabel(r"ADM mass $M$ (Planck units)")
+    ax.set_xlabel(r"ADM mass $M$ (geometric units)")
     ax.set_ylabel(r"Hawking temperature $T_H$")
-    ax.set_title("Hawking temperature: classical vs.\\ asymptotic safety")
+    ax.set_title("Hawking temperature: classical vs. asymptotic safety")
     ax.grid(True, alpha=0.25)
     ax.legend(loc="upper right", framealpha=0.85)
+    # "center right" keeps the citation box off the large-M tail of the
+    # temperature curves (which hugs the lower-right corner).
     add_reference_box(
         ax,
         [
             format_arxiv("Bonanno & Reuter (2000)", "hep-th/0002196"),
             format_arxiv("Platania (2023)", "2302.04272"),
         ],
-        loc="lower right",
+        loc="center right",
     )
     return fig
 

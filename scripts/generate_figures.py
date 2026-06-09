@@ -190,14 +190,18 @@ _CAPTIONS: dict[str, FigureCaption] = {
         title="Annotated Einstein–Hilbert phase portrait",
         description=(
             "RG flow in the (g, lambda) coupling plane (d = 4, Litim "
-            "regulator). The non-Gaussian UV fixed point (NGFP, green star) "
-            "at g* ~ 0.69, lambda* ~ 0.14 has two relevant directions "
-            "(blue eigenvector arrows annotated with the numerical values "
-            "of theta_i) and is the asymptotic-safety candidate of "
-            "Reuter (1998). The Gaussian fixed point (GFP, white circle) "
-            "sits at the origin. The dashed line marks the lambda = 1/2 "
-            "propagator-pole singularity. The thick red curve is the back-"
-            "integrated UV-critical separatrix."
+            "regulator). The non-Gaussian UV fixed point (NGFP, green "
+            "star) at g* ~ 0.707, lambda* ~ 0.193 has two relevant "
+            "directions with the complex-conjugate critical-exponent pair "
+            "theta = 1.475 ± 3.043i (blue eigenvector arrows, annotated "
+            "with the theta value), so the streamlines spiral into the "
+            "fixed point — the asymptotic-safety candidate of Reuter "
+            "(1998). The Gaussian fixed point (GFP, white circle) sits at "
+            "the origin. The crimson curve emanating from the NGFP is the "
+            "back-integrated UV-critical separatrix (its outer windings "
+            "blend into the colored trajectory bundle). The lambda = 1/2 "
+            "propagator pole lies outside the plotted window "
+            "(lambda <= 0.45)."
         ),
         references=[
             "Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].",
@@ -236,7 +240,10 @@ _CAPTIONS: dict[str, FigureCaption] = {
             "blue (IR) to red (UV); thickness is modulated by local flow "
             "speed `tanh(|beta|)`. Fixed points are marked: the Gaussian "
             "FP at the origin and the Reuter NGFP at "
-            "`g* ~ 0.69, lambda* ~ 0.14`."
+            "`g* ~ 0.707, lambda* ~ 0.193` (two relevant directions, "
+            "`theta = 1.475 ± 3.043i`); the trajectories wind helically "
+            "onto the NGFP world-line toward the UV, the real-space "
+            "signature of the complex exponent pair."
         ),
         references=[
             "Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].",
@@ -264,11 +271,19 @@ _CAPTIONS: dict[str, FigureCaption] = {
     "foliated_3d": FigureCaption(
         title="Foliated EH 3D phase portrait",
         description=(
-            "3D phase portrait of the foliated Einstein–Hilbert truncation "
-            "in `(g, lambda, lambda_ADM)` coupling space on `S^1 x S^3`. The "
-            "highlighted plane `lambda_ADM = 1` marks full-Diff restoration "
-            "at the NGFP, in agreement with Manrique et al. (2011) and "
-            "preserved under Wick rotation by Saueressig et al. (2025)."
+            "3D phase portrait of the toolkit's schematic foliated "
+            "Einstein–Hilbert truncation in `(g, lambda, lambda_ADM)` "
+            "coupling space on `S^1 x S^3`. The highlighted plane "
+            "`lambda_ADM = 1` is a fixed plane of the flow by construction "
+            "(`beta_lambda_ADM ∝ g (lambda_ADM - 1)`), UV-repulsive at "
+            "physical couplings. This truncation admits **no non-Gaussian "
+            "fixed point with `g > 0`**: the only fixed point found — and "
+            "marked here (circle) — is the *Gaussian* one at "
+            "`g = lambda = 0` on the `lambda_ADM = 1` plane. The published "
+            "foliated NGFP of Manrique et al. (2011) (Euclidean "
+            "`g* ~ 0.19, lambda* ~ 0.31`, with `lambda_ADM = 1` imposed by "
+            "their full-Diff ansatz) is a literature reference, not a root "
+            "of this system."
         ),
         references=[
             "Manrique, Rechenberger & Saueressig (2011), "
@@ -303,11 +318,20 @@ _CAPTIONS: dict[str, FigureCaption] = {
     "matter_continuation": FigureCaption(
         title="NGFP versus matter content",
         description=(
-            "Continuation of the NGFP coordinates `g*`, `lambda*` and the "
-            "real parts of the critical exponents as the number of "
-            "minimally coupled scalars `N_s` is varied in the EH+matter "
-            "truncation. The shaded region beyond `N_s = 12` marks the "
-            "foliated bound from Korver, Saueressig & Wang (2024)."
+            "Continuation of the NGFP coordinates `g*`, `lambda*` (and "
+            "the running scalar quartic `lambda_phi*`) and the real parts "
+            "of the critical exponents as the number of minimally coupled "
+            "scalars `N_s` is varied in the gravity+matter truncation. "
+            "The pure-gravity limit `N_s = 0` reproduces the EH NGFP "
+            "`g* ~ 0.707, lambda* ~ 0.193`; increasing `N_s` raises "
+            "`lambda*` and mildly lowers `g*`. Two of the three "
+            "exponents form a complex-conjugate pair (Re(theta) ~ 1.48 "
+            "at `N_s = 0`, rising with `N_s`) whose Re curves coincide; "
+            "the third is real (~0.7-0.8). The dashed line and shading "
+            "start at the "
+            "foliated existence wedge of Korver, Saueressig & Wang "
+            "(2024), `N_s + 6.4 N_v <= 23.1`, i.e. `N_s ~ 23` at "
+            "`N_v = 0` — beyond the sweep's largest `N_s = 12`."
         ),
         references=[
             "Dona, Eichhorn & Percacci (2014), Phys. Rev. D 89, 084035 "
@@ -348,9 +372,12 @@ _CAPTIONS: dict[str, FigureCaption] = {
         description=(
             "Six pairwise streamplots projecting the quadratic-gravity "
             "`(g, lambda, alpha, beta)` flow onto every pair of coupling "
-            "axes. The frozen couplings are anchored at the NGFP. The "
-            "panels containing `beta` exhibit asymptotic freedom of the "
-            "Weyl-squared coupling at the GFP (Codello et al. 2009)."
+            "axes. The one-loop truncation has no interior NGFP; the "
+            "frozen couplings are anchored at literature reference values "
+            "(Codello et al. 2009) that this truncation does not itself "
+            "reproduce. The panels containing `beta` show the constant "
+            "one-loop running of the Weyl-squared coefficient (+133/20 "
+            "per 16 pi^2, asymptotic freedom of the C^2 sector)."
         ),
         references=[
             "Codello, Percacci & Rahmede (2009), Ann. Phys. 324, 414 [0812.0785].",
@@ -464,11 +491,18 @@ _CAPTIONS: dict[str, FigureCaption] = {
     "lapse_with_horizons": FigureCaption(
         title="RG-improved Schwarzschild lapse with horizons",
         description=(
-            "Lapse `f(r)` for a super-critical mass on the Bonanno-Reuter "
-            "geometry, with both Cauchy (`r_-`) and event (`r_+`) "
-            "horizons annotated. The de Sitter core `f -> 1` as `r -> 0` "
-            "is the asymptotic-safety regularisation of the central "
-            "singularity."
+            "Lapse `f(r) = 1 - 2 G(r) M / r` for a super-critical mass "
+            "`M = 8` on a trajectory with IR Newton constant `G_N = 0.02` "
+            "(Planck mass `M_pl = G_N^{-1/2} ~ 7.07`, critical mass "
+            "`M_crit ~ 5.7`). The running `G(r) = g(k(r))/k(r)^2` is "
+            "constant in the IR and softens like `g* r^2` inside the "
+            "Planck radius, so both Bonanno-Reuter horizons appear: the "
+            "inner Cauchy horizon `r_-` and the outer event horizon `r_+` "
+            "(dashed vertical lines). As `r -> 0` the lapse returns to 1 "
+            "only *linearly* with the `k = 1/r` cutoff used here: the "
+            "central singularity is softened (curvature still diverges, "
+            "but much more mildly than classically), not replaced by a "
+            "regular de Sitter core."
         ),
         references=[
             "Bonanno & Reuter (2000), Phys. Rev. D 62, 043008 [hep-th/0002196].",
@@ -482,10 +516,17 @@ _CAPTIONS: dict[str, FigureCaption] = {
     "classical_vs_rg_lapse": FigureCaption(
         title="Classical vs RG-improved lapse for several masses",
         description=(
-            "Overlay of classical Schwarzschild `1 - 2M/r` (dashed) and "
-            "RG-improved lapse (solid) for three representative masses, "
-            "illustrating horizon merging at the critical mass and the "
-            "naked-mass remnant for sub-critical M."
+            "Overlay of the classical Schwarzschild lapse "
+            "`1 - 2 G_N M / r` (dashed) and the RG-improved lapse (solid) "
+            "for `M = 3, 6, 9` on a trajectory with `G_N = 0.02` "
+            "(`M_crit ~ 5.7`). The sub-critical `M = 3` curve stays "
+            "positive at all radii — a horizonless naked-mass remnant — "
+            "while its classical counterpart still crosses zero; `M = 6`, "
+            "just above critical, dips barely below zero (nearly merged "
+            "inner/outer horizon pair); `M = 9` shows two well-separated "
+            "horizons. At small `r` the RG-improved lapse always lies "
+            "above the classical one (`G(r) <= G_N`) and rejoins it in "
+            "the IR."
         ),
         references=[
             "Bonanno & Reuter (2000) [hep-th/0002196].",
@@ -499,10 +540,16 @@ _CAPTIONS: dict[str, FigureCaption] = {
     "hawking_temperature": FigureCaption(
         title="Hawking temperature: classical vs asymptotic safety",
         description=(
-            "Hawking temperature `T_H(M) = f'(r_+)/(4 pi)` versus ADM "
-            "mass. The asymptotic-safety prediction (solid blue) peaks "
-            "and then drops to zero at `M_crit`, in stark contrast with "
-            "the classical `1/(8 pi M)` divergence (dashed) as M shrinks."
+            "Hawking temperature `T_H(M) = |f'(r_+)| / (4 pi)` versus ADM "
+            "mass on a trajectory with `G_N = 0.02` (`M_crit ~ 5.7`). At "
+            "large `M` the RG-improved temperature (solid) tracks the "
+            "classical `1/(8 pi G_N M)` curve (dashed); as `M` decreases "
+            "it instead peaks near `~1.3 M_crit` (star) and then turns "
+            "over, falling toward the extremal limit `T_H -> 0` as the "
+            "two horizons merge at `M_crit` (dotted vertical line; cold "
+            "remnant). No temperature is drawn below `M_crit`, where no "
+            "horizon exists — in contrast with the classical divergence "
+            "as `M -> 0`."
         ),
         references=[
             "Bonanno & Reuter (2000) [hep-th/0002196].",
@@ -1175,18 +1222,21 @@ def gen_matter_continuation(out: Path, fmt: str) -> None:
         # promoted to a running variable) has the pinned NGFP exercised
         # by ``tests/test_benchmarks_published.py::TestGravityMatterFP``
         # and produces a smoothly-varying continuation in ``N_s``.
-        n_values = np.array([0, 1, 2, 8, 10, 12], dtype=float)
+        n_values = np.array([0, 1, 2, 4, 6, 8, 10, 12], dtype=float)
 
         def builder(n: float):
             return build_gravity_matter_fp_system(
                 MatterContent(n_scalars=int(n)), scalar_quartic=True,
             )
 
+        # Initial guess = the corrected pure-gravity (N_s = 0) NGFP
+        # (g*, lambda*) = (0.70732, 0.19320) with a small scalar
+        # quartic; the continuation then tracks the root in N_s.
         result = continuation(
             system_builder=builder,
             parameter_name="N_s",
             parameter_values=n_values,
-            initial_guess={"g": 0.69, "lambda": 0.142, "lambda_phi": 0.012},
+            initial_guess={"g": 0.70, "lambda": 0.195, "lambda_phi": 0.009},
         )
         return plot_matter_content_continuation(result)
     _run("Matter continuation", _make, "matter_continuation", out, fmt)
@@ -1226,29 +1276,55 @@ def gen_quadratic_pairwise(out: Path, fmt: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+# IR Newton constant (in k0 units) of the shared cosmology / scattering
+# trajectory built by ``_eh_trajectory_for_cosmology``. The Planck mass
+# in these geometric units is M_pl = G_N^{-1/2} ≈ 7.07; the critical
+# Bonanno-Reuter mass of the resulting RG-improved Schwarzschild
+# geometry computes to M_crit ≈ 5.7 ≈ 0.8 M_pl.
+_COSMO_G_NEWTON = 0.02
+
+
 def _eh_trajectory_for_cosmology():
     """Build a representative EH trajectory used by the cosmology figures.
 
-    We need a trajectory that interpolates between the UV NGFP and the
-    Gaussian (classical) FP in the IR — required by ``G(r) = g/k²``
-    so the dimensional Newton constant is bounded at small ``k`` (large
-    ``r``). Starting AT the NGFP gives a flat trajectory whose ``G(r)``
-    blows up; instead we start *slightly* off the NGFP and integrate
-    backward in RG time (UV → IR), mirroring the test fixture in
-    ``tests/test_cosmology.py::eh_trajectory``.
+    We need a trajectory that interpolates between the Gaussian
+    (classical) regime in the IR and the NGFP in the UV — required by
+    ``G(r) = g/k²`` so the dimensional Newton constant is *constant*
+    at small ``k`` (large ``r``) and softens like ``g*/k²`` in the UV.
+
+    The corrected EH NGFP is UV-attractive (both directions relevant,
+    complex pair ``theta = 1.475 ± 3.043i``), so perturbing off the
+    NGFP and integrating *down* in RG time spirals into the
+    ``lambda = 1/2`` propagator pole after a few e-folds: the
+    integration aborts (``success=False``), ``RGTrajectory.at_scale``
+    silently clamps, and ``G(r)`` inherits a spurious ``r²`` growth in
+    the IR. Instead we mirror the proven construction in
+    :func:`asymsafety.cli.amplitude_cmd._build_trajectory`: start deep
+    in the IR with classical scaling ``g = G_N e^{2t}`` (all other
+    couplings zero) and integrate upward — the flow converges onto the
+    UV-attractive NGFP, giving ``G ≈ G_N`` in the IR and
+    ``G ≈ g*/k²`` in the UV.
     """
-    from asymsafety.analysis.fixed_points import FixedPointFinder
+    import math
+
+    import numpy as np
+
     from asymsafety.analysis.flow import FlowIntegrator
     from asymsafety.beta.einstein_hilbert import build_eh_beta_system
 
     system = build_eh_beta_system(d=4)
-    fp = FixedPointFinder(system).find_fixed_point({"g": 0.7, "lambda": 0.14})
-    ic_uv = {
-        "g": fp.location["g"] - 0.001,
-        "lambda": fp.location["lambda"] + 0.001,
-    }
+    t_ir = -8.0
+    t_uv = 15.0
+    ic_ir = {name: 0.0 for name in system.coupling_names}
+    ic_ir["g"] = _COSMO_G_NEWTON * math.exp(2.0 * t_ir)
+    # Dense storage grid (Δt = 0.01): ``RGTrajectory.at_scale``
+    # interpolates linearly on the *stored* points (the integrator
+    # defaults to only 500), and downstream consumers differentiate
+    # the lapse — coarse storage leaves visible piecewise-linear
+    # kinks in T_H(M).
+    t_eval = np.linspace(t_ir, t_uv, int((t_uv - t_ir) / 0.01) + 1)
     return FlowIntegrator(system).integrate(
-        ic_uv, t_span=(10.0, -10.0), max_step=0.05,
+        ic_ir, t_span=(t_ir, t_uv), max_step=0.05, t_eval=t_eval,
     )
 
 
@@ -1393,8 +1469,11 @@ def gen_lapse_with_horizons(out: Path, fmt: str) -> None:
     def _make():
         from asymsafety.cosmology.rg_improved_bh import RGImprovedSchwarzschild
         from asymsafety.cosmology.visualization import plot_lapse_with_horizons
+        # M_crit ≈ 5.7 for the G_N = 0.02 trajectory (M_pl ≈ 7.07);
+        # M = 8 is clearly super-critical so both r_- and r_+ exist and
+        # sit well inside the default radial window.
         bh = RGImprovedSchwarzschild(
-            trajectory=_eh_trajectory_for_cosmology(), M=2.0,
+            trajectory=_eh_trajectory_for_cosmology(), M=8.0,
         )
         return plot_lapse_with_horizons(bh)
     _run("Lapse with horizons", _make, "lapse_with_horizons", out, fmt)
@@ -1404,10 +1483,13 @@ def gen_classical_vs_rg_lapse(out: Path, fmt: str) -> None:
     def _make():
         from asymsafety.cosmology.rg_improved_bh import RGImprovedSchwarzschild
         from asymsafety.cosmology.visualization import plot_classical_vs_rg_lapse
+        # M_crit ≈ 5.7: M = 3 is sub-critical (no horizon anywhere),
+        # M = 6 is just above critical (nearly merged horizon pair),
+        # M = 9 is clearly super-critical (well-separated r_-, r_+).
         bh = RGImprovedSchwarzschild(
-            trajectory=_eh_trajectory_for_cosmology(), M=1.0,
+            trajectory=_eh_trajectory_for_cosmology(), M=9.0,
         )
-        return plot_classical_vs_rg_lapse(bh, M_values=(0.4, 1.0, 2.5))
+        return plot_classical_vs_rg_lapse(bh, M_values=(3.0, 6.0, 9.0))
     _run("Classical vs RG lapse", _make, "classical_vs_rg_lapse", out, fmt)
 
 
@@ -1415,10 +1497,12 @@ def gen_hawking_temperature(out: Path, fmt: str) -> None:
     def _make():
         from asymsafety.cosmology.rg_improved_bh import RGImprovedSchwarzschild
         from asymsafety.cosmology.visualization import plot_hawking_temperature
+        # Sweep through M_crit ≈ 5.7 (no-horizon region at the left
+        # edge) up to ~5 M_crit where T_H rejoins the classical curve.
         bh = RGImprovedSchwarzschild(
-            trajectory=_eh_trajectory_for_cosmology(), M=1.0,
+            trajectory=_eh_trajectory_for_cosmology(), M=8.0,
         )
-        return plot_hawking_temperature(bh, M_range=(0.3, 4.0), n_masses=40)
+        return plot_hawking_temperature(bh, M_range=(2.0, 30.0), n_masses=150)
     _run("Hawking temperature", _make, "hawking_temperature", out, fmt)
 
 
@@ -1930,9 +2014,22 @@ _CAPTIONS.update({
     "partial_wave_unitarity": FigureCaption(
         title="Partial-wave growth and unitarity",
         description=(
-            "The s-wave partial amplitude |a_0(s)|. Classical gravity runs "
-            "past the |a_l|=1 unitarity line near the Planck scale; the "
-            "asymptotically-safe amplitude stays bounded."
+            "The s-wave partial amplitude |a_0(s)| of graviton-mediated "
+            "scalar scattering, projected with the forward/backward cutoff "
+            "|cos(theta)| <= 0.99 on the massless t/u-channel graviton "
+            "poles, on a trajectory with IR Newton constant G_N = 0.02 "
+            "(Planck mass `M_Pl = G_N^{-1/2} ~ 7.1 k_0`, dotted vertical "
+            "line). Classical GR (red) grows linearly in s and crosses "
+            "the |a_l| = 1 line (dashed) at `sqrt(s) ~ 3.4 k_0 ~ 0.5 "
+            "M_Pl`; the asymptotically-safe curve (green) departs from GR "
+            "at the Planck scale and flattens to a finite plateau. Honest "
+            "caveat: that AS plateau (~1.4e2) sits *above* |a_0| = 1 — "
+            "its absolute value is dominated by the angular cutoff on the "
+            "forward graviton pole (it scales like 2 g*/(1 - cos_max)) "
+            "and is normalisation/cutoff-dependent, so the figure does "
+            "not demonstrate the literal elastic bound for asymptotic "
+            "safety. The scheme-robust statement is boundedness: the AS "
+            "growth exponent is ~0 versus GR's ~1 (Knorr 2026)."
         ),
         references=["Knorr (2026) [2602.21285]"],
         see_also=[

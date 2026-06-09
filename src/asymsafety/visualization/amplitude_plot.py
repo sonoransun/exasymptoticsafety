@@ -107,7 +107,15 @@ def plot_partial_wave_unitarity(
     figsize: tuple[float, float] = (8.0, 5.0),
     show_references: bool = True,
 ) -> Figure:
-    """``|a_ℓ(s)|`` for AS vs GR with the ``|a_ℓ| = 1`` unitarity line."""
+    """``|a_ℓ(s)|`` for AS vs GR with the ``|a_ℓ| = 1`` unitarity line.
+
+    Note the *absolute* normalisation of both curves depends on the
+    trajectory's IR Newton constant and on the forward/backward angular
+    cutoff ``cos_max`` applied to the massless graviton ``t``/``u``
+    poles (see :func:`asymsafety.scattering.consistency.partial_wave`);
+    the scheme-robust statement is GR's unbounded ``∝ s`` growth versus
+    the finite AS plateau, not the literal elastic bound.
+    """
     from asymsafety.scattering import consistency as C
 
     apply_style()
@@ -124,6 +132,14 @@ def plot_partial_wave_unitarity(
     ax.loglog(np.sqrt(s), a_as, color=COLOR_NGFP, lw=2.0,
               label="asymptotic safety")
     ax.axhline(1.0, color="0.4", ls="--", lw=1.0, label=r"$|a_\ell|=1$")
+    # Mark the Planck scale of the underlying trajectory when it sits
+    # inside the plotted window (in k0 units, M_Pl = G_N^{-1/2}).
+    G_N = float(amplitude.form_factor.newton_constant())
+    if G_N > 0:
+        m_pl = G_N ** -0.5
+        if np.sqrt(lo) < m_pl < np.sqrt(hi):
+            ax.axvline(m_pl, color="0.6", ls=":", lw=1.2,
+                       label=r"$M_{\mathrm{Pl}} = G_N^{-1/2}$")
     ax.set_xlabel(r"$\sqrt{s}\,/\,k_0$")
     ax.set_ylabel(rf"$|a_{{{ell}}}(s)|$")
     ax.set_title("Partial-wave growth: GR is unbounded, asymptotic safety is not")

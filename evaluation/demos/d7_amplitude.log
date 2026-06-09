@@ -1,0 +1,3 @@
+Sampled |M| over 200 energies for truncation 'eh' (IR/GR ratio 0.245, UV bounded=True) → evaluation/demos/d7_amp.npz
+  consistency: all_passed=True
+  bridge: Asymptotic safety satisfies the foundational physical-scattering requirements (c...

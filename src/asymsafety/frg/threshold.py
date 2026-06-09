@@ -85,13 +85,27 @@ class ThresholdFunctions:
     # --- General regulator (symbolic integrals) ---
 
     def _phi_symbolic(self, p: int, n: int | Rational, w: Expr) -> Expr:
-        """Symbolic integral form for general regulator."""
+        """Symbolic integral form Φ^p_n(w) for a general regulator.
+
+        Uses the module-docstring numerator [R_k - z R_k'] = ∂_t R_k / 2
+        (Reuter 1998, hep-th/9605030) — *not* the full ∂_t R_k, whose
+        factor 2 belongs to :class:`QFunctional` — so this branch
+        carries the same normalization as the Litim closed form
+        ``_phi_litim`` and as ``evaluate_numerical`` (e.g. it reproduces
+        1/[Γ(n+1)(1+w)^p] for the Litim shape and Φ^1_1(0) = π²/6 for
+        the exponential shape). Evaluated at k = 1: the threshold
+        functions are k-independent in this dimensionless form.
+
+        Returns:
+            Unevaluated :class:`sympy.Integral` over z ∈ (0, ∞),
+            divided by Γ(n).
+        """
         z = Symbol("z_int", positive=True)
-        k = Symbol("k_int", positive=True)
+        k = sympy.Integer(1)  # dimensionless form: k-dependence drops out
         R = self.regulator.R_k(z, k)
-        dR_dt = self.regulator.dR_k_dt(z, k)
-        integrand = z**(n - 1) * dR_dt / (z + R + k**2 * w)**p
-        return integrand / gamma(n)  # Integral must be evaluated numerically
+        numerator = R - z * sympy.diff(R, z)
+        integrand = z**(n - 1) * numerator / (z + R + w)**p
+        return sympy.Integral(integrand, (z, 0, oo)) / gamma(n)
 
     def _phi_tilde_symbolic(self, p: int, n: int | Rational, w: Expr) -> Expr:
         """Symbolic integral form for Φ̃."""
@@ -130,15 +144,22 @@ class ThresholdFunctions:
 
         if func_type == "Phi":
             def integrand(z):
+                # Numerator per the module convention (Reuter 1998,
+                # hep-th/9605030): R_k - z R_k' = -z y r'(y), which for
+                # the exponential shape r(y) = 1/(e^y - 1) equals
+                # k^2 y^2 e^y / (e^y - 1)^2.  This reproduces the exact
+                # Bose-integral anchors Φ^1_1(0) = π²/6, Φ^2_1(0) = 1,
+                # Φ^1_2(0) = 2ζ(3) and the Litim closed form
+                # 1/[Γ(n+1)(1+w)^p] in the Litim limit.
                 y = z / k_val**2
                 r = self._shape_numerical(y)
                 dr = self._shape_derivative_numerical(y)
                 R_val = z * r
-                dR_dt_val = 2 * z * (r - y * dr)
+                num_val = -z * y * dr
                 denom = (z + R_val + k_val**2 * w_val)**p
                 if abs(denom) < 1e-300:
                     return 0.0
-                return z**(n - 1) * dR_dt_val / denom
+                return z**(n - 1) * num_val / denom
         else:
             def integrand(z):
                 y = z / k_val**2
@@ -153,20 +174,35 @@ class ThresholdFunctions:
         return result / mgamma(n)
 
     def _shape_numerical(self, y: float) -> float:
-        """Numerical shape function r(y) for the exponential regulator."""
+        """Numerical shape function r(y) = 1/(e^y - 1) for the
+        exponential regulator.
+
+        For large y, e^y (and a fortiori (e^y - 1)²) overflows double
+        precision; use the exact asymptotic r(y) ≈ e^{-y} instead
+        (relative error < e^{-350}).
+        """
         import numpy as np
         if isinstance(self.regulator, ExponentialRegulator):
             if y < 1e-10:
                 return 1.0 / y if y > 0 else 1e10
+            if y > 350.0:
+                return float(np.exp(-y))
             return 1.0 / (np.exp(y) - 1)
         raise NotImplementedError(f"Numerical shape for {self.regulator.name}")
 
     def _shape_derivative_numerical(self, y: float) -> float:
-        """Numerical dr/dy for the exponential regulator."""
+        """Numerical dr/dy = -e^y/(e^y - 1)² for the exponential regulator.
+
+        For large y, (e^y - 1)² overflows double precision (and for
+        y > 709 the naive ratio evaluates to inf/inf = NaN); use the
+        exact asymptotic dr/dy ≈ -e^{-y} instead.
+        """
         import numpy as np
         if isinstance(self.regulator, ExponentialRegulator):
             if y < 1e-10:
                 return -1.0 / y**2 if y > 0 else -1e20
+            if y > 350.0:
+                return -float(np.exp(-y))
             ey = np.exp(y)
             return -ey / (ey - 1)**2
         raise NotImplementedError

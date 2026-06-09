@@ -1,0 +1,11 @@
+location: {'g': '0.7073208809870124', 'lambda': '0.1932005071508141'}
+Fixed point: {'g': 0.7073208809870124, 'lambda': 0.19320050715081413}
+Critical exponents θ_i:
+  θ_1 = 1.475302 ± 3.043206i (relevant)
+  θ_2 = 1.475302 ± 3.043206i (relevant)
+Relevant directions: 2
+UV attractive: True
+critical_exponents: ['1.475302426-3.043205846j', '1.475302426+3.043205846j']
+beta residual at FP: 6.907e-13
+VERDICT pin-match rtol 1e-6: FAIL (g*=0.707320880987, lambda*=0.193200507151)
+vs literature: dg=0.0%, dl=0.1%, product g*l*=0.1367 vs 0.137 (0.3%)

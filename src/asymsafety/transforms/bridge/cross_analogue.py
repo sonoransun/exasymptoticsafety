@@ -1,4 +1,4 @@
-"""Cross-analogue bridge: verify commutativity of the transformation diagram.
+"""Cross-analogue bridge: regression-check the transformation diagram.
 
          Laplace/Koopman
 Classical RG ──────────────> Control Theory / Hydraulic
@@ -7,6 +7,11 @@ Classical RG ──────────────> Control Theory / Hydrau
      v                              v
 Quantum Computing <─────────────────
          QFT / Grover
+
+The asserted ``verify_commutativity`` check covers only the classical
+RG / transfer-matrix / resolvent corner of this diagram, where the
+three paths are exact linear-algebra identities on one Jacobian
+eigendecomposition (see :class:`CrossAnalogueBridge`).
 """
 
 from __future__ import annotations
@@ -25,8 +30,15 @@ if TYPE_CHECKING:
 class CrossAnalogueBridge:
     """Bridge connecting RG, hydraulic, and quantum domains.
 
-    Verifies that all paths through the commutative diagram
-    produce consistent critical exponents.
+    The asserted check, :meth:`verify_commutativity`, covers only the
+    classical RG / transfer-matrix / resolvent paths. All three are
+    algebraic re-expressions of the *same* Jacobian eigendecomposition
+    (spectral mapping for ``expm``; the resolvent poles are the
+    stability eigenvalues by definition), so the check is a
+    linear-algebra **regression test** of the toolkit's wiring, not an
+    independent physics validation. The hydraulic analogue is compared
+    best-effort in :meth:`full_comparison_table`; the quantum analogues
+    are not part of the asserted check.
     """
 
     def __init__(
@@ -56,6 +68,12 @@ class CrossAnalogueBridge:
         """Get critical exponents from resolvent poles.
 
         Poles of R(s) = (sI - M)^{-1} are at s = eigenvalues of M = -theta_i.
+
+        Note:
+            This path is *definitionally identical* to the direct RG
+            path: ``ResolventOperator.poles()`` returns the stability
+            eigenvalues verbatim (no independent pole search), so the
+            deviation from :meth:`rg_critical_exponents` is exactly 0.
         """
         from asymsafety.transforms.linear.resolvent import ResolventOperator
 
@@ -94,8 +112,21 @@ class CrossAnalogueBridge:
         eigs = np.linalg.eig(impedance)[0]
         return np.sort(eigs.real)[::-1]  # Sort by real part descending
 
-    def verify_commutativity(self, tol: float = 0.1) -> dict:
-        """Check all paths give consistent critical exponents.
+    def verify_commutativity(self, tol: float = 1e-9) -> dict:
+        """Linear-algebra regression check on the classical paths.
+
+        Compares the RG, transfer-matrix, and resolvent critical
+        exponents. These are **not independent computations**: all
+        three derive from the same Jacobian eigendecomposition. The
+        transfer-matrix path round-trips through ``expm(M dt)`` and
+        re-diagonalizes (spectral-mapping identity; deviation ~1e-13
+        on the shipped truncations), and the resolvent path returns
+        the stability eigenvalues verbatim (deviation exactly 0). A
+        failure therefore indicates a wiring/implementation regression
+        in the transform layer, not new physics — hence the default
+        tolerance of 1e-9, three orders above the observed expm
+        round-trip error. The hydraulic and quantum analogues are not
+        part of this check (see :meth:`full_comparison_table`).
 
         Returns dict with method names, values, and agreement status.
         """

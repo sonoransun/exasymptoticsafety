@@ -1,0 +1,34 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- /root/cdev/exasymptoticsafety/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /root/cdev/exasymptoticsafety
+configfile: pyproject.toml
+plugins: nbmake-1.5.5, timeout-2.4.0, hypothesis-6.152.4
+timeout: 600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 6 items
+
+notebooks/01_reuter_fixed_point.ipynb::01_reuter_fixed_point.ipynb PASSED [ 16%]
+notebooks/02_phase_portrait.ipynb::02_phase_portrait.ipynb PASSED        [ 33%]
+notebooks/03_gravity_matter_scan.ipynb::03_gravity_matter_scan.ipynb PASSED [ 50%]
+notebooks/04_rg_improved_bh.ipynb::04_rg_improved_bh.ipynb PASSED        [ 66%]
+notebooks/05_acceleration_and_sweep.ipynb::05_acceleration_and_sweep.ipynb PASSED [ 83%]
+notebooks/06_scattering_amplitudes.ipynb::06_scattering_amplitudes.ipynb PASSED [100%]
+
+=============================== warnings summary ===============================
+notebooks/01_reuter_fixed_point.ipynb::01_reuter_fixed_point.ipynb
+notebooks/02_phase_portrait.ipynb::02_phase_portrait.ipynb
+notebooks/03_gravity_matter_scan.ipynb::03_gravity_matter_scan.ipynb
+notebooks/04_rg_improved_bh.ipynb::04_rg_improved_bh.ipynb
+notebooks/05_acceleration_and_sweep.ipynb::05_acceleration_and_sweep.ipynb
+  /root/cdev/exasymptoticsafety/.venv/lib/python3.12/site-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+    validate(nb)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+Learn more about nbmake at https://github.com/treebeardtech/nbmake
+
+================== 6 passed, 5 warnings in 134.99s (0:02:14) ===================
+EXIT=0

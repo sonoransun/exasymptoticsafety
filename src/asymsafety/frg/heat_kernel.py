@@ -92,7 +92,17 @@ class SeeleyDeWittCoefficients:
             scalar: E = 0 (minimally coupled) or E = -ξR̄ (non-minimal)
             vector: E_μ^ν = -R̄_μ^ν = -(R̄/d)δ_μ^ν
             ghost_vector: same as vector
-            TT_tensor: E from the curvature of the spin connection
+            TT_tensor: E = 0 (bare constrained -D²); pass the trace of
+                the Lichnerowicz endomorphism explicitly if needed.
+
+        The TT tensor is a *constrained* bundle: the unconstrained
+        master formula tr(I)R̄/6 - tr(E) does not apply. Its b_2 is
+        computed from the exact S^4 spectrum (eigenvalues l(l+3)-2,
+        degeneracies 5(2l+3)(l-1)(l+4)/6, l ≥ 2 [Rubin & Ordóñez 1984]),
+        which gives b_2(-D²|_TT) = -(5/6) R̄; cf. the constrained
+        spectral route of Lauscher & Reuter, Phys. Rev. D 65 (2002)
+        025013. For Δ = -D²|_TT + E this becomes -(5/6)R̄ - tr(E)
+        (Lichnerowicz on S^4: tr(E) = (10/3)R̄ ⇒ b_2 = -(25/6)R̄).
 
         Args:
             field_type: Type of field.
@@ -106,6 +116,14 @@ class SeeleyDeWittCoefficients:
         # Standard endomorphisms on maximally symmetric backgrounds
         if endomorphism == sympy.S.Zero:
             endomorphism = self._standard_endomorphism_trace(field_type)
+
+        if field_type == "TT_tensor":
+            if d != 4:
+                raise NotImplementedError(
+                    "Constrained TT heat kernel coefficients are only "
+                    "implemented on S^4 (d=4)"
+                )
+            return -Rational(5, 6) * R - endomorphism
 
         return Rational(1, 6) * tr_I * R - endomorphism
 
@@ -124,10 +142,16 @@ class SeeleyDeWittCoefficients:
                      + 1/12 tr(Ω²) + 1/2 tr(E²) - 1/6 R tr(E) + 1/6 D²tr(E)
 
         On S^d (constant curvature), the D² terms vanish.
+
+        For the constrained TT bundle the unconstrained master formula
+        does not apply; see _b4_TT_constrained.
         """
         d = self.d
         R = self.R_bar
         tr_I = self.trace_id(field_type)
+
+        if field_type == "TT_tensor":
+            return self._b4_TT_constrained(endomorphism)
 
         # Universal curvature-squared coefficients
         c_R2 = Rational(1, 72) * tr_I
@@ -136,10 +160,12 @@ class SeeleyDeWittCoefficients:
 
         # Bundle curvature contribution: (1/12) tr(Ω_μν Ω^μν)
         omega_sq_trace = self._omega_squared_trace(field_type)
-        # Ω² on max sym background: Ω_μν^{ab} = R_μν^{ab} for vectors/tensors
-        # For vectors: tr(Ω²) = R_μνρσ R^μνρσ = R²_μνρσ, so adds to c_Riem2
-        # More precisely: tr(Ω²_μν) is the trace over internal indices.
-        # This contributes to the R²_μνρσ coefficient.
+        # Ω_μν is the SO(d) curvature acting on the bundle indices; its
+        # internal trace is negative, tr(Ω²) = -R²_μνρσ for a vector
+        # (antisymmetry of Ω makes the sign convention-independent), so
+        # the bundle term *subtracts* from the R²_μνρσ coefficient:
+        # spin-1 total in d=4 is 4/180 - 1/12 = -11/180
+        # [Christensen & Duff 1979; Vassilevich 2003].
         c_Riem2 += omega_sq_trace["Riem2"]
         c_Ric2 += omega_sq_trace.get("Ric2", sympy.S.Zero)
         c_R2 += omega_sq_trace.get("R2", sympy.S.Zero)
@@ -178,6 +204,55 @@ class SeeleyDeWittCoefficients:
         )
         return sympy.simplify(result)
 
+    # --- Internal: constrained TT bundle (S^4 spectral route) ---
+
+    def _b4_TT_constrained(self, endomorphism: Expr = sympy.S.Zero
+                           ) -> dict[str, Expr]:
+        """b_4 for the constrained TT bundle on S^4.
+
+        The transversality constraint changes the heat kernel
+        coefficients relative to the unconstrained Sym² master formula,
+        so b_4 is computed from the exact S^4 spectrum (eigenvalues
+        l(l+3) - 2, degeneracies 5(2l+3)(l-1)(l+4)/6, l ≥ 2
+        [Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888]); this is the
+        constrained spectral route of Lauscher & Reuter, Phys. Rev. D
+        65 (2002) 025013. The exact mode sum gives:
+
+            b_4(-D²|_TT) = -(1/432) R̄²
+
+        For Δ = -D²|_TT + E with E ∝ identity on the TT bundle (the
+        only case on a maximally symmetric background),
+        Tr e^{-tΔ} = e^{-t tr(E)/5} Tr e^{+t D²} yields:
+
+            b_4 = -(1/432) R̄² + (1/6) R̄ tr(E) + (1/10) tr(E)²
+
+        (Lichnerowicz on S^4, tr(E) = (10/3) R̄: b_4 = (719/432) R̄².)
+
+        On S^d the three curvature invariants degenerate, so the
+        decomposition into {R², Ric², Riem²} is not determined by
+        sphere data: the total is returned as an effective R̄²
+        coefficient, valid on maximally symmetric backgrounds only.
+        """
+        if self.d != 4:
+            raise NotImplementedError(
+                "Constrained TT heat kernel coefficients are only "
+                "implemented on S^4 (d=4)"
+            )
+        R = self.R_bar
+        if endomorphism == sympy.S.Zero:
+            endomorphism = self._standard_endomorphism_trace("TT_tensor")
+
+        if endomorphism == sympy.S.Zero:
+            c_R2 = -Rational(1, 432)
+        else:
+            total = (
+                -Rational(1, 432) * R**2
+                + Rational(1, 6) * R * endomorphism
+                + Rational(1, 10) * endomorphism**2
+            )
+            c_R2 = self._extract_R2_coefficient(total)
+        return {"R2": c_R2, "Ric2": sympy.S.Zero, "Riem2": sympy.S.Zero}
+
     # --- Internal: standard endomorphism and bundle curvature ---
 
     def _standard_endomorphism_trace(self, field_type: FieldType) -> Expr:
@@ -186,9 +261,11 @@ class SeeleyDeWittCoefficients:
         scalar (minimal): E = 0, tr(E) = 0
         vector: E_μ^ν = -R̄_μ^ν = -(R̄/d)δ_μ^ν, tr(E) = -R̄
         ghost_vector: same as vector, tr(E) = -R̄
-        TT_tensor: E comes from curvature terms in the Lichnerowicz operator.
-            tr(E_TT) = -2(d²-d-2)/(d(d-1)) R̄ · tr_I_TT / d_TT
-            Simplified: tr(E) for TT on S^d depends on d.
+        TT_tensor: E = 0 — the TT row is defined for the bare
+            constrained Laplacian -D²|_TT, whose coefficients are
+            computed via the exact S^4 spectrum (see b2 /
+            _b4_TT_constrained). For the Lichnerowicz operator on S^4
+            pass tr(E) = (2/3)R̄ × 5 = (10/3)R̄ explicitly.
         """
         d = self.d
         R = self.R_bar
@@ -198,17 +275,7 @@ class SeeleyDeWittCoefficients:
         elif field_type in ("vector", "ghost_vector"):
             return -R  # tr over d components: d × (-R/d) = -R
         elif field_type == "TT_tensor":
-            # Lichnerowicz operator on TT tensors: Δ_L h^TT = -D² h^TT + E h^TT
-            # On S^d: E_{ab}^{cd} h^TT_{cd} where E involves Riemann
-            # tr(E) = -(d²-3d+4)/(d(d-1)) R̄ × tr_I_TT ... simplified:
-            # For d=4: E gives an effective mass-like term
-            # tr(E_TT) = 2 × [(d+1)(d-2)/2] × (-R̄/d²) × ...
-            # Using the known result: on S^d, the TT Laplacian eigenvalues
-            # are shifted by -2R̄/(d(d-1)) per component
-            # So tr(E_TT) = tr_I_TT × [some combination]
-            # For d=4: tr(E) = 5 × (-2R̄/(4·3)) = -5R̄/6
-            # General: tr_I × (-2/(d(d-1))) R̄
-            return -2 * self.trace_id(field_type) * R / (d * (d - 1))
+            return sympy.S.Zero  # bare -D²|_TT (constrained spectral route)
         elif field_type == "symmetric_tensor":
             return -2 * R  # Approximate
         return sympy.S.Zero
@@ -224,17 +291,29 @@ class SeeleyDeWittCoefficients:
             # E_μ^ν = -(R̄/d)δ_μ^ν, tr(E²) = d(R̄/d)² = R̄²/d
             return R**2 / d
         elif field_type == "TT_tensor":
-            # tr(E²) for TT tensors on S^d
-            # Each component gets E ∝ R̄/(d(d-1)), squared and traced
-            tr_I = self.trace_id(field_type)
-            return tr_I * 4 * R**2 / (d * (d - 1))**2
+            return sympy.S.Zero  # bare -D²|_TT (constrained spectral route)
         return sympy.S.Zero
 
     def _omega_squared_trace(self, field_type: FieldType) -> dict[str, Expr]:
         """(1/12) tr(Ω_μν Ω^μν) decomposed into curvature invariants.
 
-        For a vector field, Ω_μν = R_μν (Riemann as SO(d) curvature),
-        so tr(Ω²) = R_μνρσ R^μνρσ (Kretschner scalar).
+        Ω_μν is antisymmetric in its bundle indices, so the internal
+        trace tr(Ω_μν Ω^μν) is *negative* definite in curvature-squared
+        terms (basis- and convention-independent: it is quadratic in Ω).
+
+        For a vector field, (Ω_μν)^a_b = R_μν{}^a{}_b, so
+            tr(Ω²) = R_μν{}^a{}_b R^μν{}^b{}_a = -R_μνρσ R^μνρσ,
+        giving the bundle contribution -(1/12) to the Riem² coefficient
+        and the spin-1 total 1/180·d - 1/12 = -11/180 in d=4
+        [Christensen & Duff, Nucl. Phys. B 154 (1979) 301;
+         Vassilevich, Phys. Rept. 388 (2003) 279].
+
+        For rank-2 symmetric tensors Sym²(V), the Dynkin index scales as
+        T(Sym²V) = (d+2) T(V), so tr(Ω²)|_Sym² = -(d+2) R²_μνρσ and the
+        bundle contribution is -(d+2)/12 (= -1/2 in d=4). The same value
+        applies to the traceless part (the trace part is a scalar with
+        Ω = 0). Note that for the *constrained* TT bundle this generic
+        master-formula path is not used — see _b4_TT_constrained.
 
         For a scalar field, Ω = 0 (trivial bundle).
         """
@@ -243,16 +322,11 @@ class SeeleyDeWittCoefficients:
         if field_type == "scalar":
             return {"Riem2": sympy.S.Zero}
         elif field_type in ("vector", "ghost_vector"):
-            # (1/12) × 1 × R²_μνρσ coefficient
-            return {"Riem2": Rational(1, 12)}
-        elif field_type == "TT_tensor":
-            # For rank-2 symmetric traceless tensors, the bundle curvature
-            # gives: (1/12) tr(Ω²) = (1/12) × (sum of contributions)
-            # This is more complex; on S^d the result is a known multiple
-            # of R²_μνρσ.
-            # For d=4: (1/12) × [2(d-1)/(d(d-1))] × tr_I × R²_μνρσ
-            # Simplified: scales with number of components
-            return {"Riem2": Rational(1, 12) * 2 * (d - 1)}
+            # (1/12) × tr(Ω²) = -(1/12) R²_μνρσ
+            return {"Riem2": -Rational(1, 12)}
+        elif field_type in ("symmetric_tensor", "TT_tensor"):
+            # (1/12) × tr(Ω²)|_Sym² = -(d+2)/12 R²_μνρσ
+            return {"Riem2": -Rational(d + 2, 12)}
         return {"Riem2": sympy.S.Zero}
 
     def _extract_R2_coefficient(self, expr: Expr) -> Expr:

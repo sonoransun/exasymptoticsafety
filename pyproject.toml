@@ -16,7 +16,7 @@ dependencies = [
     # are matplotlib-version-sensitive. Refresh with
     # `python scripts/generate_figures.py --update-baselines` when
     # bumping the upper bound.
-    "matplotlib>=3.8,<3.10",
+    "matplotlib>=3.8,<3.11",
 ]
 
 [project.optional-dependencies]

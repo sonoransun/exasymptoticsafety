@@ -91,9 +91,11 @@ class TestCacheDir:
 class TestDiskCacheFallback:
     """When joblib is unavailable, disk_cache transparently falls back."""
 
-    def test_decorator_works_without_joblib(self):
+    def test_decorator_works_without_joblib(self, tmp_path, monkeypatch):
         # Whether or not joblib is present, the decorator must be a no-op
-        # in terms of API surface.
+        # in terms of API surface. The cache dir must be fresh: a persistent
+        # cache from a previous test run would satisfy f(5) without calling f.
+        monkeypatch.setenv("ASYMSAFETY_CACHE_DIR", str(tmp_path / "cache"))
         calls = []
 
         @disk_cache()

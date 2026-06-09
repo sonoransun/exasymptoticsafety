@@ -1,0 +1,57 @@
+........................................................................ [ 12%]
+........................................................................ [ 25%]
+........................................................................ [ 38%]
+........................................................................ [ 50%]
+........................................................................ [ 63%]
+........................................................................ [ 76%]
+........................................................................ [ 88%]
+................................................................         [100%]
+=============================== warnings summary ===============================
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: divide by zero encountered in divide
+    return g*((1/12)*g*(-28 + 20/(1 - 2*Dummy_57) - 36/(1 - 2*Dummy_57)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_57) - 12/(1 - 2*Dummy_57)**2)/pi + 1)) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: invalid value encountered in subtract
+    return g*((1/12)*g*(-28 + 20/(1 - 2*Dummy_57) - 36/(1 - 2*Dummy_57)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_57) - 12/(1 - 2*Dummy_57)**2)/pi + 1)) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: divide by zero encountered in divide
+    return Dummy_58*((1/12)*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 2) + (1/8)*g*(-5/3*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*(6 - 12*Dummy_58)*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 16 + 40/(2 - 4*Dummy_58))/pi
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: invalid value encountered in subtract
+    return Dummy_58*((1/12)*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 2) + (1/8)*g*(-5/3*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*(6 - 12*Dummy_58)*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 16 + 40/(2 - 4*Dummy_58))/pi
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+    self.pid = os.fork()
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=689928) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: divide by zero encountered in scalar divide
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: invalid value encountered in scalar multiply
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: divide by zero encountered in scalar power
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: invalid value encountered in scalar divide
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+568 passed, 20 warnings in 33.63s

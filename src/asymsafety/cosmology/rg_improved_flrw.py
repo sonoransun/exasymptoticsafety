@@ -12,6 +12,19 @@ The leading phenomenology is a Planck-scale modification at very early
 times that may resolve the initial singularity (Bonanno-Reuter cosmology),
 plus a possible late-time effect on dark-energy interpretations of Λ.
 
+Consistency caveat (Bianchi identity): the Bianchi identity applied to
+the improved Einstein equations requires
+
+    ρ̇ + 3H(ρ + p) = -(Ġ ρ + Λ̇/8π)/G            [hep-th/0106133]
+
+This module instead imposes *standard* conservation ρ̇ = -3H(1 + w)ρ,
+i.e. the energy exchange with the running (G, Λ) sector is dropped.
+Bonanno & Reuter make the same ansatz but additionally enforce the
+integrability constraint Λ̇ + 8πρĠ = 0, which fixes the
+scale-identification parameter ξ; here ξ stays a free parameter
+(default 1), so the Bianchi residual is generically nonzero and
+vanishes only for the BR-consistent ξ. See :meth:`RGImprovedFLRW.integrate`.
+
 References:
     Bonanno & Reuter (2002), Phys. Rev. D 65, 043508 [hep-th/0106133]
     Reuter & Weyer (2004), Phys. Rev. D 69, 104022 [hep-th/0311196]
@@ -104,6 +117,19 @@ class RGImprovedFLRW:
 
         Uses Hubble-matching ``k = ξ H(t)`` when ``scale`` is a
         ``HubbleScale``; otherwise uses ``scale.k_of_t(t)``.
+
+        Note:
+            Conservation ansatz — this integration imposes *standard*
+            conservation ``ρ̇ = -3H(1 + w)ρ`` alongside Friedmann-I with
+            running ``G(k(t))``, ``Λ(k(t))``. The Bianchi identity of
+            the improved field equations would instead require
+            ``ρ̇ + 3H(ρ + p) = -(Ġρ + Λ̇/8π)/G`` (Bonanno & Reuter,
+            hep-th/0106133): the energy exchanged with the running
+            (G, Λ) sector is dropped here, leaving a nonzero Bianchi
+            residual unless the BR integrability constraint
+            ``Λ̇ + 8πρĠ = 0`` — which fixes ``ξ`` and is *not* imposed
+            by this module — happens to hold for the chosen scale
+            identification.
 
         Args:
             a0: Initial scale factor.

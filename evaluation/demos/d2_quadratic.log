@@ -1,0 +1,6 @@
+couplings: ['g', 'lambda', 'alpha', 'beta']
+Traceback (most recent call last):
+  File "/root/cdev/exasymptoticsafety/evaluation/demos/d2_quadratic.py", line 10, in <module>
+    print("location:", {k: f"{v:.10g}" for k, v in fp.location.items()})
+                                                   ^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'location'

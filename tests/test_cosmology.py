@@ -117,7 +117,8 @@ class TestRGImprovedSchwarzschild:
             assert b < a
 
     def test_lapse_to_unity_at_origin(self, eh_trajectory):
-        """f(r) → 1 as r → 0 (de Sitter core, no singularity)."""
+        """f(r) → 1 as r → 0 (softened core; curvature still ∝ 1/r — see
+        the rg_improved_bh module docstring, HV-15a-b)."""
         bh = RGImprovedSchwarzschild(eh_trajectory, M=1.0, k0=1.0)
         assert bh.lapse(1e-4) == pytest.approx(1.0, abs=0.01)
 

@@ -26,20 +26,27 @@ projecting onto the dimensionless ``(α, u, r)`` system::
 The charged fixed point at large ``N`` is
 
     α*  =  ε / N
-    u*  =  (ε / (N + 4)) · (1 + O(N⁻¹))
+    u*  =  (ε / (N + 4)) · (1 + O(N⁻¹))      [the u₊ quartic root]
     r*  =  0
 
 with correlation-length exponent (one-loop)
 
-    ν = 1 / (2 − (N + 2) u* + 6 α*)  →  1/2 + O(N⁻¹).
+    ν = 1 / (2 − (N + 2) u* + 6 α*)  →  1/(2 − ε) + O(N⁻¹),
+
+i.e. ν → 1 from below for ε = 1, *increasing* with N — the same
+trend as the d = 3 large-N_f field-theory form ν = 1 − C/N_f of
+Bonati, Pelissetto & Vicari (2025) [arXiv:2410.05823]. The charged FP
+is the *larger* root u₊ of the one-loop quartic condition (Halperin,
+Lubensky & Ma 1974); the smaller root u₋ is the tricritical FP with a
+second relevant direction.
 
 This is the standard 4 − ε result; for the d = 3 lattice numbers in
 Bonati, Pelissetto & Vicari (2025) we set ε = 1, knowing that
 absolute agreement with the lattice Monte-Carlo ν cannot be reached
 from a perturbative one-loop expansion. The bridge tests therefore
-verify only *qualitative trends* (FP existence above N*, monotonicity
-of ν with N) and the commutativity of the toolkit's analogue methods
-on this β-system.
+verify only *qualitative trends* (FP existence above N*, monotonic
+increase of ν with N toward 1) and the commutativity of the toolkit's
+analogue methods on this β-system.
 
 References:
     Bonati, Pelissetto & Vicari (2025), Phys. Rep. [arXiv:2410.05823]
@@ -134,10 +141,17 @@ def charged_fp_guess(N: int, epsilon: float = 1.0) -> dict[str, float]:
     """Closed-form large-N initial guess for the charged FP.
 
     From the one-loop expressions, the gauge coupling is fixed by
-    ``α* = ε / N`` (for Nc = 1). The quartic ``u*`` is the positive
-    root of the quadratic ``(N + 4) u² − (ε + 6 α*) u + 9 α*² = 0``;
-    we return the large-N branch (the one continuously connected to
-    the decoupled Wilson-Fisher FP as α → 0).
+    ``α* = ε / N`` (for Nc = 1). The quartic ``u*`` solves the
+    quadratic ``(N + 4) u² − (ε + 6 α*) u + 9 α*² = 0``, whose two
+    roots as α → 0 are ``{0, ε/(N + 4)}``: the branch continuously
+    connected to the decoupled Wilson-Fisher FP is the *plus* root
+
+        u₊ = (B + √(B² − 4AC)) / (2A),
+
+    which is the charged (IR-stable, one relevant direction) FP of
+    Halperin, Lubensky & Ma (1974), PRL 32, 292. The minus root u₋ is
+    the tricritical FP (two relevant directions) and must not be used
+    for ν comparisons against Bonati et al. (2025).
 
     The mass coordinate is exactly zero at any continuous transition.
     """
@@ -154,7 +168,7 @@ def charged_fp_guess(N: int, epsilon: float = 1.0) -> dict[str, float]:
         # exercise the bridge with a meaningful initial guess.
         u_star = eps / (N + 4)
     else:
-        u_star = (B - disc ** 0.5) / (2 * A)
+        u_star = (B + disc ** 0.5) / (2 * A)
 
     return {"alpha": alpha_star, "u": float(u_star), "r": 0.0}
 
@@ -163,9 +177,13 @@ def correlation_length_exponent(N: int, epsilon: float = 1.0) -> float:
     """One-loop ν at the charged FP.
 
     Reads off the (positive) eigenvalue along the ``r`` direction at
-    the charged FP and inverts:  ν = 1 / θ_r. For large N this
-    approaches 1/2 + O(1/N); it is a deliberately *qualitative* proxy
-    for the lattice MC numbers in :mod:`asymsafety.validation.bonati_2025`.
+    the charged FP and inverts:  ν = 1 / θ_r. At the u₊ charged FP,
+    ``(N + 2) u₊ → ε`` as N → ∞, so ν → 1/(2 − ε) — i.e. ν → 1 from
+    below for ε = 1 — *increasing* with N, the same trend as the
+    Bonati, Pelissetto & Vicari (2025) large-N_f form ν = 1 − C/N_f.
+    It remains a perturbative one-loop proxy for the lattice MC
+    numbers in :mod:`asymsafety.validation.bonati_2025` (agreement at
+    N_f ∈ {30, 40, 60} is at the few-percent level, not exact).
     """
     fp_guess = charged_fp_guess(N, epsilon=epsilon)
     # The r-direction eigenvalue is the coefficient of r in β_r, i.e.
@@ -184,7 +202,8 @@ class GaugeHiggsAnalogue:
     Construct, then access ``.system``, ``.fixed_point``, ``.stability``,
     and ``.bridge`` directly. The bridge can be passed to any code that
     expects a :class:`CrossAnalogueBridge` (e.g.
-    ``bridge.verify_commutativity(tol=0.15)``).
+    ``bridge.verify_commutativity()`` — a linear-algebra regression
+    check on the shared stability eigendecomposition; see its docstring).
     """
 
     def __init__(self, N: int, Nc: int = 1, epsilon: float = 1.0) -> None:

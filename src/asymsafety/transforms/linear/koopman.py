@@ -23,7 +23,7 @@ from itertools import product
 import numpy as np
 
 from asymsafety.analysis.fixed_points import FixedPoint
-from asymsafety.analysis.flow import RGTrajectory
+from asymsafety.analysis.flow import FlowIntegrator, RGTrajectory
 from asymsafety.analysis.stability import StabilityAnalysis
 from asymsafety.beta.system import BetaFunctionSystem
 from asymsafety.transforms._types import ComparisonResult, KoopmanResult
@@ -193,35 +193,90 @@ class ClassicalKoopmanOperator:
         return result
 
     def compare_with_stability(
-        self, stability: StabilityAnalysis
+        self,
+        stability: StabilityAnalysis,
+        trajectories: list[RGTrajectory] | None = None,
+        dt: float = 0.01,
+        n_trajectories: int = 40,
+        displacement: float = 1e-5,
+        dictionary_degree: int = 1,
+        tol: float = 1e-3,
+        seed: int = 0,
     ) -> ComparisonResult:
-        """Compare leading Koopman eigenvalues with stability eigenvalues.
+        """Compare EDMD Koopman eigenvalues with stability eigenvalues.
 
-        Near the fixed point, the leading Koopman eigenvalues (those
-        associated with the linear dictionary elements) should agree
-        with the eigenvalues of the stability matrix.  This comparison
-        requires that ``compute_edmd`` has not yet been called -- we
-        use the stability analysis eigenvalues directly.
+        Near the fixed point, the Koopman operator restricted to the
+        linear dictionary is exp(M dt) (spectral-mapping theorem), so
+        the continuous-time exponents recovered from the EDMD
+        eigenvalues,
+
+            mu_K = log(eig K) / dt,
+
+        must reproduce the eigenvalues of the stability matrix M.
+        This method actually runs EDMD: it integrates ``n_trajectories``
+        short two-snapshot trajectories of the beta system from random
+        initial displacements of size ``displacement`` around the fixed
+        point (unless ``trajectories`` is supplied), calls
+        :meth:`compute_edmd`, and matches each stability eigenvalue to
+        the nearest ``log(eig K)/dt``. The comparison is genuine: a
+        wrong Jacobian, fixed point, or EDMD implementation makes it
+        fail.
 
         Args:
             stability: A completed stability analysis at the same
                 fixed point.
+            trajectories: Optional pre-computed training trajectories.
+                Snapshots must be uniformly spaced by ``dt``; when None,
+                synthetic near-linear trajectories are generated.
+            dt: Snapshot spacing in RG time (the Koopman step).
+            n_trajectories: Number of synthetic trajectories.
+            displacement: Gaussian scale of the initial displacements
+                from the fixed point (small, to stay in the linear
+                regime).
+            dictionary_degree: Monomial dictionary degree for EDMD.
+                Degree 1 (constant + linear) isolates the linearised
+                Koopman block.
+            tol: Agreement tolerance on max |mu_K - mu(M)|; the EDMD
+                reconstruction error on near-linear data is ~1e-5.
+            seed: Seed for the initial-displacement RNG.
 
         Returns:
-            ComparisonResult comparing the n leading Koopman-like
-            eigenvalues with the stability matrix eigenvalues.
+            ComparisonResult with ``values_a`` the matched
+            ``log(eig K)/dt`` and ``values_b`` the stability
+            eigenvalues, aligned entry by entry.
         """
         # Stability eigenvalues (of M)
-        stab_evals = np.sort(stability.eigenvalues)
+        stab_evals = np.asarray(stability.eigenvalues, dtype=complex)
 
-        # For a perfect linear system with step dt, the Koopman
-        # eigenvalues would be exp(lambda_i * dt).  Since the stability
-        # eigenvalues are the continuous-time values, we compare them
-        # directly (this method is for qualitative validation).
-        koopman_evals = np.sort(stability.eigenvalues)
+        if trajectories is None:
+            integrator = FlowIntegrator(self._system)
+            rng = np.random.default_rng(seed)
+            trajectories = []
+            for _ in range(n_trajectories):
+                delta = rng.normal(scale=displacement, size=self._n)
+                ic = {
+                    name: self._fp.location[name] + delta[i]
+                    for i, name in enumerate(self._coupling_names)
+                }
+                trajectories.append(integrator.integrate(
+                    ic, t_span=(0.0, dt), t_eval=np.array([0.0, dt]),
+                ))
+
+        edmd = self.compute_edmd(
+            trajectories, dictionary_degree=dictionary_degree
+        )
+
+        # Continuous-time exponents from the discrete Koopman spectrum.
+        lam = edmd.eigenvalues[np.abs(edmd.eigenvalues) > 1e-12]
+        mu_K = np.log(lam) / dt
+
+        # Match each stability eigenvalue to the nearest EDMD exponent.
+        koopman_evals = np.array([
+            mu_K[np.argmin(np.abs(mu_K - mu))] for mu in stab_evals
+        ])
 
         max_deviation = float(
-            np.max(np.abs(stab_evals - koopman_evals))
+            np.max(np.abs(koopman_evals - stab_evals))
         )
 
         return ComparisonResult(
@@ -230,5 +285,5 @@ class ClassicalKoopmanOperator:
             values_a=koopman_evals,
             values_b=stab_evals,
             max_deviation=max_deviation,
-            agrees=max_deviation < 1e-6,
+            agrees=max_deviation < tol,
         )

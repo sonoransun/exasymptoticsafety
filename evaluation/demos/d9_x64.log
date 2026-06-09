@@ -1,0 +1,4 @@
+numpy out: (1600, 2) float64 | jax out: (1600, 2) float64
+max relative deviation (finite entries): 2.724e-12
+non-finite entries numpy/jax: 0/0
+VERDICT (rtol 1e-06): PASS

@@ -1,0 +1,150 @@
+........................................................................ [ 15%]
+F....................................................................... [ 30%]
+........................................................................ [ 45%]
+........................................................................ [ 60%]
+........................................................................ [ 75%]
+........................................................................ [ 90%]
+.........F......................................                         [100%]
+=================================== FAILURES ===================================
+__________ TestDiskCacheFallback.test_decorator_works_without_joblib ___________
+
+self = <tests.test_caching.TestDiskCacheFallback object at 0x7a15e2a80ef0>
+
+    def test_decorator_works_without_joblib(self):
+        # Whether or not joblib is present, the decorator must be a no-op
+        # in terms of API surface.
+        calls = []
+    
+        @disk_cache()
+        def f(x):
+            calls.append(x)
+            return x + 1
+    
+        assert f(5) == 6
+        assert f(5) == 6
+        # Either disk or memory: both must hit on the second call
+>       assert calls == [5]
+E       assert [] == [5]
+E         
+E         Right contains one more item: 5
+E         Use -v to get more diff
+
+tests/test_caching.py:107: AssertionError
+___________________ Test3DPlotters.test_flow_basin_3d_smoke ____________________
+
+self = <tests.test_visualization_smoke.Test3DPlotters object at 0x7a15e118f080>
+eh_system = BetaFunctionSystem([g, lambda])
+eh_ngfp = FixedPoint(g=0.693658, lambda=0.142289, relevant=1)
+
+    def test_flow_basin_3d_smoke(self, eh_system, eh_ngfp):
+        from asymsafety.gui.visualization_3d import flow_basin_3d
+        # Tiny sample for speed
+>       fig = flow_basin_3d(
+            eh_system, eh_ngfp,
+            x_coupling="g", y_coupling="lambda", z_coupling="lambda",
+            n_samples=12, radius=0.1,
+            t_span=(0.0, 1.0),
+            show_references=False,
+        )
+
+tests/test_visualization_smoke.py:392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/asymsafety/gui/visualization_3d.py:1216: in flow_basin_3d
+    traj = integrator.integrate(ic, t_span=t_span)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/asymsafety/analysis/flow.py:120: in integrate
+    sol = solve_ivp(
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/ivp.py:657: in solve_ivp
+    message = solver.step()
+              ^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/base.py:201: in step
+    success, message = self._step_impl()
+                       ^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/rk.py:144: in _step_impl
+    y_new, f_new = rk_step(self.fun, t, y, self.f, h, self.A,
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/rk.py:64: in rk_step
+    K[s] = fun(t + c * h, y + dy)
+           ^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/base.py:158: in fun
+    return self.fun_single(t, y)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+t = np.float64(0.013765402581188064), y = array([0.69839078, 0.5000002 ])
+
+>   def fun_wrapped(t, y):
+E   Failed: Timeout (>60.0s) from pytest-timeout.
+
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/base.py:23: Failed
+=============================== warnings summary ===============================
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: divide by zero encountered in divide
+    return g*(g*(8 + (4/3)/(1 - 2*Dummy_57) - 8/(1 - 2*Dummy_57)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_57) - 2/(1 - 2*Dummy_57)**2) + 1) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: invalid value encountered in subtract
+    return g*(g*(8 + (4/3)/(1 - 2*Dummy_57) - 8/(1 - 2*Dummy_57)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_57) - 2/(1 - 2*Dummy_57)**2) + 1) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: divide by zero encountered in divide
+    return Dummy_58*(g*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 2) + 8*g*(-g*(-4/3 + (1 - 2*Dummy_58)**(-1.0))*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 4 + 3/(1 - 2*Dummy_58))/pi
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: invalid value encountered in subtract
+    return Dummy_58*(g*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 2) + 8*g*(-g*(-4/3 + (1 - 2*Dummy_58)**(-1.0))*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 4 + 3/(1 - 2*Dummy_58))/pi
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: divide by zero encountered in power
+    return Dummy_58*(g*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 2) + 8*g*(-g*(-4/3 + (1 - 2*Dummy_58)**(-1.0))*(8 + (4/3)/(1 - 2*Dummy_58) - 8/(1 - 2*Dummy_58)**2)/(-g*(2 + (1/3)/(1 - 2*Dummy_58) - 2/(1 - 2*Dummy_58)**2) + 1) - 4 + 3/(1 - 2*Dummy_58))/pi
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+    self.pid = os.fork()
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=585665) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-270>:2: RuntimeWarning: divide by zero encountered in scalar divide
+    return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) + 2), _Dummy_282*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_282))*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_282))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_282)**(-1.0))*(lambda_ADM - 1)/pi]
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-270>:2: RuntimeWarning: invalid value encountered in scalar multiply
+    return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) + 2), _Dummy_282*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_282))*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_282))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_282)**(-1.0))*(lambda_ADM - 1)/pi]
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-270>:2: RuntimeWarning: divide by zero encountered in scalar power
+    return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) + 2), _Dummy_282*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_282))*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_282))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_282)**(-1.0))*(lambda_ADM - 1)/pi]
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-270>:2: RuntimeWarning: invalid value encountered in scalar divide
+    return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) + 2), _Dummy_282*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_282))*(-4 + 5/(1 - 2*_Dummy_282) + 6/(1 - 2*_Dummy_282)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_282) + 3/(1 - 2*_Dummy_282)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_282))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_282)**(-1.0))*(lambda_ADM - 1)/pi]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+60.00s call     tests/test_visualization_smoke.py::Test3DPlotters::test_flow_basin_3d_smoke
+17.65s call     tests/test_visualization_smoke.py::Test2DPlotters::test_annotated_eh_phase_portrait
+10.12s setup    tests/test_visualization_smoke.py::TestCosmologyPlotters::test_plot_running_newton_constant
+7.90s setup    tests/test_visualization_smoke.py::TestTransformPlotters::test_plot_scalogram
+6.57s setup    tests/test_visualization_smoke.py::TestQuantumPlotters::test_plot_koopman_spectrum
+6.24s setup    tests/test_fourier.py::test_fourier_transform_shape
+6.22s call     tests/test_visualization_smoke.py::Test2DPlotters::test_separatrix_overlay
+5.91s setup    tests/test_fourier.py::test_power_spectrum
+5.44s setup    tests/test_wavelet.py::test_scalogram
+5.35s setup    tests/test_wavelet.py::test_wavelet_mexican_hat
+=========================== short test summary info ============================
+FAILED tests/test_caching.py::TestDiskCacheFallback::test_decorator_works_without_joblib
+FAILED tests/test_visualization_smoke.py::Test3DPlotters::test_flow_basin_3d_smoke
+2 failed, 478 passed, 21 warnings in 239.21s (0:03:59)
+EXIT=1

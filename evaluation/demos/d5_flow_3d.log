@@ -1,0 +1,7 @@
+traj 0: t range [-8.00,0.00], IR g=3.6658
+traj 1: t range [-7.86,0.00], IR g=98.3413
+traj 2: t range [-8.00,0.00], IR g=0.0613
+traj 3: t range [-8.00,0.00], IR g=1.5615
+traj 4: t range [-8.00,0.00], IR g=0.3088
+traj 5: t range [-7.70,0.00], IR g=98.3418
+VERDICT: PASS — 6 trajectories integrated from near-NGFP toward IR; 3D figure saved to evaluation/demos/d5_flow_3d.png

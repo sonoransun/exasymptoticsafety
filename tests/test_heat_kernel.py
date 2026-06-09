@@ -56,3 +56,65 @@ class TestSeeleyDeWitt:
         assert b4["R2"] == Rational(1, 72)
         assert b4["Ric2"] == Rational(-1, 180)
         assert b4["Riem2"] == Rational(1, 180)
+
+    def test_b4_scalar_on_sphere(self):
+        """Scalar b_4 on S^4: 29 R̄²/2160 (= 29/15 at R̄ = 12).
+
+        Standard minimal-scalar value; verified against the exact mode
+        sum over the Rubin-Ordóñez S^4 spectrum.
+        """
+        b4 = self.sd.b4_on_sphere("scalar")
+        assert simplify(b4 - Rational(29, 2160) * self.R**2) == 0
+
+    def test_b4_vector_riem2_coefficient(self):
+        """Spin-1 Riem² coefficient: 4/180 - 1/12 = -11/180.
+
+        tr(Ω²) = -R²_μνρσ for the vector bundle (antisymmetry of Ω),
+        so the (1/12)tr(Ω²) term *subtracts*; Christensen & Duff (1979),
+        Vassilevich (2003).
+        """
+        b4 = self.sd.b4("vector")
+        assert b4["Riem2"] == Rational(-11, 180)
+
+    def test_b4_vector_on_sphere(self):
+        """Vector (E = -Ric) b_4 on S^4: 179 R̄²/540 (= 716/15 at R̄ = 12).
+
+        Verified against both the Vassilevich master formula and the
+        exact mode sum for -D² - Ric on S^4.
+        """
+        b4 = self.sd.b4_on_sphere("vector")
+        assert simplify(b4 - Rational(179, 540) * self.R**2) == 0
+
+    def test_b2_TT_constrained(self):
+        """b_2 for -D² on the constrained TT bundle: -(5/6) R̄.
+
+        Constrained spectral route (Lauscher & Reuter PRD 65, 025013):
+        exact mode sum over eigenvalues l(l+3)-2 with degeneracies
+        5(2l+3)(l-1)(l+4)/6, l ≥ 2.
+        """
+        b2 = self.sd.b2("TT_tensor")
+        assert simplify(b2 + Rational(5, 6) * self.R) == 0
+
+    def test_b2_TT_lichnerowicz(self):
+        """b_2 for the Lichnerowicz operator on TT (tr E = 10R̄/3): -(25/6) R̄."""
+        b2 = self.sd.b2("TT_tensor", endomorphism=Rational(10, 3) * self.R)
+        assert simplify(b2 + Rational(25, 6) * self.R) == 0
+
+    def test_b4_TT_on_sphere(self):
+        """b_4 for -D² on the constrained TT bundle on S^4: -R̄²/432."""
+        b4 = self.sd.b4_on_sphere("TT_tensor")
+        assert simplify(b4 + self.R**2 / 432) == 0
+
+    def test_b4_TT_lichnerowicz_on_sphere(self):
+        """b_4 for the Lichnerowicz operator on TT on S^4: 719 R̄²/432."""
+        b4 = self.sd.b4_on_sphere(
+            "TT_tensor", endomorphism=Rational(10, 3) * self.R,
+        )
+        assert simplify(b4 - Rational(719, 432) * self.R**2) == 0
+
+    def test_ghost_vector_matches_vector(self):
+        """Ghost vector shares the vector bundle coefficients."""
+        assert simplify(
+            self.sd.b4_on_sphere("ghost_vector")
+            - self.sd.b4_on_sphere("vector")
+        ) == 0

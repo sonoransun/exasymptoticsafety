@@ -696,7 +696,7 @@ asymsafety-gui
 
 ## Physical Computational Analogues
 
-The toolkit provides three novel physical mappings — hydraulic networks, quantum circuits, and integral/linear transforms — connected via a commutative bridge that verifies all domains produce consistent critical exponents.
+The toolkit provides three novel physical mappings — hydraulic networks, quantum circuits, and integral/linear transforms — connected via a cross-analogue bridge. The bridge's asserted check (`verify_commutativity`) covers only the classical RG / transfer-matrix / resolvent paths, which are algebraic re-expressions of the same stability eigendecomposition: it is a linear-algebra regression check of the transform layer (agreement to ~1e-13), not an independent cross-domain validation of the critical exponents. The hydraulic path is compared best-effort and the quantum analogues are not part of the asserted check.
 
 ![Hydraulic analogy](docs/images/hydraulic_analogy.png)
 
@@ -708,7 +708,7 @@ The toolkit provides three novel physical mappings — hydraulic networks, quant
 
 ![Cross-analogue bridge](docs/images/cross_analogue_bridge.png)
 
-*Commutative diagram showing how different mathematical representations (classical RG, control theory / hydraulic, integral transforms, quantum computing) are connected. All paths through the diagram yield consistent critical exponents $\theta_i$.*
+*Commutative diagram showing how different mathematical representations (classical RG, control theory / hydraulic, integral transforms, quantum computing) are connected. Only the classical RG / transfer-matrix / resolvent corner is asserted to commute — and those paths share one Jacobian eigendecomposition, so their agreement on $\theta_i$ is a consistency check of the implementation, not independent physics.*
 
 ### Transform domain
 
@@ -719,7 +719,7 @@ The toolkit provides three novel physical mappings — hydraulic networks, quant
 
 ![Cross-method comparison](docs/images/comparison_table.png)
 
-*Side-by-side critical exponents from the three perturbative paths through the cross-analogue bridge — direct RG stability, transfer-matrix exponentiation, and resolvent poles. All three agree at the NGFP within numerical tolerance. The hydraulic path is excluded by default because it returns impedance eigenvalues of the generated pipe network rather than the RG exponents themselves; pass `include_hydraulic=True` to `plot_comparison_table` to overlay it as a sanity check.*
+*Side-by-side critical exponents from the three perturbative paths through the cross-analogue bridge — direct RG stability, transfer-matrix exponentiation, and resolvent poles. All three are algebraic re-expressions of the same stability eigendecomposition (the resolvent path definitionally so), and agree at the NGFP to ~1e-13 — a regression check of the transform layer rather than an independent determination of $\theta_i$. The hydraulic path is excluded by default because it returns impedance eigenvalues of the generated pipe network rather than the RG exponents themselves; pass `include_hydraulic=True` to `plot_comparison_table` to overlay it as a sanity check.*
 
 ### Quantum domain
 
@@ -775,9 +775,9 @@ flowchart LR
 ```python
 from asymsafety.transforms.bridge import GaugeHiggsAnalogue
 analogue = GaugeHiggsAnalogue(N=60, Nc=1, epsilon=1.0)
-analogue.fixed_point.location  # {'alpha': 0.0167, 'u': 0.00269, 'r': 0.0}
-analogue.nu                     # 0.5174 (one-loop, → 1/2 in WF limit)
-analogue.bridge.verify_commutativity(tol=0.2)  # RG ↔ transfer matrix ↔ resolvent agree
+analogue.fixed_point.location  # {'alpha': 0.0167, 'u': 0.0145, 'r': 0.0}
+analogue.nu                     # 0.8323 (one-loop u₊ root, → 1 at large N_f per Bonati 2025)
+analogue.bridge.verify_commutativity()  # linear-algebra regression check (shared eigendecomposition)
 ```
 
 Animations: [`rg_flow_ahm.mp4`](docs/animations/rg_flow_ahm.mp4) shows trajectories spiralling into the CFP on the critical surface; [`nu_vs_nf_sweep.mp4`](docs/animations/nu_vs_nf_sweep.mp4) sweeps `N_f` and traces `ν(N_f)` against the large-`N_f` asymptote.

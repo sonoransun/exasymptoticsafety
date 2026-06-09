@@ -34,7 +34,11 @@ def test_amplitude_with_checks_and_bridge_json(tmp_path):
     assert rc == 0
     _arrays, meta = read_json(out)
     assert meta["consistency"]["uv_finite"]
+    # The IR-upward trajectory construction reaches the Newtonian regime,
+    # so the (honest) roll-up that includes IR recovery passes for real.
+    assert meta["consistency"]["ir_newtonian_recovery"]
     assert meta["consistency"]["all_passed"]
+    assert abs(meta["ir_ratio_to_gr"] - 1.0) < 0.1
     assert meta["bridge"]["as_physically_consistent"]
     assert meta["bridge"]["distinct_from_strings"]
 

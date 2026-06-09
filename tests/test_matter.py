@@ -4,17 +4,122 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from sympy import Symbol
+from sympy import Rational, Symbol, pi, simplify
 
-from asymsafety.actions.matter import MatterContent
+from asymsafety.actions.matter import MatterContent, matter_eta_N_correction
 from asymsafety.analysis.fixed_points import FixedPointFinder
+from asymsafety.beta.einstein_hilbert import build_eh_beta_system
 from asymsafety.beta.matter import (
     build_eh_matter_beta_system,
     build_gravity_matter_fp_system,
     scalar_anomalous_dimension,
     scan_gravity_matter_fps,
+    scan_matter_content,
 )
 from asymsafety.utils.conventions import conformal_coupling
+
+
+class TestZeroMatterUnification:
+    """The zero-matter limit must reduce exactly to pure gravity (HV-12)."""
+
+    def test_eh_matter_zero_matter_identical_to_eh(self):
+        """build_eh_matter_beta_system(MatterContent()) ≡ build_eh_beta_system."""
+        eh = build_eh_beta_system(d=4)
+        ehm = build_eh_matter_beta_system(MatterContent(), d=4)
+        for name in ("g", "lambda"):
+            diff = simplify(
+                eh.beta(name).expression - ehm.beta(name).expression
+            )
+            assert diff == 0, f"beta_{name} differs in zero-matter limit"
+
+    def test_gravity_matter_zero_matter_identical_to_eh(self):
+        """build_gravity_matter_fp_system at zero matter ≡ build_eh_beta_system."""
+        eh = build_eh_beta_system(d=4)
+        gm = build_gravity_matter_fp_system(MatterContent(), d=4)
+        for name in ("g", "lambda"):
+            diff = simplify(
+                eh.beta(name).expression - gm.beta(name).expression
+            )
+            assert diff == 0, f"beta_{name} differs in zero-matter limit"
+
+    def test_zero_matter_ngfp_exists(self):
+        """scan_matter_content must find the Reuter FP at N_s = 0."""
+        results = scan_matter_content(range(0, 1))
+        assert results[0]["fp_exists"]
+        assert results[0]["g_star"] == pytest.approx(
+            0.7073208809868445, rel=1e-8
+        )
+        assert results[0]["lambda_star"] == pytest.approx(
+            0.19320050715078566, rel=1e-8
+        )
+
+
+class TestDEPMatterWeights:
+    """Per-field η_N weights from Dona-Eichhorn-Percacci [1311.2898]."""
+
+    def test_scalar_weight(self):
+        """A_scalar = +1/(6π) per field (DEP Eq. (35))."""
+        A, B = matter_eta_N_correction(MatterContent(n_scalars=1), 4)
+        assert simplify(A - Rational(1, 6) / pi) == 0
+        assert B == 0
+
+    def test_dirac_weight(self):
+        """A_dirac = +1/(3π) per field (DEP Eq. (38))."""
+        A, B = matter_eta_N_correction(MatterContent(n_dirac=1), 4)
+        assert simplify(A - Rational(1, 3) / pi) == 0
+        assert B == 0
+
+    def test_vector_weight(self):
+        """A_vector = -2/(3π) per field in d=4 (DEP Eq. (38))."""
+        A, B = matter_eta_N_correction(MatterContent(n_vectors=1), 4)
+        assert simplify(A + Rational(2, 3) / pi) == 0
+        assert B == 0
+
+
+def _fp_for(matter: MatterContent, guess: dict) -> dict | None:
+    system = build_eh_matter_beta_system(matter, 4)
+    fp = FixedPointFinder(system).find_fixed_point(guess)
+    if fp is None or fp.location.get("g", 0) <= 1e-6:
+        return None
+    return fp.location
+
+
+class TestMatterTrends:
+    """Full-system NGFP trends vs DEP [1311.2898] Sec. IV."""
+
+    def test_scalars_push_lambda_up(self):
+        """Scalars push λ* towards larger values (towards the λ=1/2
+        pole - the DEP destabilization mechanism)."""
+        guess = {"g": 0.7, "lambda": 0.19}
+        lams = []
+        for n in range(0, 5):
+            loc = _fp_for(MatterContent(n_scalars=n), guess)
+            assert loc is not None
+            lams.append(loc["lambda"])
+            guess = loc
+        assert all(b > a for a, b in zip(lams, lams[1:]))
+
+    def test_dirac_increases_g_decreases_lambda(self):
+        """Fermions shift the FP towards larger g* and smaller λ*
+        (DEP: 'considerable shift towards larger G and more
+        negative Λ')."""
+        loc0 = _fp_for(MatterContent(), {"g": 0.7, "lambda": 0.19})
+        loc1 = _fp_for(MatterContent(n_dirac=1), {"g": 1.0, "lambda": 0.13})
+        assert loc0 is not None and loc1 is not None
+        assert loc1["g"] > loc0["g"]
+        assert loc1["lambda"] < loc0["lambda"]
+
+    def test_vectors_decrease_g(self):
+        """Vectors decrease g* (DEP: 'the effect of vector degrees of
+        freedom is always to decrease G*'); no bound on N_v."""
+        guess = {"g": 0.7, "lambda": 0.19}
+        gs = []
+        for n in range(0, 4):
+            loc = _fp_for(MatterContent(n_vectors=n), guess)
+            assert loc is not None
+            gs.append(loc["g"])
+            guess = loc
+        assert all(b < a for a, b in zip(gs, gs[1:]))
 
 
 class TestScalarAnomalousDimension:
@@ -125,8 +230,9 @@ class TestQuarticFixedPoint:
             self.matter, scalar_quartic=True
         )
         self.finder = FixedPointFinder(self.system)
+        # One scalar shifts the gravitational NGFP to ~(0.660, 0.206)
         self.fp = self.finder.find_fixed_point(
-            {"g": 0.65, "lambda": 0.14, "lambda_phi": 0.01}
+            {"g": 0.66, "lambda": 0.21, "lambda_phi": 0.01}
         )
 
     def test_ngfp_exists(self):
@@ -161,7 +267,7 @@ class TestQuarticFixedPoint:
             assert abs(val) < 1e-6, f"beta_{name} = {val} at FP"
 
     def test_gravity_couplings_near_pure_eh(self):
-        """g* should be in the same ballpark as the pure EH NGFP (~0.69)."""
+        """g* should be in the same ballpark as the pure EH NGFP (~0.707)."""
         assert self.fp is not None
         assert 0.1 < self.fp.location["g"] < 2.0
 
@@ -175,8 +281,8 @@ class TestYukawaFixedPoint:
             self.matter, scalar_quartic=True, yukawa=True
         )
         self.finder = FixedPointFinder(self.system)
-        # The Dirac fermion shifts the gravitational NGFP to ~(0.70, 0.148)
-        self.guess = {"g": 0.70, "lambda": 0.148, "lambda_phi": 0.01, "y": 0.0}
+        # The Dirac fermion shifts the gravitational NGFP to ~(0.93, 0.158)
+        self.guess = {"g": 0.93, "lambda": 0.158, "lambda_phi": 0.015, "y": 0.0}
 
     def test_ngfp_exists_with_yukawa(self):
         fp = self.finder.find_fixed_point(self.guess)
@@ -202,7 +308,7 @@ class TestRunningXiFixedPoint:
 
     def test_ngfp_exists_with_xi(self):
         fp = self.finder.find_fixed_point(
-            {"g": 0.65, "lambda": 0.14, "lambda_phi": 0.01, "xi": 1.0 / 6}
+            {"g": 0.66, "lambda": 0.21, "lambda_phi": 0.01, "xi": 1.0 / 6}
         )
         assert fp is not None
         assert not fp.is_gaussian
@@ -210,7 +316,7 @@ class TestRunningXiFixedPoint:
     def test_xi_star_near_conformal(self):
         """xi* should be in the vicinity of conformal coupling 1/6."""
         fp = self.finder.find_fixed_point(
-            {"g": 0.65, "lambda": 0.14, "lambda_phi": 0.01, "xi": 1.0 / 6}
+            {"g": 0.66, "lambda": 0.21, "lambda_phi": 0.01, "xi": 1.0 / 6}
         )
         assert fp is not None
         xi_conf = float(conformal_coupling(4))

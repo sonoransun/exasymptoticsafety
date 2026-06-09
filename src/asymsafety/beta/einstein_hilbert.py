@@ -8,29 +8,31 @@ Conventions:
     g = G k^{d-2}               (dimensionless Newton coupling)
     λ = Λ / k^2                 (dimensionless cosmological constant)
     t = log(k/k_0)              (RG time)
-    η_N = -∂_t ln(Z_N)          (graviton anomalous dimension)
+    η_N = -∂_t ln(Z_N) = +∂_t ln(G)   (graviton anomalous dimension)
 
     β_g = (d - 2 + η_N) g
     β_λ = -(2 - η_N) λ + [trace contributions]
 
 The anomalous dimension is determined self-consistently:
-    η_N = g·N(λ) / (1 - g·D(λ))
+    η_N = g·A(λ) / (1 - g·B(λ))
 
-where N(λ) and D(λ) encode the one-loop graviton and ghost traces.
+where A(λ) and B(λ) encode the one-loop graviton and ghost traces
+(see :class:`asymsafety.frg.anomalous_dim.AnomalousDimensionSolver`).
 
 References:
     Reuter (1998), Phys. Rev. D 57, 971
     Lauscher & Reuter (2002), Phys. Rev. D 65, 025013
+    Litim (2004), Phys. Rev. Lett. 92, 201301 [hep-th/0312114]
     Codello, Percacci & Rahmede (2009), Ann. Phys. 324, 414
     Dona, Eichhorn & Percacci (2014), Phys. Rev. D 89, 084035
     D'Angelo, Drago, Pinamonti & Rejzner (2024), Phys. Rev. D 109, 066012
         [2310.20603] (Lorentzian FRG confirmation of Reuter FP)
 """
 
-import sympy
-from sympy import Expr, Rational, Symbol, pi, simplify
+from sympy import Rational, Symbol, pi
 
 from asymsafety.beta.system import BetaFunction, BetaFunctionSystem
+from asymsafety.frg.anomalous_dim import AnomalousDimensionSolver
 from asymsafety.frg.threshold import ThresholdFunctions
 
 
@@ -40,23 +42,43 @@ def build_eh_beta_system(d: int = 4,
 
     The beta functions are derived from the Wetterich equation using
     the heat kernel expansion on an S^d background with the optimised
-    (Litim) cutoff.
+    (Litim) cutoff: single-metric approximation, Type Ia cutoff,
+    de Donder (harmonic) gauge with α = 1.
 
-    The anomalous dimension η_N is computed self-consistently from
-    the R-projection of the flow equation. The graviton trace includes
-    contributions from the TT sector (5 dof in d=4), the scalar
-    conformal mode (1 dof, wrong-sign kinetic term), and the
-    Faddeev-Popov ghost (4 vector dof with -2 Grassmann factor).
+    The d-dimensional closed forms (Reuter 1998 [hep-th/9605030];
+    Reuter & Saueressig [0708.1317], Eqs. (4.40)-(4.43)) are
 
-    The decomposition follows the single-metric approximation with
-    the de Donder (harmonic) gauge in the Landau limit (α → 0).
+        β_g = (d - 2 + η_N) g
+        β_λ = -(2 - η_N) λ + (g/2) (4π)^{1-d/2}
+                  × [ 2d(d+1) Φ^1_{d/2}(-2λ) - 8d Φ^1_{d/2}(0)
+                      - d(d+1) η_N Φ̃^1_{d/2}(-2λ) ]
+
+    with η_N = g·A(λ)/(1 - g·B(λ)) computed by
+    :class:`asymsafety.frg.anomalous_dim.AnomalousDimensionSolver`.
+    The graviton volume trace counts all d(d+1)/2 metric modes
+    (10 in d=4) and the ghost trace the 2d Grassmann vector modes
+    (-8d with the Grassmann factor).
+
+    In d=4 with the Litim regulator this reduces to (x = 1/(1-2λ)):
+
+        β_λ = -(2 - η_N) λ + (g/2π) [5x - 4 - (5/6) η_N x]
+
+    and yields the benchmark NGFP g* ≈ 0.707, λ* ≈ 0.193 with
+    θ = 1.475 ± 3.043 i (Litim PRL 92, 201301 [hep-th/0312114];
+    Codello, Percacci & Rahmede [0805.2909]). Near the Gaussian FP
+    the vacuum-energy flow is positive: ∂β_λ/∂g|_GFP = +1/(2π).
 
     Args:
-        d: Spacetime dimension.
-        gauge: Gauge choice.
+        d: Spacetime dimension (d >= 3; the heat-kernel closed forms
+            below are the d-dimensional Reuter expressions).
+        gauge: Gauge choice (only "harmonic", i.e. de Donder α = 1,
+            is implemented).
 
     Returns:
         BetaFunctionSystem with β_g and β_λ.
+
+    Raises:
+        NotImplementedError: If d < 3 or gauge != "harmonic".
 
     See Also:
         :func:`asymsafety.visualization.phase_portrait.annotated_eh_phase_portrait`
@@ -73,53 +95,52 @@ def build_eh_beta_system(d: int = 4,
         Reuter (1998), Phys. Rev. D 57, 971 [hep-th/9605030].
         Lauscher & Reuter (2002), Phys. Rev. D 65, 025013 [hep-th/0108040].
         Litim (2001), Phys. Rev. D 64, 105007 [hep-th/0103195].
+        Litim (2004), Phys. Rev. Lett. 92, 201301 [hep-th/0312114].
     """
+    if d < 3:
+        raise NotImplementedError(
+            f"build_eh_beta_system requires d >= 3 (got d={d}): the "
+            "heat-kernel trace expressions are the d-dimensional Reuter "
+            "(1998) closed forms, which degenerate for d <= 2."
+        )
+    if gauge != "harmonic":
+        raise NotImplementedError(
+            f"Only the de Donder (harmonic, alpha=1) gauge is implemented "
+            f"(got gauge={gauge!r})."
+        )
+
     g = Symbol("g", positive=True)
     lam = Symbol("lambda", real=True)
 
-    one_m_2l = 1 - 2 * lam  # (1 - 2λ)
+    tf = ThresholdFunctions()
+    solver = AnomalousDimensionSolver(tf)
 
-    # --- Anomalous dimension η_N ---
-    # η_N = g·N(λ) / (1 - g·D(λ))
-    #
-    # N(λ) comes from the R-projection of the graviton and ghost traces:
-    #   TT (5 dof): contributes Φ^1_1 and Φ^2_1 terms with mass w=-2λ
-    #   Ghost (-8 effective dof): contributes Φ^1_1 and Φ^2_1 at w=0
-    #   Scalar (1 dof, wrong sign): additional Φ terms
-    #
-    # The R-projection involves differentiating the threshold functions
-    # w.r.t. R̄ and evaluating at R̄=0, which generates Φ^2 terms.
-    #
-    # N(λ) = (4/3)/(1-2λ) + 8 - 8/(1-2λ)²
-    # D(λ) = 1/(3(1-2λ)) + 2 - 2/(1-2λ)²
-    #
-    # These coefficients correspond to the single-metric EH truncation
-    # with Type I Litim cutoff and de Donder gauge.
+    # --- Anomalous dimension η_N = g·A(λ) / (1 - g·B(λ)) ---
+    # A and B encode the R-projection of the graviton and ghost traces
+    # (Type Ia Litim cutoff, de Donder gauge); see AnomalousDimensionSolver.
+    A_eta, B_eta = solver.compute_AB_einstein_hilbert(lam, d)
+    eta_N = solver.solve(g, A_eta, B_eta)
 
-    N_eta = (Rational(4, 3) / one_m_2l + 8 - 8 / one_m_2l**2)
-    D_eta = (Rational(1, 3) / one_m_2l + 2 - 2 / one_m_2l**2)
-
-    eta_N = g * N_eta / (1 - g * D_eta)
-
-    # β_g = (2 + η_N) g
-    beta_g_expr = (2 + eta_N) * g
+    # β_g = (d - 2 + η_N) g
+    beta_g_expr = (d - 2 + eta_N) * g
 
     # --- β_λ ---
-    # β_λ = -(2 - η_N)λ + g·V(λ, η_N)/π
-    #
-    # V is the volume (cosmological constant) trace contribution:
-    #   TT+scalar (6 effective dof at mass w=-2λ): 3/(1-2λ)
-    #   Ghost (-8 dof at mass w=0): -4
-    #   η_N correction: -η_N(1/(1-2λ) - 4/3)
-    #
-    # The overall prefactor is determined by matching the trace normalization.
-    # With the conventions g = Gk^2, the correct prefactor is approximately
-    # g·8/π (absorbing factors from (4π)^{-d/2} × 32πg × Q-functionals).
+    # Volume (cosmological constant) projection of the flow:
+    #   graviton: d(d+1)/2 modes at mass argument w = -2λ
+    #             -> 2d(d+1) Φ^1_{d/2}(-2λ)
+    #   ghost:    2d Grassmann vector modes at w = 0
+    #             -> -8d Φ^1_{d/2}(0)
+    #   η_N insertion from R_k ∝ Z_N on the graviton modes:
+    #             -> -d(d+1) η_N Φ̃^1_{d/2}(-2λ)
+    w = -2 * lam
+    nd2 = Rational(d, 2)
+    prefactor = Rational(1, 2) * (4 * pi)**(1 - nd2)
 
-    vol = (3 / one_m_2l - 4
-           - eta_N * (1 / one_m_2l - Rational(4, 3)))
+    vol = (2 * d * (d + 1) * tf.Phi(1, nd2, w)
+           - 8 * d * tf.Phi(1, nd2, 0)
+           - d * (d + 1) * eta_N * tf.Phi_tilde(1, nd2, w))
 
-    beta_lam_expr = -(2 - eta_N) * lam + 8 * g / sympy.pi * vol
+    beta_lam_expr = -(2 - eta_N) * lam + prefactor * g * vol
 
     # Build the system
     system = BetaFunctionSystem()
@@ -138,17 +159,19 @@ def build_eh_beta_system(d: int = 4,
 
 
 def eh_fixed_point_litim_d4() -> dict[str, float]:
-    """Known approximate fixed point values for EH + Litim in d=4.
+    """Toolkit-computed NGFP for EH + Litim (Type Ia, de Donder) in d=4.
 
-    The Reuter fixed point (non-Gaussian UV fixed point).
-    Exact values depend on gauge and cutoff scheme.
-
-    These values are for the single-metric approximation with
-    Type I Litim cutoff and de Donder gauge.
+    These are the fixed-point coordinates and the complex-conjugate
+    critical-exponent pair θ = θ' ± i θ'' of the system returned by
+    :func:`build_eh_beta_system` (16-digit numerics), consistent with
+    Litim, Phys. Rev. Lett. 92, 201301 (2004) [hep-th/0312114] and
+    Codello, Percacci & Rahmede [0805.2909]:
+    g* ≈ 0.707, λ* ≈ 0.193, θ ≈ 1.475 ± 3.043 i (two relevant
+    directions).
     """
     return {
-        "g": 0.69,
-        "lambda": 0.14,
-        "theta_real": 0.75,
-        "theta_imag": 0.0,
+        "g": 0.7073208809868445,
+        "lambda": 0.19320050715078566,
+        "theta_real": 1.475302425763855,
+        "theta_imag": 3.043205846411925,
     }

@@ -1,0 +1,149 @@
+........................................................................ [ 12%]
+............F........................................................... [ 25%]
+........................................................................ [ 38%]
+........................................................................ [ 50%]
+........................................................................ [ 63%]
+........................................................................ [ 76%]
+................................................................F....... [ 88%]
+................................................................         [100%]
+=================================== FAILURES ===================================
+__________________ test_amplitude_with_checks_and_bridge_json __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-127/test_amplitude_with_checks_and0')
+
+    def test_amplitude_with_checks_and_bridge_json(tmp_path):
+        out = tmp_path / "amp.json"
+        rc = main([
+            "amplitude", "--truncation", "eh", "--guess", "g=0.7,lambda=0.14",
+            "--s-range", "1e-2:1e6:30", "--checks", "--compare-string",
+            "--output", str(out),
+        ])
+        assert rc == 0
+        _arrays, meta = read_json(out)
+        assert meta["consistency"]["uv_finite"]
+        # The default CLI trajectory does not extend deep enough into the IR
+        # for Newtonian recovery at s_small=1e-3 (ratio ~0.25, not ~1), and
+        # all_passed must reflect that instead of reporting a clean bill.
+        assert not meta["consistency"]["ir_newtonian_recovery"]
+        assert not meta["consistency"]["all_passed"]
+        assert meta["bridge"]["as_physically_consistent"]
+>       assert meta["bridge"]["distinct_from_strings"]
+E       assert False
+
+tests/test_cli_amplitude.py:43: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Sampled |M| over 30 energies for truncation 'eh' (IR/GR ratio 0.243, UV bounded=True) → /tmp/pytest-of-root/pytest-127/test_amplitude_with_checks_and0/amp.json
+  consistency: all_passed=False (ir_newtonian_recovery=False)
+  bridge: Asymptotic safety satisfies the foundational physical-scattering requirements (c...
+__________________ test_figure_hash[heat_kernel_coefficients] __________________
+
+name = 'heat_kernel_coefficients'
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-127/test_figure_hash_heat_kernel_c0')
+
+    @pytest.mark.parametrize("name", HASHED_FIGURES)
+    def test_figure_hash(name: str, tmp_path: Path) -> None:
+        """Render *name* and compare its sha256 against the baseline."""
+        if os.environ.get("ASYMSAFETY_ALLOW_RERENDER"):
+            pytest.skip("ASYMSAFETY_ALLOW_RERENDER set — skipping hash check.")
+    
+        baseline_file = _BASELINE_DIR / f"{name}.png.sha256"
+        if not baseline_file.exists():
+            pytest.skip(
+                f"no baseline at {baseline_file.relative_to(_REPO_ROOT)} — "
+                "regenerate with: python scripts/generate_figures.py "
+                f"--update-baselines --only {name}"
+            )
+    
+        from asymsafety.visualization.style import apply_style
+        apply_style()
+    
+        gen = _generator_for(name)
+        gen(tmp_path, "png")
+    
+        image_path = tmp_path / f"{name}.png"
+        assert image_path.exists(), f"generator did not produce {image_path}"
+    
+        expected = baseline_file.read_text().strip()
+        actual = hashlib.sha256(image_path.read_bytes()).hexdigest()
+    
+>       assert actual == expected, (
+            f"image hash mismatch for {name}:\n"
+            f"  expected: {expected}\n"
+            f"  actual:   {actual}\n"
+            f"  baseline: {baseline_file.relative_to(_REPO_ROOT)}\n"
+            "If the rendering change is intentional, refresh the baseline:\n"
+            "  python scripts/generate_figures.py "
+            f"--update-baselines --only {name}\n"
+            "Otherwise inspect the diff between the new PNG and the previous one."
+        )
+E       AssertionError: image hash mismatch for heat_kernel_coefficients:
+E           expected: a4e2891326c19b0f0e353ac8bc7731ce6eafc54eefc6947a0c14d8325ab7f8b7
+E           actual:   617d7fd514fc83a11c52653d66a6c047c536de4ea7db0f6877e17a3b8e72eed1
+E           baseline: tests/baselines/heat_kernel_coefficients.png.sha256
+E         If the rendering change is intentional, refresh the baseline:
+E           python scripts/generate_figures.py --update-baselines --only heat_kernel_coefficients
+E         Otherwise inspect the diff between the new PNG and the previous one.
+E       assert '617d7fd514fc...17a3b8e72eed1' == 'a4e2891326c1...4d8325ab7f8b7'
+E         
+E         - a4e2891326c19b0f0e353ac8bc7731ce6eafc54eefc6947a0c14d8325ab7f8b7
+E         + 617d7fd514fc83a11c52653d66a6c047c536de4ea7db0f6877e17a3b8e72eed1
+
+tests/test_visualization_regression.py:94: AssertionError
+=============================== warnings summary ===============================
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: divide by zero encountered in divide
+    return g*((1/12)*g*(-28 + 20/(1 - 2*Dummy_57) - 36/(1 - 2*Dummy_57)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_57) - 12/(1 - 2*Dummy_57)**2)/pi + 1)) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-24>:2: RuntimeWarning: invalid value encountered in subtract
+    return g*((1/12)*g*(-28 + 20/(1 - 2*Dummy_57) - 36/(1 - 2*Dummy_57)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_57) - 12/(1 - 2*Dummy_57)**2)/pi + 1)) + 2)
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: divide by zero encountered in divide
+    return Dummy_58*((1/12)*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 2) + (1/8)*g*(-5/3*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*(6 - 12*Dummy_58)*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 16 + 40/(2 - 4*Dummy_58))/pi
+
+tests/test_batch_evaluator.py::TestNumpyBatchEvaluator::test_handles_singularity
+  <lambdifygenerated-25>:2: RuntimeWarning: invalid value encountered in subtract
+    return Dummy_58*((1/12)*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 2) + (1/8)*g*(-5/3*g*(-28 + 20/(1 - 2*Dummy_58) - 36/(1 - 2*Dummy_58)**2)/(pi*(6 - 12*Dummy_58)*((1/24)*g*(20/(2 - 4*Dummy_58) - 12/(1 - 2*Dummy_58)**2)/pi + 1)) - 16 + 40/(2 - 4*Dummy_58))/pi
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+    self.pid = os.fork()
+
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_compute_backends.py::TestLocalBackend::test_map_simple
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_eh
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_with_prefilter
+  /usr/lib/python3.12/multiprocessing/popen_fork.py:66: DeprecationWarning: This process (pid=689267) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: divide by zero encountered in scalar divide
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: invalid value encountered in scalar multiply
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: divide by zero encountered in scalar power
+
+tests/test_visualization_smoke.py::Test3DPlotters::test_foliated_phase_portrait_3d
+  <lambdifygenerated-305>:2: RuntimeWarning: invalid value encountered in scalar divide
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 5 durations ==============================
+1.71s call     tests/test_visualization_smoke.py::Test2DPlotters::test_quadratic_pairwise_grid
+1.67s call     tests/test_animations_smoke.py::test_parameter_sweep_animation_smoke
+1.47s call     tests/test_animations_smoke.py::test_rg_trajectory_animation_smoke
+1.31s call     tests/test_fixed_points_acceleration.py::TestParallelRefinement::test_parallel_matches_serial_gravity_matter
+1.16s call     tests/test_cli_amplitude.py::test_amplitude_with_checks_and_bridge_json
+=========================== short test summary info ============================
+FAILED tests/test_cli_amplitude.py::test_amplitude_with_checks_and_bridge_json
+FAILED tests/test_visualization_regression.py::test_figure_hash[heat_kernel_coefficients]
+2 failed, 566 passed, 20 warnings in 34.95s

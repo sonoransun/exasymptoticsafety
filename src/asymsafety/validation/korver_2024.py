@@ -5,10 +5,18 @@ of matter fields compatible with asymptotic safety in the foliated
 Einstein-Hilbert truncation.
 
 Key results:
-    - Matter field bounds derived from foliated AS
+    - The foliated NGFP annihilates against a second fixed point along
+      (approximately) straight lines in the (N_s, N_v) plane:
+          N_s + 6.4 N_v ≈ 23.1   (p = 0 regulator scheme)
+          N_s + 4.7 N_v ≈ 22.4   (p-vec regulator scheme)
+      so scalars alone admit N_s ≲ 22–23 and vectors alone N_v ≲ 3–4.
     - IR fixed point for graviton mass prevents negative squared mass
     - Phase diagram qualitatively stable under matter addition
-    - Bounds cast by asymptotic safety on N_s (scalars) and N_v (vectors)
+
+These dicts hold *literature* values for reference and figure shading;
+the toolkit's own foliated system (:mod:`asymsafety.beta.foliated`) is
+a schematic truncation that does not reproduce these annihilation
+bounds.
 
 References:
     Korver, Saueressig & Wang (2024),
@@ -18,11 +26,13 @@ References:
 """
 
 # Matter field bounds from foliated asymptotic safety
-# (Korver, Saueressig & Wang 2024)
-# These are approximate bounds — the NGFP ceases to exist beyond them.
+# (Korver, Saueressig & Wang 2024 [2402.01260]): the NGFP-annihilation
+# wedge N_s + 6.4 N_v ≲ 23.1 in the p = 0 regulator scheme.
 FOLIATED_MATTER_BOUNDS = {
-    "max_N_s": 12,        # Maximum minimally coupled scalars
-    "max_N_v": 6,         # Maximum gauge vectors
+    "wedge_N_v_coefficient": 6.4,  # N_s + 6.4·N_v ≤ wedge_rhs (p = 0)
+    "wedge_rhs": 23.1,
+    "max_N_s": 23,        # Max scalars with N_v = 0 (wedge intercept ≈ 23.1)
+    "max_N_v": 3,         # Max vectors with N_s = 0 (⌊23.1/6.4⌋ = 3)
     "graviton_mass_ir_fp": True,  # IR FP prevents negative mass squared
     "phase_diagram_stable": True,  # Qualitatively stable under matter
     "reference": "Korver, Saueressig & Wang (2024), Phys. Lett. B 855, 138789",
@@ -44,7 +54,15 @@ def validate_foliated_matter_bounds(
     N_v: int,
     ngfp_exists: bool,
 ) -> dict:
-    """Check whether computed NGFP existence is consistent with bounds.
+    """Check computed NGFP existence against the KSW annihilation wedge.
+
+    The Korver–Saueressig–Wang bound is the half-plane
+    ``N_s + 6.4 N_v ≤ 23.1`` (p = 0 regulator scheme of [2402.01260]):
+    inside the wedge the foliated NGFP exists, beyond it the NGFP has
+    annihilated. The check fails (``consistent=False``) whenever the
+    computed ``ngfp_exists`` disagrees with the wedge prediction in
+    *either* direction — an NGFP found outside the wedge or one missing
+    inside it both flag an inconsistency.
 
     Args:
         N_s: Number of minimally coupled scalars.
@@ -55,14 +73,16 @@ def validate_foliated_matter_bounds(
         Dict with consistency check results.
     """
     bounds = FOLIATED_MATTER_BOUNDS
-    within_bounds = N_s <= bounds["max_N_s"] and N_v <= bounds["max_N_v"]
+    within_bounds = (
+        N_s + bounds["wedge_N_v_coefficient"] * N_v <= bounds["wedge_rhs"]
+    )
 
     results = {
         "N_s": N_s,
         "N_v": N_v,
         "within_foliated_bounds": within_bounds,
         "ngfp_found": ngfp_exists,
-        "consistent": (within_bounds == ngfp_exists) or within_bounds,
+        "consistent": within_bounds == ngfp_exists,
         "reference": bounds["reference"],
     }
     return results

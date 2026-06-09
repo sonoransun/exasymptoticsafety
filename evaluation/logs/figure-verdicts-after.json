@@ -1,0 +1,62 @@
+[
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/eh_phase_portrait.png",
+  "verdict": "PASS",
+  "physics_note": "Figure now matches the corrected Litim EH anchors: NGFP star at (g, lambda) = (0.707, 0.193) with on-plot annotation 'g*=0.707, lambda*=0.193, Reuter 1998'; streamlines clearly spiral around it, consistent with the complex pair; theta box reads '+1.48+3.04i (rel.)' matching 1.4753+-3.0432i; legend says 'NGFP (2 rel.)'; GFP marked at origin; a back-integrated separatrix spirals out of the NGFP with a branch reaching toward the GFP near lambda~0.04. Pre-fix wrong location/topology is gone.",
+  "remaining_issues": "Caption file is stale: it still cites the pre-fix values 'g* ~ 0.69, lambda* ~ 0.14', contradicting the figure's own (correct) 0.707/0.193 annotation, and claims a dashed lambda = 1/2 propagator-pole line that does not appear in the plot (lambda axis ends ~0.42). Minor: theta box shows only the +3.04i member of the conjugate pair (should be +-3.04i), and only the innermost loop of the separatrix is rendered in the legend's crimson \u2014 its outer continuation appears as unlabeled gray/olive/teal segments, making the 'thick red curve' caption wording only partially accurate."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/running_couplings.png",
+  "verdict": "PASS",
+  "physics_note": "Pre-fix, g(t) diverged (~100) toward the UV with lambda flat \u2014 no NGFP. Post-fix, all three trajectories saturate at g* ~ 0.707 and lambda* ~ 0.193, matching the corrected anchors, and approach the plateau via damped oscillations with period ~2 in t \u2014 exactly the spiral signature of the complex pair theta = 1.475 +- 3.043i. Meets the running_couplings criterion (UV plateau at g*).",
+  "remaining_issues": "Cosmetic only: legend repeats g/lambda three times without distinguishing initial conditions; no g*/lambda* reference lines or annotation of the values; caption does not mention NGFP saturation or the oscillatory (complex-exponent) approach."
+ },
+ {
+  "figure": "partial_wave_unitarity.png",
+  "verdict": "FAIL",
+  "physics_note": "Qualitative physics improved: GR's |a_0| now grows as a clean power law (proportional to s) while the AS curve plateaus at a finite constant, matching the corrected-NGFP expectation, and the title honestly states only the growth contrast. But the anchor's pass criterion is unmet: both curves sit above the |a_l|=1 dashed line over the entire range (GR enters at ~13 at sqrt(s)/k0=0.1; AS plateaus at ~6-8), so no unitarity crossing is depicted.",
+  "remaining_issues": "Normalization still wrong: GR never crosses |a_l|=1 inside the frame (already non-unitary at the left edge) and the AS plateau (~6-8) itself violates the bound. Caption claims GR \"runs past the |a_l|=1 line near the Planck scale\" and implies AS is unitarity-safe \u2014 neither is shown. Likely causes: G*k0^2 normalization in the figure script and the cos_max=0.99 forward-cutoff enhancement in consistency.partial_wave. Minor: small AS uptick at sqrt(s)/k0 > ~500 instead of a flat plateau."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/lapse_with_horizons.png",
+  "verdict": "FAIL",
+  "physics_note": "Improved: trajectory now comes from the corrected EH flow (FP 0.19320/0.70732, theta 1.4753+-3.0432i verified); lapse is regular at small r with f->1 and a physical spiral wiggle. But the trajectory stalls at t~3 (lambda->1/2 boundary), so G(r) ~ r^2 in the window: f never returns to 1, crosses zero only once at r~8.29 (outside the plot), and the Bonanno-Reuter two-horizon structure is absent. Anchor's G=const conditional is not met.",
+  "remaining_issues": "(1) In-figure annotation \"M < M_crit: no horizon\" is false \u2014 computed M_crit ~ 0.166, so M=2 is ~12x super-critical; plot_lapse_with_horizons conflates \"no root inside r_range=(1e-3,5)\" with sub-criticality (root at r~8.29 hidden). (2) Caption (generate_figures.py:467) still claims both r_- and r_+ are annotated; figure shows none \u2014 caption/figure contradiction. (3) Spurious IR G~r^2 growth is window/clip-hidden but undisclosed in figure/caption (only in the code docstring). (4) Minor: \"de Sitter core\" label overclaims vs rg_improved_bh.py docstring (linear f->1, curvature still diverges)."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/classical_vs_rg_lapse.png",
+  "verdict": "FAIL",
+  "physics_note": "Improved: NGFP now correct (g*=0.70732, lambda*=0.19320), classical curves exact, RG lapse regular (f->1) at small r. But the script's FP perturbation no longer reaches the IR under the corrected spiral flow: integration aborts at t=4.79 (success=False, lambda->0.456 near the 1/2 pole), at_scale clamps g=0.030, so f_RG=1-2g_end*M*r falls linearly, crossing zero once at r=16.6/M and dipping below classical \u2014 violating G(r)<=G0 and never showing the required two-horizon/merging structure.",
+  "remaining_issues": "Caption dishonest: claims horizon merging at M_cr and sub-critical naked remnant, but no inner/outer horizon pair exists anywhere and the M=0.4 'remnant' is an axis-window artifact (its lapse crosses zero at r~41, off-plot). Underlying trajectory has success=False and is silently clamped by RGTrajectory.at_scale; _eh_trajectory_for_cosmology (scripts/generate_figures.py:1232) needs a separatrix-aligned perturbation or failure check. Minor: title shows literal 'vs.\\' backslash."
+ },
+ {
+  "figure": "hawking_temperature",
+  "verdict": "FAIL",
+  "physics_note": "Improved: trajectory now built from the corrected EH NGFP (0.193, 0.707); classical 1/(8piM) curve is quantitatively right; RG T_H is positive and regular, vanishing as M shrinks instead of diverging. But the RG curve rises monotonically (T_H ~ M, pure UV-scaling G ~ r^2), never merges with the classical curve at large M (~2x off at M=4), shows no peak, no drop, no M_crit \u2014 the anchor's peak-then-drop criterion is not met.",
+  "remaining_issues": "Caption still claims the AS curve \"peaks and then drops to zero at M_crit\" \u2014 false for the plotted curve. The \"peak temperature\" star marks the plot-boundary argmax of a monotone curve, not a genuine maximum; no M_crit line appears. The honest caveat (trajectory's G(r) grows in the deep IR, so T_H keeps rising) exists only in the plot-function docstring (visualization.py:314-321), not in the caption (generate_figures.py:502-516). Either use a trajectory reaching a G=const IR regime or rewrite caption and drop the peak marker."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/matter_continuation.png",
+  "verdict": "FAIL",
+  "physics_note": "The computed physics is now correct: re-running the pipeline gives N_s=4 -> (g*,lambda*)=(0.558,0.236) and N_s=0 -> (0.70732,0.19320) with theta=1.4753+-3.0432i, exactly the post-fix anchors; theta curves in the figure match. But the rendered figure shows only the Re(theta) panel \u2014 the g*/lambda* panels (the corrected lambda*-up, g*-down trend) were silently dropped because the script's stale pre-fix guess (g=0.69, lambda=0.142) fails at N_s=0,1 and ContinuationResult.locations returns {} when the first FP is None.",
+  "remaining_issues": "(1) scripts/generate_figures.py:1192 uses pre-fix initial guess {g:0.69, lambda:0.142, lambda_phi:0.012}; with post-fix guess {0.70, 0.195, 0.009} the NGFP exists at N_s=0,1 \u2014 update it so all panels and the pure-gravity limit appear. (2) Caption says shading starts \"beyond N_s = 12\" but figure shades at ~23 (matches korver_2024 wedge N_s+6.4N_v<=23.1); fixed_point_plot.py docstring also still says N_s<=12, N_v<=6. (3) Caption promises g*, lambda* coordinates that the figure does not show. (4) theta_1 curve invisible under theta_2 (complex pair) with no annotation; missing N_s=0,1 points and the 2->8 gap unexplained."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/quadratic_pairwise.png",
+  "verdict": "PASS",
+  "physics_note": "The (g,lambda) slice spiral now centers exactly on the corrected EH-limit quasi-FP (0.70732, 0.19320) with inward winding matching complex theta=1.475+-3.043i. beta_alpha=+5/36 and beta_beta=+133/20 (x1/16pi^2) verified constant; all beta-panels flow strictly upward and the (alpha,beta) panel shows the correct slope-47.9 parallel lines. Caption honestly states no interior NGFP and that Codello-2009 frozen anchors are not reproduced by the truncation. Internal features (beta_g zero at g=0.955, lambda pole at 0.335, zero at 0.395) all match the corrected system.",
+  "remaining_issues": "Minor: caption could note the (g,lambda) spiral center is a 2D-slice quasi-fixed point (the EH NGFP recovered at small frozen alpha,beta), not a 4D fixed point \u2014 currently implicit; and the toolkit beta_g zero at g=0.955 vs the literature frozen g=0.970 could be confused without a sentence distinguishing them. No physics errors."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/foliated_3d.png",
+  "verdict": "FAIL",
+  "physics_note": "Improved: the corrected betas no longer produce a spurious g>0 NGFP \u2014 the marked point is now the Gaussian FP (0, 0, 1) on the correctly highlighted lambda_ADM=1 full-Diff fixed plane. But the anchor requires honest \"no NGFP with g>0\" documentation, and the figure instead labels that Gaussian FP \"NGFP (2 rel.)\" (is_gaussian fails because lambda_ADM=1; the 2nd \"relevant\" exponent is a +7e-33 marginal zero). Honesty criterion not met.",
+  "remaining_issues": "(1) Legend \"NGFP (2 rel.)\" misclassifies the Gaussian FP (analysis/fixed_points.py is_gaussian requires all couplings\u22480). (2) Star drawn at wrong spot outside the box: z_coupling=\"lambda_adm\" vs system key \"lambda_ADM\", so _fp_coords falls back to z=0 (gui/visualization_3d.py:165,1097). (3) Caption still claims full-Diff restoration \"at the NGFP, in agreement with Manrique et al. (2011)\" \u2014 no no-NGFP disclaimer. (4) Colorbar log(1+|beta|) spans [-0.1,0.1] though the quantity is >=0, and arrows render uniform dark blue; unnormalized quiver obscures the plane's UV-repulsion."
+ },
+ {
+  "figure": "/root/cdev/exasymptoticsafety/evaluation/figures-after/3d_flow.png",
+  "verdict": "PASS",
+  "physics_note": "Pre-fix, trajectories ran away (g to ~100), never reached the FP, and the legend claimed one relevant direction. Post-fix, all four trajectories converge UV-ward (red) onto a vertical world-line at the NGFP star, with helical winding near the FP consistent with the complex pair theta = 1.475 +- 3.043i; legend now reads \"NGFP (2 rel.)\". Numerically verified the plotted FP is (g*, lambda*) = (0.70732, 0.19320), matching the anchors. GFP correctly at the origin.",
+  "remaining_issues": "Caption (3d_flow.caption.md line 5; template at scripts/generate_figures.py:238-239) still quotes stale pre-fix coordinates \"g* ~ 0.69, lambda* ~ 0.14\" \u2014 should be g* ~ 0.707, lambda* ~ 0.193 (lambda* ~28% off the plotted value). Minor: the in-plot star label \"Reuter 1998\" attaches Litim-regulator coordinates to the 1998 paper; conventional naming, acceptable given the references box."
+ }
+]

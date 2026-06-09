@@ -89,32 +89,36 @@ def build_eh_matter_beta_system(
     # β_g
     beta_g_expr = (d - 2 + eta_N) * g
 
-    # β_λ: gravitational + matter volume contributions
+    # β_λ: gravitational + matter volume contributions, sharing the
+    # d-dimensional Reuter (1998) bracket used by build_eh_beta_system:
+    #   β_λ = -(2-η_N)λ + (g/2)(4π)^{1-d/2} [grav_volume + matter_volume]
     w = -2 * lam
-    Phi_1_2_w = tf.Phi(1, 2, w)
-    Phi_1_2_0 = tf.Phi(1, 2, 0)
-    tPhi_1_2_w = tf.Phi_tilde(1, 2, w)
-    tPhi_1_2_0 = tf.Phi_tilde(1, 2, 0)
+    nd2 = Rational(d, 2)
+    prefactor = Rational(1, 2) * (4 * pi)**(1 - nd2)
 
-    # Gravitational trace (TT + ghost)
+    # Gravitational trace (d(d+1)/2 graviton modes + 2d ghost modes),
+    # identical to build_eh_beta_system so the zero-matter limit reduces
+    # exactly to pure gravity.
     grav_volume = (
-        5 * Phi_1_2_w - 4 * Phi_1_2_0
-        - eta_N * (Rational(5, 6) * tPhi_1_2_w
-                   - Rational(2, 3) * tPhi_1_2_0)
+        2 * d * (d + 1) * tf.Phi(1, nd2, w)
+        - 8 * d * tf.Phi(1, nd2, 0)
+        - d * (d + 1) * eta_N * tf.Phi_tilde(1, nd2, w)
     )
 
-    # Matter volume contributions:
-    # Each massless scalar: +1 × Φ^1_2(0)
-    # Each Dirac fermion: -4 × Φ^1_2(0) (Grassmann)
-    # Each gauge boson: +(d-2) × Φ^1_2(0)
-    Phi_1_d2_0 = tf.Phi(1, Rational(d, 2), 0)
+    # Matter volume contributions (massless, minimally coupled; one
+    # bosonic mode carries the same weight 4Φ^1_{d/2}(0) as one graviton
+    # mode, Grassmann modes -4Φ^1_{d/2}(0)):
+    # Each scalar: +4 × Φ^1_{d/2}(0)
+    # Each Dirac fermion: -16 × Φ^1_{d/2}(0) (4 Grassmann dof in d=4)
+    # Each gauge boson: +4(d-2) × Φ^1_{d/2}(0) (d-1 modes - 1 ghost)
+    Phi_1_d2_0 = tf.Phi(1, nd2, 0)
     matter_volume = (
-        matter.n_scalars * Phi_1_2_0
-        - 4 * matter.n_dirac * Phi_1_2_0  # Grassmann sign
-        + (d - 2) * matter.n_vectors * Phi_1_2_0
+        4 * matter.n_scalars * Phi_1_d2_0
+        - 16 * matter.n_dirac * Phi_1_d2_0  # Grassmann sign
+        + 4 * (d - 2) * matter.n_vectors * Phi_1_d2_0
     )
 
-    beta_lam_expr = -(2 - eta_N) * lam + g / (2 * pi) * (
+    beta_lam_expr = -(2 - eta_N) * lam + prefactor * g * (
         grav_volume + matter_volume
     )
 
@@ -204,10 +208,10 @@ def build_gravity_matter_fp_system(
 ) -> BetaFunctionSystem:
     """Build coupled gravity-matter beta system with dynamical matter couplings.
 
-    Uses the same gravitational sector as ``build_eh_beta_system`` (N/D
-    anomalous dimension formulation) and adds matter loop corrections
-    to the cosmological constant running.  Optional extensions promote
-    selected matter couplings to dynamical variables:
+    Uses the same gravitational sector as ``build_eh_beta_system``
+    (η_N = g·A/(1-g·B) via ``AnomalousDimensionSolver``) and adds matter
+    loop corrections to the cosmological constant running.  Optional
+    extensions promote selected matter couplings to dynamical variables:
 
         scalar_quartic: lambda_phi (phi^4 quartic self-coupling)
         yukawa: y (Yukawa scalar-fermion coupling)
@@ -252,29 +256,18 @@ def build_gravity_matter_fp_system(
     y_sym = Symbol("y", positive=True) if yukawa else None
     xi_sym = Symbol("xi", real=True) if running_xi else None
 
-    one_m_2l = 1 - 2 * lam
-
     # --- Gravitational anomalous dimension (same as build_eh_beta_system) ---
-    # eta_N = g*N(lambda) / (1 - g*D(lambda))
-    # N and D encode graviton + ghost traces in single-metric EH truncation
-    # with Type I Litim cutoff and de Donder gauge.
-    N_eta = (Rational(4, 3) / one_m_2l + 8 - 8 / one_m_2l**2)
-    D_eta = (Rational(1, 3) / one_m_2l + 2 - 2 / one_m_2l**2)
-
-    # Matter correction to N_eta: each matter field shifts the graviton
-    # self-energy through one-loop diagrams. The leading correction is
-    # proportional to the scalar b_2 heat kernel coefficient.
-    # Per scalar: delta_N = -1/(6(1-2lambda))
-    # Per Dirac fermion: delta_N = +1/(3(1-2lambda))
-    # Per gauge vector: delta_N = -(d-2)/(6(1-2lambda))
-    delta_N_matter: Expr = (
-        matter.n_scalars * (-Rational(1, 6) / one_m_2l)
-        + matter.n_dirac * (Rational(1, 3) / one_m_2l)
-        + matter.n_vectors * (-Rational(d - 2, 6) / one_m_2l)
-    )
-
-    N_total = N_eta + delta_N_matter
-    eta_N = g * N_total / (1 - g * D_eta)
+    # eta_N = g*(A_grav + A_matter) / (1 - g*(B_grav + B_matter)):
+    # A/B encode graviton + ghost traces in the single-metric EH
+    # truncation with Type Ia Litim cutoff and de Donder gauge
+    # (Reuter 1998 [hep-th/9605030]); the per-field matter weights are
+    # the Dona-Eichhorn-Percacci values (1311.2898): scalar +1/(6pi),
+    # Dirac +1/(3pi), vector -2/(3pi) in d=4.
+    tf = ThresholdFunctions()
+    solver = AnomalousDimensionSolver(tf)
+    A_grav, B_grav = solver.compute_AB_einstein_hilbert(lam, d)
+    A_matter, B_matter = matter_eta_N_correction(matter, d)
+    eta_N = solver.solve(g, A_grav + A_matter, B_grav + B_matter)
 
     # Scalar anomalous dimension from graviton loops
     eta_phi_expr: Expr = sympy.S.Zero
@@ -282,35 +275,47 @@ def build_gravity_matter_fp_system(
         eta_phi_expr = scalar_anomalous_dimension(g, lam, d)
 
     # --- beta_g ---
-    beta_g_expr = (2 + eta_N) * g
+    beta_g_expr = (d - 2 + eta_N) * g
 
     # --- beta_lambda ---
-    # Gravitational volume (same as build_eh_beta_system)
-    vol = (3 / one_m_2l - 4
-           - eta_N * (1 / one_m_2l - Rational(4, 3)))
+    # Gravitational + matter volume in the shared d-dimensional Reuter
+    # bracket (same as build_eh_beta_system / build_eh_matter_beta_system):
+    #   β_λ = -(2-η_N)λ + (g/2)(4π)^{1-d/2} [grav_volume + matter_volume]
+    w = -2 * lam
+    nd2 = Rational(d, 2)
+    prefactor = Rational(1, 2) * (4 * pi)**(1 - nd2)
 
-    # Matter volume corrections (matched to EH module normalisation):
-    # Each scalar: +1/32, each Dirac: -1/8, each vector: +(d-2)/32
+    grav_volume = (
+        2 * d * (d + 1) * tf.Phi(1, nd2, w)
+        - 8 * d * tf.Phi(1, nd2, 0)
+        - d * (d + 1) * eta_N * tf.Phi_tilde(1, nd2, w)
+    )
+
+    # Matter volume corrections (same per-field weights as
+    # build_eh_matter_beta_system):
+    # Each scalar: +4, each Dirac: -16, each vector: +4(d-2),
+    # all × Φ^1_{d/2}(0)
+    Phi_1_d2_0 = tf.Phi(1, nd2, 0)
     delta_vol_matter: Expr = (
-        matter.n_scalars * Rational(1, 32)
-        - matter.n_dirac * Rational(1, 8)
-        + matter.n_vectors * Rational(d - 2, 32)
+        4 * matter.n_scalars * Phi_1_d2_0
+        - 16 * matter.n_dirac * Phi_1_d2_0
+        + 4 * (d - 2) * matter.n_vectors * Phi_1_d2_0
     )
 
     # Backreaction of quartic coupling on beta_lambda (scalar mass shift)
     if scalar_quartic:
         delta_vol_matter = delta_vol_matter + (
-            matter.n_scalars * lambda_phi_sym * Rational(1, 64)
+            matter.n_scalars * lambda_phi_sym
         )
 
     # Backreaction of Yukawa coupling on beta_lambda (fermion mass shift)
     if yukawa:
         delta_vol_matter = delta_vol_matter + (
-            -matter.n_dirac * y_sym**2 * Rational(1, 16)
+            -4 * matter.n_dirac * y_sym**2
         )
 
     beta_lam_expr = (-(2 - eta_N) * lam
-                     + 8 * g / pi * (vol + delta_vol_matter))
+                     + prefactor * g * (grav_volume + delta_vol_matter))
 
     # --- Build system ---
     system = BetaFunctionSystem()
@@ -397,7 +402,7 @@ def scan_gravity_matter_fps(
     from asymsafety.analysis.fixed_points import FixedPointFinder
 
     results: list[dict] = []
-    guess: dict[str, float] = {"g": 0.65, "lambda": 0.14}
+    guess: dict[str, float] = {"g": 0.66, "lambda": 0.21}
     if scalar_quartic:
         guess["lambda_phi"] = 0.01
     if yukawa:

@@ -29,6 +29,11 @@ class JaxBatchEvaluator:
                 "JAX is required. Install with: pip install asymsafety[gpu]"
             ) from exc
 
+        # JAX defaults to float32, which loses ~3 significant digits against
+        # the float64 numpy backend near the eta_N pole denominators.
+        if not jax.config.read("jax_enable_x64"):
+            jax.config.update("jax_enable_x64", True)
+
         self._system = system
         symbols = system.coupling_symbols
         names = system.coupling_names

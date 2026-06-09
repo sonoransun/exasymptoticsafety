@@ -291,9 +291,11 @@ def annotated_eh_phase_portrait(
       labelled with their reference paper.
     - Eigenvector arrows at the NGFP, blue for relevant
       (``Re theta > 0``) and orange for irrelevant; annotated with the
-      numerical value of ``theta_i`` via
-      :func:`asymsafety.visualization.style.theta_label`.
-    - The propagator-pole boundary ``lambda = 1/2``.
+      numerical value of ``theta_i`` (complex-conjugate pairs are drawn
+      once, labelled ``theta = Re ± Im i``).
+    - The propagator-pole boundary ``lambda = 1/2`` — only when it
+      falls inside the plotted window (the default window ends at
+      ``lambda = 0.45``, so it is omitted there).
     - Optionally, the back-integrated separatrix of the relevant
       eigendirection (the local UV-critical-surface trace).
     - A citation footer linking to Reuter (1998), Lauscher & Reuter
@@ -462,9 +464,28 @@ def annotated_eh_phase_portrait(
         fp_lam = ngfp.location["lambda"]
         arrow_scale = 0.2
 
-        for col_idx in range(sa.eigenvectors.shape[1]):
+        n_exponents = sa.eigenvectors.shape[1]
+        conjugate_partners: set[int] = set()
+        for col_idx in range(n_exponents):
+            # A complex-conjugate pair shares the (real part of its)
+            # eigenvector, so the two arrows and labels would overlap
+            # exactly; draw the pair once with a "±" label instead of
+            # letting the last-drawn member hide its partner.
+            if col_idx in conjugate_partners:
+                continue
             evec = sa.eigenvectors[:, col_idx].real
             theta = sa.critical_exponents[col_idx]
+            theta_text = theta_label(theta)
+            if abs(theta.imag) > 1e-10:
+                for other_idx in range(col_idx + 1, n_exponents):
+                    other = sa.critical_exponents[other_idx]
+                    if abs(other - np.conj(theta)) < 1e-8 * max(1.0, abs(theta)):
+                        conjugate_partners.add(other_idx)
+                        theta_text = (
+                            rf"$\theta={theta.real:+.2f}"
+                            rf"\pm{abs(theta.imag):.2f}i$"
+                        )
+                        break
 
             # Normalize to desired length in coupling space
             norm = np.sqrt(evec[x_idx]**2 + evec[y_idx]**2)
@@ -505,7 +526,7 @@ def annotated_eh_phase_portrait(
             relevance_word = "rel." if is_relevant else "irrel."
             txt = ax.text(
                 fp_g + dx * 1.45, fp_lam + dy * 1.45,
-                f"{theta_label(theta)}\n({relevance_word})",
+                f"{theta_text}\n({relevance_word})",
                 fontsize=9,
                 color=color,
                 fontweight="bold",
@@ -996,10 +1017,17 @@ def quadratic_pairwise_grid(
     Quadratic gravity ``Gamma_k = (16 pi G)^{-1} (R - 2 Lambda) +
     alpha R^2 + beta C_{munurhosigma}^2`` lives in the four-coupling
     space ``(g, lambda, alpha, beta)``. This grid plots all six
-    pairwise projections, freezing the remaining two couplings at their
-    NGFP values (Codello et al. 2009). Of particular note: the
-    ``C^2`` coupling ``beta`` is asymptotically free at the GFP,
-    visible as flow toward ``beta = 0`` in any panel containing it.
+    pairwise projections, freezing the remaining two couplings at a
+    reference point. Note: the one-loop truncation has **no interior
+    NGFP** — ``beta_alpha`` and ``beta_beta`` are nonzero universal
+    constants (``+5/36`` and ``+133/20``, x ``1/16 pi^2``), so
+    ``alpha`` and ``beta`` run logarithmically in every panel. The
+    positive ``beta_beta`` is asymptotic freedom of the ``C^2`` sector
+    in the coefficient convention (``beta`` grows toward the UV; the
+    inverse coupling ``1/(2 beta)`` flows to zero). The Codello et al.
+    (2009) NGFP coordinates are external literature reference values
+    from the full nonperturbative calculation, not fixed points of
+    this system.
 
     Parameters
     ----------
@@ -1009,12 +1037,17 @@ def quadratic_pairwise_grid(
     couplings : tuple of 4 str, default ``("g", "lambda", "alpha", "beta")``
         Names of the four couplings.
     bounds : dict, optional
-        Per-coupling ``(min, max)`` plotting ranges. Defaults are
-        sensible for the canonical NGFP near ``(0.97, 0.14, 0.006, 0.002)``.
+        Per-coupling ``(min, max)`` plotting ranges. Defaults bracket
+        the Codello (2009) literature reference point
+        ``(0.97, 0.14, 0.006, 0.002)`` — which is *not* a fixed point
+        of this one-loop system.
     n_grid : int, default ``22``
     fp_guess : dict, optional
-        Seed for the four-coupling NGFP search. Default is the
-        Codello (2009) approximate location.
+        Anchor point for the frozen couplings. A fixed-point refinement
+        is attempted, but the one-loop system has no four-coupling NGFP
+        (``beta_alpha``/``beta_beta`` are nonzero constants), so the
+        anchor falls back to this reference value. Default is the
+        Codello (2009) literature location.
     figsize : tuple, default ``(14, 9)``
 
     Returns
@@ -1029,8 +1062,9 @@ def quadratic_pairwise_grid(
     See Also
     --------
     :mod:`asymsafety.validation.codello_2009`
-        Benchmark fixed-point coordinates and the asymptotic-freedom
-        result for ``beta``.
+        One-loop universal coefficients and the literature fixed-point
+        coordinates (external reference values, not reproduced by this
+        truncation).
     :func:`asymsafety.beta.quadratic.build_quadratic_beta_system`
         Builder for the beta-function system.
     """

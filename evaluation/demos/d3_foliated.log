@@ -1,0 +1,5 @@
+location: {'g': '1.013141123e-16', 'lambda': '-2.169344205e-16', 'lambda_ADM': '1'}
+critical exponents: ['2', '7.16078e-33', '-2']
+VERDICT lambda_ADM* == 1: PASS (lambda_ADM* = 1)
+lambda* below pole 1/2: PASS
+manrique_2011 reference: g*~0.96, lambda*~0.20, lambda_ADM*=1.0

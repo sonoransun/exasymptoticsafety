@@ -1,0 +1,4 @@
+verify_commutativity ->
+  critical_exponents: {'rg_stability': array([  0.75027158, -29.85599867]), 'transfer_matrix': array([  0.75027158, -29.85599867]), 'resolvent': array([  0.75027158, -29.85599867])}
+  agreements: {'transfer_matrix': {'max_deviation': 5.293543381412746e-13, 'agrees': True}, 'resolvent': {'max_deviation': 0.0, 'agrees': True}}
+  all_agree: True

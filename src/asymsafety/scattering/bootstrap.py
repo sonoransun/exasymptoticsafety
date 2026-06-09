@@ -16,11 +16,16 @@ amplitude can be cross-checked against the *same* criteria in
 :mod:`asymsafety.scattering.bridge`.
 
 Conventions:
-    Linear Regge trajectory ``α(x) = α0 + α' x``.  Open bosonic string:
-    ``α0 = 1``, ``α' = 1``.  Poles of ``Γ(-α(x))`` at ``α(x) = 0,1,2,…``
-    give the tower ``x_n = (n - α0)/α'`` of squared masses, with the
-    residue at level ``n`` a polynomial in the crossed channel of degree
-    ``n`` (maximal exchanged spin ``n``).
+    Linear Regge trajectory ``α(x) = α0 + α' x``.  Open bosonic string
+    (Veneziano): ``α0 = 1``, ``α' = 1``.  Poles of ``Γ(-α(x))`` at
+    ``α(x) = 0,1,2,…`` give the tower ``x_n = (n - α0)/α'`` of squared
+    masses, with the residue at level ``n`` a polynomial in the crossed
+    channel of degree ``n`` (maximal exchanged spin ``n``).  Closed
+    string (Virasoro–Shapiro): massless external states, ``α0 = 0`` with
+    ``u = -s - t``, so the trajectories satisfy the constraint
+    ``α_s + α_t + α_u = 0`` on which the bootstrap operates
+    (Virasoro 1969; Polchinski *String Theory* Vol. 1, §6.2;
+    arXiv:2508.09246).
 """
 
 from __future__ import annotations
@@ -67,20 +72,31 @@ def veneziano(s, t, *, alpha0: float = 1.0, alphap: float = 1.0):
     return out if np.ndim(out) else complex(out)
 
 
-def virasoro_shapiro(s, t, u, *, alpha0: float = 1.0, alphap: float = 0.25):
+def virasoro_shapiro(s, t, u, *, alpha0: float = 0.0, alphap: float = 0.25):
     """Virasoro–Shapiro (closed-string four-point) amplitude.
 
     ``A(s,t,u) = Γ(-α_s)Γ(-α_t)Γ(-α_u) /
-                 [Γ(α_s+α_t)Γ(α_t+α_u)Γ(α_u+α_s)]``
-    (symmetric closed-string convention), manifestly fully crossing
+                 [Γ(1+α_s)Γ(1+α_t)Γ(1+α_u)]``
+    (Virasoro 1969; Polchinski *String Theory* Vol. 1, Eqs.
+    (6.2.39)–(6.2.40); arXiv:2508.09246), manifestly fully crossing
     symmetric in ``s, t, u``.
+
+    The defaults are the massless closed-string convention: ``α0 = 0``
+    with ``alphap`` playing the role of ``α'/4``, so on the massless
+    surface ``s + t + u = 0`` the trajectories obey
+    ``α_s + α_t + α_u = 0``.  Each channel then carries the infinite
+    Regge tower of ``Γ(-α)`` poles at ``α(x) = 0, 1, 2, …``
+    (``x_n = n/alphap``), the residue in ``α(s)`` at level ``n`` is the
+    positive polynomial ``[∏_{k=1}^{n-1}(α_t+k)]²/(n!)²`` of degree
+    ``2(n-1)``, and the fixed-angle falloff is super-polynomial — the
+    ultrasoft behaviour required by the bootstrap of arXiv:2508.09246.
     """
     a_s = regge_trajectory(s, alpha0, alphap)
     a_t = regge_trajectory(t, alpha0, alphap)
     a_u = regge_trajectory(u, alpha0, alphap)
     with np.errstate(divide="ignore", invalid="ignore"):
         num = gamma(-a_s) * gamma(-a_t) * gamma(-a_u)
-        den = gamma(a_s + a_t) * gamma(a_t + a_u) * gamma(a_u + a_s)
+        den = gamma(1 + a_s) * gamma(1 + a_t) * gamma(1 + a_u)
         out = num / den
     return out if np.ndim(out) else complex(out)
 
@@ -88,9 +104,16 @@ def virasoro_shapiro(s, t, u, *, alpha0: float = 1.0, alphap: float = 0.25):
 def veneziano_residue(n: int, t, *, alpha0: float = 1.0, alphap: float = 1.0):
     """Residue of the Veneziano amplitude at the ``α(s) = n`` pole.
 
-    Analytically ``Res = -(-1)^n/n! · ∏_{k=1}^{n} (α(t) + k)`` — a
-    polynomial in ``α(t)`` of degree exactly ``n`` (the higher-spin
-    content up to spin ``n``), with zeros at ``α(t) = -1, -2, …, -n``.
+    Near ``α_s = n`` one has ``Γ(-α_s) ≈ -(-1)^n/[n!(α_s - n)]`` and
+    ``Γ(-α_t)/Γ(-n-α_t) = (-1)^n ∏_{k=1}^{n}(α_t + k)``, so the residue
+    in the trajectory variable ``α(s)`` is
+
+    ``Res = -(1/n!) · ∏_{k=1}^{n} (α(t) + k)``
+
+    with a sign *uniform* in ``n`` (the two ``(-1)^n`` factors cancel;
+    cf. arXiv:2508.09246) — a polynomial in ``α(t)`` of degree exactly
+    ``n`` (the higher-spin content up to spin ``n``), with zeros at
+    ``α(t) = -1, -2, …, -n``.
     """
     from math import factorial
 
@@ -98,7 +121,7 @@ def veneziano_residue(n: int, t, *, alpha0: float = 1.0, alphap: float = 1.0):
     poch = np.ones_like(np.atleast_1d(a_t), dtype=float)
     for kk in range(1, n + 1):
         poch = poch * (a_t + kk)
-    res = -((-1) ** n) / factorial(n) * poch
+    res = -poch / factorial(n)
     return res if np.ndim(t) else float(res[0])
 
 
@@ -123,14 +146,22 @@ class StringAmplitude:
 
     Args:
         kind: ``"veneziano"`` or ``"virasoro_shapiro"``.
-        alpha0, alphap: Regge-trajectory parameters.
+        alpha0, alphap: Regge-trajectory parameters.  ``alpha0`` defaults
+            per kind: ``0`` for ``virasoro_shapiro`` (massless closed
+            string, so the ``u = -s-t`` kinematics built here satisfy
+            the constraint ``α_s+α_t+α_u = 0``) and ``1`` for
+            ``veneziano`` (open bosonic string).
         m: External mass used to build kinematics (default massless).
     """
 
     kind: str = "veneziano"
-    alpha0: float = 1.0
+    alpha0: float | None = None
     alphap: float = 0.25
     m: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.alpha0 is None:
+            self.alpha0 = 0.0 if self.kind == "virasoro_shapiro" else 1.0
 
     def eval(self, s, t, u=None, *, dressed: bool = True):  # noqa: D401
         del dressed  # the bootstrap amplitude has no "undressed" variant
@@ -157,6 +188,7 @@ def ultrasoft_falloff(
     s_lo: float = 5.0,
     s_hi: float = 50.0,
     n: int = 60,
+    s_values=None,
 ) -> dict:
     """Test for faster-than-power-law (ultrasoft) fixed-angle decay.
 
@@ -165,8 +197,20 @@ def ultrasoft_falloff(
     grows ever more negative; a power law has a constant slope and a
     UV-constant amplitude has slope ``≈ 0``.  Returns the low- and
     high-energy slopes and whether the falloff is super-polynomial.
+
+    Args:
+        s_values: Optional explicit sample energies (overrides
+            ``s_lo``/``s_hi``/``n``).  For a meromorphic string
+            amplitude, pass points midway between the Regge poles —
+            e.g. the dual ladder ``s = (n + 1/2)/alphap`` for the
+            massless Virasoro–Shapiro convention — so the fit window
+            is pole-free and the slopes track the decaying envelope
+            rather than pole spikes.
     """
-    s = np.geomspace(s_lo, s_hi, n)
+    if s_values is not None:
+        s = np.asarray(s_values, dtype=float)
+    else:
+        s = np.geomspace(s_lo, s_hi, n)
     A = np.abs(np.asarray(amplitude.amplitude_vs_s(s, cos_theta)))
     good = np.isfinite(A) & (A > 0)
     s, A = s[good], A[good]

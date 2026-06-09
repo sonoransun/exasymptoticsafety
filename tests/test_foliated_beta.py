@@ -5,22 +5,26 @@ so that performance refactors of beta/system.py cannot silently drift
 the physics.
 
 Reference values:
-    Manrique-Rechenberger-Saueressig 2011 (validation/manrique_2011.py):
-        g* ≈ 0.96, λ* ≈ 0.20, λ_ADM* = 1
-    Saueressig et al. 2025 (validation/lorentzian_2024.py):
-        λ_ADM → 1 preserved under Wick rotation
+    Manrique-Rechenberger-Saueressig 2011, PRL 106, 251302 [1102.5012],
+    Eq. (10) (validation/manrique_2011.py):
+        Euclidean g* ≈ 0.19, λ* ≈ 0.31, θ = 1.07 ± 3.31 i;
+        λ_ADM = 1 imposed by the Diff-invariant ansatz (not a running
+        coupling in MRS).
 
-Note: the current implementation produces correct one-loop structure and
-preserves λ_ADM = 1 as a fixed line of β_{λ_ADM}, but the (g, λ) sector
-collapses to the Gaussian basin under fsolve from typical guesses — the
-self-consistent NGFP that exists in the full literature truncation is not
-recovered by this minimal implementation. Tests therefore pin the
-structural invariants rather than asserting NGFP existence.
+Note: the implemented foliated system is schematic. λ_ADM = 1 is a
+fixed plane of β_{λ_ADM} by construction, with eigenvalue
+∂β_{λ_ADM}/∂λ_ADM = gλ/(π(1-2λ)) > 0 at physical couplings — the plane
+is UV-repulsive (IR-attractive). The (g, λ) sector admits no NGFP at
+physical λ (η_N = -2 is unreachable for λ > -1/2), so the MRS NGFP is
+not a root of this system. Tests therefore pin structural invariants
+and the corrected plane orientation rather than asserting NGFP
+existence.
 """
 
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from sympy import Symbol
 
 from asymsafety.beta.foliated import (
@@ -65,10 +69,13 @@ class TestFoliatedSystemStructure:
 
 
 class TestFoliatedFixedLine:
-    """λ_ADM = 1 is a fixed line: β_{λ_ADM} vanishes there for any (g, λ).
+    """λ_ADM = 1 is a fixed plane: β_{λ_ADM} vanishes there for any (g, λ).
 
-    This is the central physics result of Manrique-Rechenberger-Saueressig:
-    the foliated system flows toward full-Diff invariance.
+    The plane is built into the schematic β_{λ_ADM} ∝ g(λ_ADM - 1); in
+    Manrique-Rechenberger-Saueressig (2011) λ_ADM is not a running
+    coupling at all — λ_ADM = 1 is imposed by their Diff-invariant
+    ansatz. At physical couplings the plane is UV-repulsive (see the
+    sign-aware tests below).
     """
 
     def setup_method(self):
@@ -91,22 +98,44 @@ class TestFoliatedFixedLine:
                 f"(g={g_val}, λ={lam_val}, λ_ADM=1) — fixed line broken"
             )
 
-    def test_lambda_adm_perturbation_drives_back_to_one(self):
-        """For g > 0, β_{λ_ADM} has the right sign to restore λ_ADM = 1."""
-        # Slightly above 1 → β should be negative (drives down)
-        # Slightly below 1 → β should be positive (drives up)
+    def test_lambda_adm_plane_is_uv_repulsive_at_physical_lambda(self):
+        """β_{λ_ADM} signs: λ_ADM = 1 is UV-repulsive (IR-attractive).
+
+        ∂β_{λ_ADM}/∂λ_ADM = gλ/(π(1-2λ)) > 0 for g > 0, 0 < λ < 1/2,
+        so perturbations grow toward the UV (∂_t δ = +|·|δ): β > 0
+        above the plane and β < 0 below it. The previous assertion only
+        required opposite signs and was blind to this orientation
+        (HV-15c-d); the comments even demanded the opposite
+        ("restoring") signs, which the system does not produce.
+        """
         above = self.system.evaluate(
             {"g": 0.5, "lambda": 0.1, "lambda_ADM": 1.05}
         )
         below = self.system.evaluate(
             {"g": 0.5, "lambda": 0.1, "lambda_ADM": 0.95}
         )
-        # Sign of β determines stability; require opposite signs
-        assert above["lambda_ADM"] * below["lambda_ADM"] < 0
+        assert above["lambda_ADM"] > 0, (
+            f"β_{{λ_ADM}} = {above['lambda_ADM']:.3e} above the plane — "
+            "expected > 0 (UV-repulsive)"
+        )
+        assert below["lambda_ADM"] < 0, (
+            f"β_{{λ_ADM}} = {below['lambda_ADM']:.3e} below the plane — "
+            "expected < 0 (UV-repulsive)"
+        )
+
+    def test_lambda_adm_eigenvalue_is_g_lambda_over_pi_one_minus_2lambda(self):
+        """∂β_{λ_ADM}/∂λ_ADM at (g, λ, 1) equals gλ/(π(1-2λ)) exactly."""
+        g_val, lam_val = 0.5, 0.1
+        M = self.system.jacobian_numerical(
+            {"g": g_val, "lambda": lam_val, "lambda_ADM": 1.0}
+        )
+        expected = g_val * lam_val / (np.pi * (1 - 2 * lam_val))
+        assert M[2, 2] == pytest.approx(expected, rel=1e-10)
+        assert M[2, 2] > 0  # UV-repulsive plane
 
 
 class TestFoliatedBenchmarkReference:
-    """Validation reference values are present and self-consistent."""
+    """Validation reference values match MRS PRL 106, 251302, Eq. (10)."""
 
     def test_foliated_eh_fp_keys(self):
         for key in ("g_star", "lambda_star", "lambda_ADM_star", "n_relevant"):
@@ -116,17 +145,46 @@ class TestFoliatedBenchmarkReference:
         for key in ("g_star", "lambda_star", "lambda_ADM_star"):
             assert key in LORENTZIAN_FP
 
+    def test_euclidean_fp_is_mrs_eq10(self):
+        """Euclidean MRS Eq. (10): g* = 0.19, λ* = 0.31, θ = 1.07 ± 3.31i."""
+        assert FOLIATED_EH_FP["g_star"] == pytest.approx(0.19)
+        assert FOLIATED_EH_FP["lambda_star"] == pytest.approx(0.31)
+        assert FOLIATED_EH_FP["theta_real"] == pytest.approx(1.07)
+        assert FOLIATED_EH_FP["theta_imag"] == pytest.approx(3.31)
+
+    def test_lorentzian_fp_is_mrs_eq10(self):
+        """Lorentzian MRS Eq. (10): g* = 0.21, λ* = 0.30."""
+        assert LORENTZIAN_FP["g_star"] == pytest.approx(0.21)
+        assert LORENTZIAN_FP["lambda_star"] == pytest.approx(0.30)
+
     def test_lambda_adm_reference_is_one(self):
-        """Both Euclidean and Lorentzian benchmarks: λ_ADM* = 1."""
+        """λ_ADM = 1 in both dicts (imposed by the MRS ansatz, not run)."""
         assert abs(FOLIATED_EH_FP["lambda_ADM_star"] - 1.0) < 1e-12
         assert abs(LORENTZIAN_FP["lambda_ADM_star"] - 1.0) < 1e-12
 
     def test_benchmark_function(self):
-        """foliated_eh_benchmark() returns the documented dict."""
+        """foliated_eh_benchmark() returns the MRS Eq. (10) values."""
         bench = foliated_eh_benchmark()
         assert bench["lambda_ADM"] == 1.0
-        assert 0.5 < bench["g"] < 1.5
-        assert 0.0 < bench["lambda"] < 0.5
+        assert bench["g"] == pytest.approx(FOLIATED_EH_FP["g_star"])
+        assert bench["lambda"] == pytest.approx(FOLIATED_EH_FP["lambda_star"])
+
+    def test_benchmark_is_not_a_root_of_the_schematic_system(self):
+        """The MRS NGFP is a literature value, not a root of this system.
+
+        β_g = (2 + η_N)g = 0 with g > 0 needs η_N = -2, unreachable for
+        λ > -1/2 with the schematic coefficients — pin that the residual
+        at the literature point is O(1), so nobody re-advertises it as a
+        toolkit fixed point (HV-15c-b).
+        """
+        system = build_foliated_eh_beta_system(d=4)
+        res = system.evaluate(
+            {"g": FOLIATED_EH_FP["g_star"],
+             "lambda": FOLIATED_EH_FP["lambda_star"],
+             "lambda_ADM": 1.0}
+        )
+        assert abs(res["g"]) > 0.1
+        assert abs(res["lambda_ADM"]) < 1e-12  # still on the fixed plane
 
 
 class TestFoliatedBetaPinned:

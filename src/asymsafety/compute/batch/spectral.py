@@ -68,7 +68,12 @@ def trace_on_S1xS3_vectorized(
 
 
 def _S3_multiplicity_vectorized(field_type: str, l: np.ndarray) -> np.ndarray:
-    """Vectorized multiplicities on S^3."""
+    """Vectorized multiplicities on S^3.
+
+    Scalars: (l+1)^2 (l >= 0); transverse vectors: 2l(l+2) (l >= 1);
+    TT tensors: 2(l-1)(l+3) (l >= 2).
+    Reference: Rubin & Ordonez, J. Math. Phys. 25 (1984) 2888 (d=3).
+    """
     if field_type == "scalar":
         return (l + 1).astype(float)**2
     elif field_type == "vector":
@@ -76,7 +81,7 @@ def _S3_multiplicity_vectorized(field_type: str, l: np.ndarray) -> np.ndarray:
         result[l < 1] = 0
         return result
     elif field_type == "TT":
-        result = ((l - 1) * (l + 3) * (2 * l + 1) / 3.0)
+        result = 2.0 * (l - 1) * (l + 3)
         result[l < 2] = 0
         return result
     return np.ones_like(l, dtype=float)
@@ -104,11 +109,14 @@ def trace_on_sphere_vectorized(
     lam_l = (base - shift) / a_sq
 
     # Multiplicities (S^4 specific for d=4)
+    # Rubin & Ordonez, J. Math. Phys. 25 (1984) 2888:
+    #   scalar (2l+3)(l+1)(l+2)/6; transverse vector l(l+3)(2l+3)/2;
+    #   TT 5(2l+3)(l-1)(l+4)/6.
     if d == 4:
         if field_type == "scalar":
-            d_l = ((ls + 1) * (ls + 2))**2 / 4
+            d_l = (2 * ls + 3) * (ls + 1) * (ls + 2) / 6
         elif field_type == "vector":
-            d_l = (2 * ls + 3) * (ls + 2) * (ls + 1) / 2
+            d_l = ls * (ls + 3) * (2 * ls + 3) / 2
             d_l[ls < 1] = 0
         elif field_type == "TT":
             d_l = 5 * (2 * ls + 3) * (ls - 1) * (ls + 4) / 6

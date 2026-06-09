@@ -12,6 +12,20 @@ channel invariant:
 
     M(s,t,u) = -8π [ G(s) · t u / s + G(t) · s u / t + G(u) · s t / u ] .
 
+**Overall-sign convention.**  The overall sign of ``M`` above is a
+convention, and this module's choice is *opposite* to
+Draper-Knorr-Ripken-Saueressig, Phys. Rev. Lett. 125, 181301
+[2007.04396], who obtain ``M = +8πG_N · tu/s`` per channel in the
+mostly-minus signature with ``S = 1 + iT`` (the sign chain that yields
+an attractive Newtonian potential from the t-channel Born term).  The
+minus sign used here corresponds to the opposite ``S = 1 - iT``
+(Weinberg) map; equivalently ``M_here = -M_DKRS``.  Every internal
+consumer (the :mod:`~asymsafety.scattering.consistency` checks, the
+bootstrap comparison, the plots) uses ``|M|`` or ``|M|²`` and is
+insensitive to this choice, but users extracting an interaction
+potential or interference terms via the ``S = 1 + iT`` Born map must
+flip the overall sign first.
+
 **Infrared:** ``G(x) → G_N`` recovers the classical (Newtonian) amplitude
 — in particular the forward ``1/t`` graviton pole.
 **Ultraviolet:** at the non-Gaussian fixed point ``G(x) ∝ 1/x``, so each

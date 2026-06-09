@@ -1,0 +1,111 @@
+{
+ "curated": [
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/eh_phase_portrait.png",
+   "verdict": "FAIL",
+   "physics_note": "FP markers and topology are honest to the toolkit: NGFP at (g=0.694, lambda=0.142), GFP at origin, node-like non-spiral flow, annotations theta=+0.75 (rel.) and theta=-29.86 (irrel.), legend \"NGFP (1 rel.)\" \u2014 the computed real pair, not the literature complex pair. But the pink \"UV-critical separatrix\" is wrong physics: reproduced numerically, it leaves along the IRRELEVANT eigendirection and runs to (g~1.2, lambda~0.04), never connecting to the GFP. Cause: phase_portrait.py:603 uses t_span=(-12,0), integrating forward toward UV where the |theta|~30 mode blows up. The lambda=1/2 boundary is absent (axis stops ~0.45).",
+   "caption_consistent": false,
+   "annotation_issues": "Caption says the NGFP \"has two relevant directions\" but the figure legend says \"NGFP (1 rel.)\" and annotates one relevant (theta=+0.75) and one irrelevant (theta=-29.86) \u2014 the figure is right, the caption wrong. Caption claims \"the dashed line marks the lambda = 1/2 propagator-pole singularity\" but no dashed line exists in the figure (y-range ends ~0.45; the axhline is only drawn when 0.5 is in range). The curve labeled \"UV-critical separatrix\" is actually a forward-UV runaway along the irrelevant eigendirection (does not connect NGFP to GFP; the true separatrix leaves nearly horizontally). Thick dark/green trajectory curves in the lower half have no legend entry."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/running_couplings.png",
+   "verdict": "FAIL",
+   "physics_note": "Anchors require g(t) to flatten onto a UV plateau at g* = 0.694 (and lambda near 0.142) with classical k^2 falloff toward the IR. The figure instead shows g diverging exponentially to ~90-100 for all three initial conditions while lambda stays pinned at ~0, over a tiny window t in [-8.0, -6.9]. No plateau, no fixed-point saturation, no IR classical regime is visible \u2014 the trajectories have run away (wrong integration direction or outside the NGFP basin). This contradicts asymptotic safety and the toolkit anchor.",
+   "annotation_issues": "Legend lists \"g\" and \"lambda\" three times (blue/green/purple g; orange/red/brown lambda) with no initial-condition labels, so trajectories are indistinguishable. No reference line or annotation at g* = 0.694 or lambda* = 0.142. Y-range 0-100 hides all fixed-point-scale structure; x-range t = -8.0 to -6.9 is an unexplained narrow negative window. Axis labels themselves (t = log(k/k0), \"Coupling value\") and IR/UV arrows are fine.",
+   "caption_consistent": true
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/amplitude_vs_energy.png",
+   "verdict": "PASS",
+   "physics_note": "Figure shows exactly what the anchors require: classical GR amplitude grows ~s at fixed angle (slope 2 vs sqrt(s) on log-log, ~10^2.5 to ~10^12.5), while the AS-dressed amplitude flattens to a finite plateau ~10^2 above sqrt(s)/k0 ~ 10. UV separation is ~10 decades. Legend distinguishes \"classical GR (undressed)\" from \"asymptotic safety (dressed)\". The curves do not merge at the IR end (AS ~1.5 decades below GR at 0.1 k0), consistent with the anchor caveat that Newtonian recovery requires reaching deep IR; the plot starts only at 0.1 k0.",
+   "caption_consistent": true,
+   "annotation_issues": "Minor only: the rotated \"k0 (Planck)\" label on the dotted vertical marker at sqrt(s)/k0=1 is tiny and partially overlaps the green curve, though legible. Axes, title, legend, and the Draper/Knorr/Ripken/Saueressig [2007.04396] reference box are all correct; no wrong values or garbled text."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/graviton_form_factor.png",
+   "verdict": "PASS",
+   "physics_note": "Log-log plot, x = p\u00b2/k\u2080\u00b2 (3e-3 to 1e6). Blue f(p\u00b2) rises monotonically; measured UV slope +0.99 vs p\u00b2, i.e. f \u221d p\u00b2. Orange G(p\u00b2)/G_N falls monotonically to ~2e-8; slope \u22120.97, i.e. G \u221d 1/p\u00b2 (UV softening). Curves are exact reciprocals (log f + log G/G_N \u2248 0.03), internally consistent. Matches acceptance anchors: monotonic rise of f, G\u21920 in UV, sensible log axes. The deep-IR Newtonian limit (f\u21921, the dotted y=1 line) is never reached within the plotted range \u2014 consistent with the anchor that IR recovery requires the trajectory to reach deep IR.",
+   "caption_consistent": false,
+   "annotation_issues": "Caption claims \"In the infrared f->1 (Newtonian limit)\" but the figure shows f \u2248 35 and G/G_N \u2248 0.03 at the smallest plotted p\u00b2, with no flattening toward 1 \u2014 the IR limit described is not depicted. Minor: the legend box occludes the IR end of the f(p\u00b2) curve (left of p\u00b2/k\u2080\u00b2 \u2248 0.07); the dotted y=1 reference line is unlabeled; y-axis label \"dimensionless dressing\" is generic. Title, curve labels, x-axis label, and the Draper/Knorr reference box are correct and legible."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/partial_wave_unitarity.png",
+   "verdict": "FAIL",
+   "physics_note": "Qualitative shapes match the anchor: GR's |a_0| grows like s (8 decades over 4 decades of sqrt(s)) while the AS curve plateaus (~1.5e2) in the UV. The unitarity line |a_l|=1 is drawn (dashed) and legend-labeled. But the criterion requires AS to stay below/near the bound while GR grows THROUGH it: as plotted, BOTH curves sit above |a_l|=1 at every plotted energy \u2014 AS plateaus 2 decades above the bound, and GR is already at ~20 at sqrt(s)/k0=0.1, so no crossing is visible. Looks like a missing partial-wave normalization (e.g. 1/16pi) or scale offset.",
+   "caption_consistent": false,
+   "annotation_issues": "Caption (/root/cdev/exasymptoticsafety/evaluation/figures/partial_wave_unitarity.caption.md) claims \"Classical gravity runs past the |a_l|=1 unitarity line near the Planck scale\" \u2014 no crossing is depicted; GR is above the line over the entire plotted range, including sub-Planckian sqrt(s)/k0=0.1. It also implies the AS amplitude respects the bound, but the AS plateau is ~150, well above |a_l|=1. In the image: a \"References / Knorr (2026) [2602.21285]\" text box is rendered inside the axes, overlapping the dashed unitarity line; title wording \"GR is unbounded, asymptotic safety is not\" is awkward/truncated-sounding. Axes are otherwise labeled correctly (|a_0(s)| vs sqrt(s)/k0)."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/as_vs_string.png",
+   "verdict": "PASS",
+   "physics_note": "Anchors require: AS amplitude tending to a UV constant, string (Veneziano-like) amplitude falling ultrasoft, visually distinct in the UV. Figure shows exactly this: green AS curve flat at O(1) over the full range; blue string curve with Regge resonance bumps then super-polynomial falloff (~7 decades per decade of s, steepening on log-log) to ~1e-9, ~10 decades below the AS curve at the right edge. Curves coincide in the IR (Newtonian/GR regime), as expected. No fabricated values; references annotation matches the toolkit's draper_2020/cheung_2025 validation modules.",
+   "caption_consistent": true,
+   "annotation_issues": "None significant. Axes, title, legend, and reference box are all present and legible. Minor cosmetic point: a small bump at s/k0^2 ~ 4 appears on the green AS curve where the first string resonance overlaps it in the IR-overlap region; could be mistaken for an AS feature but does not mislabel anything."
+  },
+  {
+   "figure": "evaluation/figures/lapse_with_horizons.png",
+   "verdict": "FAIL",
+   "physics_note": "De Sitter core is right (f\u21921 as r\u21920, annotated). But for M=2 > M_cr the anchors require 2 horizons and f\u21921 at large r; the figure shows only ONE zero crossing and f keeps falling past it (\u22120.52 at r=5; toolkit gives f(100)=\u221222.5, diverging to \u2212\u221e because the trajectory's G=g/k\u00b2 grows in the IR \u2014 the plot's y_clip deliberately hides this). The single crossing is downward (+\u2192\u2212), an inner/Cauchy-type root, yet is labeled \"r_+ (event)\"; a true event horizon (upward crossing) is absent. Marker does align with the curve zero.",
+   "caption_consistent": false,
+   "annotation_issues": "Caption claims \"both Cauchy (r_-) and event (r_+) horizons annotated\" but the figure marks only one horizon. That lone downward crossing is mislabeled \"r_+ (event)\" (plot code's len==1 branch always uses the event label); physically it is an inner-type root. No r_- annotation exists. The missing asymptotically-flat regime (f\u21921) is silently truncated at r=5 / y_clip=(\u22122,1.3). Axes, legend (f(r), M=2), de-Sitter-core annotation, and reference box are otherwise correct and legible."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/classical_vs_rg_lapse.png",
+   "verdict": "FAIL",
+   "physics_note": "Classical dashed curves are correct: diverge toward -inf as r->0, cross zero near r=2M, approach 1 at large r. The solid RG curves are wrong: regular at small r (f->1, ok) but they DECREASE at large r, crossing zero and reaching ~-0.5 at r~30 instead of asymptoting to 1. The sub-critical RG M=0.4 (< M_cr=1.196) curve acquires a horizon near r~20, contradicting the anchor of 0 horizons below M_cr. The RG curves look like log-axis mirror images of the classical ones, suggesting an inverted scale identification (k proportional to r instead of 1/r).",
+   "caption_consistent": false,
+   "annotation_issues": "Title contains a literal TeX escape: \"RG-improved vs.\\ classical Schwarzschild lapse\" (stray backslash). Caption claims horizon merging at the critical mass and a horizonless naked-mass remnant for sub-critical M, but no RG curve shows the two-horizon dip-and-recover shape and the sub-critical RG curve crosses f=0. Minor: y-axis clipped at -1 hides the classical divergence depth. Axes and legend labels are otherwise present and legible."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/hawking_temperature.png",
+   "verdict": "FAIL",
+   "physics_note": "Anchors require: classical ~1/(8\u03c0M) diverging at small M (shown correctly, dashed), and an AS curve that peaks then drops to zero at finite M_cr = 1.196 M_pl. The plotted blue \"RG-improved T_H\" instead rises monotonically with M, is nonzero at M~0.3, crosses above the classical curve near M~2.3, and reaches ~0.11 at M=4 (~10x classical). No peak, no drop to zero, no remnant; M_cr is not marked. This is qualitatively inverted physics \u2014 the figure contradicts both the anchors and its own caption.",
+   "caption_consistent": false,
+   "annotation_issues": "Caption claims the AS curve \"peaks and then drops to zero at M_crit\" but the depicted curve increases monotonically. M_cr = 1.196 M_pl is not marked anywhere. Legend advertises a \"peak temperature\" star marker, but no interior peak exists on the curve (any marker would sit at the right-edge maximum, M=4). Title contains a literal LaTeX escape artifact: \"classical vs.\\ asymptotic safety\". Axes are labeled and legible; references box (Bonanno & Reuter 2000, Platania 2023) matches the caption."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/nu_vs_nf.png",
+   "verdict": "PASS",
+   "physics_note": "Lattice points (30,0.64\u00b10.02),(40,0.745\u00b10.015),(60,0.81\u00b10.02) with error bars match BONATI_SU2_MC exactly and increase with N_f, lying just below the dashed large-Nf asymptote nu=1-9.727/N_f (0.676/0.757/0.838) \u2014 both anchor requirements met. The orange toolkit curve was numerically reproduced from correlation_length_exponent(): 0.596 at N=28 \u2192 0.507 at N=120, and the annotated perturbative N*\u224828 matches the computed FP-merger at N=27.87. Caveat: the toolkit curve DECREASES toward 1/2 while lattice nu increases \u2014 trend-consistent only in FP existence above N*, a documented qualitative-proxy limitation of the toolkit, faithfully (not erroneously) rendered and disclosed in the caption.",
+   "caption_consistent": true,
+   "annotation_issues": "None substantive. Axes labeled, legend accurate (Nc=1, N_f\u226528 matches implementation), Wilson-Fisher 1/2 and large-N_f asymptote reference lines labeled, no garbled text. Only nit: legend's \"N* \u2248 28\" rounds the computed 27.87, and the toolkit curve's opposite slope vs the lattice trend is not called out on the plot itself (it is in the caption)."
+  },
+  {
+   "figure": "evaluation/figures/matter_continuation.png",
+   "verdict": "FAIL",
+   "physics_note": "Plotted values are anchor-consistent: g* falls 0.694->0.646->0.403->0.373, lambda* 0.1423->0.1357, lambda_phi* 0.0120->0.0066; Korver N_s=12 bound shaded; exponents real with theta_1=0.75 at N_s=0 matching the toolkit (no spurious complex literature pair). But the continuation silently failed at N_s=2 and N_s=8 (generator requested [0,1,2,8,10,12]; reproduced: solver returns None at 2 and 8 from the cold guess), leaving a gap over N_s=2-9 that omits the anchored g*(8)=0.438 (FP verifiably exists: warm-start gives g=0.438178) and falsely implies the NGFP branch is interrupted across most of the anchored 0..8 range.",
+   "caption_consistent": true,
+   "annotation_issues": "Missing data points at N_s=2 and N_s=8 (continuation convergence failure, not physics) create an unexplained gap between N_s=1 and N_s=10 with no marker indicating failed points. Caption mentions only g*, lambda*, and exponents \u2014 omits the third panel (lambda_phi*). Minor: x-axis labels rendered as plain 'N_s' instead of math-mode; clipped theta_3 triangles in panel 4 appear only at N_s=0,1 (possibly occluded by the References box at right)."
+  },
+  {
+   "annotation_issues": "All six \"frozen:\" boxes annotate the hardcoded Codello-2009 literature guess (g=0.970, lambda=0.140, alpha=0.006, beta=0.002) as if they were toolkit NGFP coordinates \u2014 the FixedPointFinder search from that guess returns None and the code silently falls back to the raw guess (phase_portrait.py:1051-1056). No label indicates these are literature values rather than computed ones; the Codello reference box in the last panel is not tied to them. No fixed-point marker is drawn anywhere (so no false interior star, but also nothing signaling the search failed). Frozen-box text is small but legible at full resolution; axes are correctly labeled.",
+   "caption_consistent": false,
+   "figure": "quadratic_pairwise.png",
+   "physics_note": "Streamlines are the genuine toolkit quadratic flow and, consistent with the anchors, show no interior NGFP and no marker. But the slices are anchored at literature NGFP coordinates (0.97, 0.14, 0.006, 0.002) the toolkit does not possess, annotated without provenance after a silently-failed FP search. Caption claims anchoring \"at the NGFP\" (none exists) and visible asymptotic freedom of beta at the GFP \u2014 contradicted by the depicted flow: beta_beta is a beta-independent constant (-0.021), streamlines drift straight through beta=0, and the origin is not even a zero of the (alpha,beta) flow.",
+   "verdict": "FAIL"
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/foliated_3d.png",
+   "verdict": "FAIL",
+   "physics_note": "The anchors say the foliated implementation has NO NGFP with g>0 (only the g=0 fixed line), yet the figure plots a green star labeled \"NGFP (2 rel.)\" at g~0.45 \u2014 a fixed point the toolkit does not produce, with a relevant-direction count taken from literature, not toolkit output. The lambda_ADM=1 \"full Diff\" plane and lambda=1/2 singularity plane are correctly highlighted, but the flow is a tangle of long straight blue streaks spanning the whole box; no attraction back toward lambda_ADM=1 for g>0 is discernible. Color encoding is broken: all lines saturate at one end.",
+   "annotation_issues": "(1) Legend/marker \"NGFP (2 rel.)\" asserts a foliated NGFP with two relevant directions; toolkit finds none with g>0, contradicting the anchor. (2) Colorbar labeled log(1+|beta|) spans -0.100 to +0.100 \u2014 impossible, since log(1+|beta|)>=0; all trajectories render uniform deep blue, so the color scale conveys nothing. (3) The star sits at/below the bottom edge of the axes box; its lambda and lambda_ADM coordinates are unreadable and it may be clipped outside the plotted volume. (4) Flow lines are unnormalized full-box streaks, making direction/convergence illegible. Axes labels (g, lambda, lambda_ADM), plane labels \"lambda_ADM=1 (full Diff)\" and \"lambda=1/2\", and the reference box are legible.",
+   "caption_consistent": true
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/3d_flow.png",
+   "verdict": "FAIL",
+   "physics_note": "Anchors require node-like topology at the NGFP (0.693, 0.142): one relevant (theta=+0.750) and one strongly irrelevant (theta=-29.86) direction, with trajectories collapsing onto a 1D unstable manifold. The figure instead shows trajectories running from g~0 (IR, blue) to g~100 (UV, red) \u2014 UV runaway away from the NGFP, the opposite of asymptotic safety. The g axis spans 0-100, making the entire FP region invisible; no trajectory approaches the marked NGFP. No eigenvector arrows or theta labels exist to check against 0.750/-29.86. Only the legend's 'NGFP (1 rel.)' matches the toolkit anchor.",
+   "caption_consistent": true,
+   "annotation_issues": "No theta values or eigenvector arrows annotated at the NGFP (criteria expect 0.750 and -29.86). g-axis range 0-100 collapses the NGFP marker onto the plot-box corner and hides the fixed-point region (g<1.5) entirely. Colorbar spans only t in [-5.0, -3.8] while the z-axis spans [-5, 0] \u2014 inconsistent dual time scales; trajectories cover only a 1.2-unit slab of RG time. GFP circle floats on the back wall, not clearly at the (0,0) origin. Star label 'Reuter 1998' attributes the FP to a paper whose exponents are a complex pair (spiral, 2 relevant), while the legend claims '1 rel.' \u2014 mixed attribution."
+  },
+  {
+   "figure": "/root/cdev/exasymptoticsafety/evaluation/figures/cross_analogue_bridge.png",
+   "verdict": "PASS",
+   "physics_note": "Conceptual 4-box commutative diagram exactly as required: Classical RG (beta functions, fixed points, theta_i), Quantum Computing (VQRG, Grover, Koopman), Control/Hydraulic (Impedance Z(s), Bode plots, pipe network), Integral Transforms (Laplace, Mellin, Wavelet, Fourier), with edges \"Variational encoding\", \"Impedance bridge\", \"Laplace/Mellin transform\", \"Koopman evolution\", \"Transfer functions H(s)\" and center claim \"All paths yield consistent theta_i\". Consistent with the 1e-13 commutativity anchor; no numeric theta values are annotated, so no conflict with the node-vs-spiral NGFP issue. All text legible.",
+   "caption_consistent": true,
+   "annotation_issues": "None material. Minor: the center claim \"All paths yield consistent theta_i\" slightly overstates the toolkit, where only the RG/transfer-matrix/resolvent paths are asserted (hydraulic best-effort, quantum unasserted); explicit couplings<->pressures wording is absent (hydraulic box shows impedance/pipe-network items instead), but mappings shown are sensible."
+  }
+ ],
+ "sanity": "bode.png \u2014 OK \u2014 two-panel Bode plot with labeled magnitude/phase axes and clean curves.\nscalogram.png \u2014 OK \u2014 heatmap with labeled axes, colorbar, and visible structure.\nheat_kernel_coefficients.png \u2014 OK \u2014 grouped bars with legend/labels render cleanly (TT bars are near-zero height, so only scalar/vector visible, but nothing garbled).\ngrover_success_probability.png \u2014 OK \u2014 oscillating P(k) curve, axes, and legend render; references box slightly overlaps the k_opt star marker but stays readable.\nflrw_evolution.png \u2014 OK \u2014 three stacked labeled subplots with visible curves and legend.",
+ "animations": "RG flow AHM (frames 1-3): PASS \u2014 at t=0 only the seed points are shown, at t=2 trajectories have grown most of the way toward the charged-FP star, and at t=4 all trajectory heads have converged onto the fixed point, a clean monotone flow development with no blank or garbled frames (minor cosmetic note: the title is clipped at the right edge, \"\u03b1 = \u03b1\u2026\", and the plot is a 2D u\u2013r projection despite the \"3D\" label).\n\nnu vs N_f sweep (frames 1-3): PASS \u2014 the red sweep marker starts at N_f\u224812, advances to N_f\u224866 with the traversed portion of the toolkit curve highlighted in red, and reaches N_f=120 with the full curve highlighted, a sensible monotone sweep over a static, well-rendered background with no blank or garbled frames."
+}

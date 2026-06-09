@@ -1,0 +1,73 @@
+Generating 51 figures → evaluation/figures-after/ (png, workers=4, timeout=300s)
+
+  OK   wetterich_equation.png  (0.5s)
+  OK   asymptotic_safety_concept.png  (1.1s)
+  OK   cross_analogue_bridge.png  (0.8s)
+  OK   regulator_comparison.png  (1.3s)
+  OK   fp_stability_concept.png  (1.4s)
+  OK   hydraulic_analogy.png  (1.1s)
+  OK   running_couplings.png  (1.3s)
+<lambdifygenerated-4>:2: RuntimeWarning: divide by zero encountered in scalar divide
+  return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) + 2), _Dummy_35*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_35))*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_35))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_35)**(-1.0))*(lambda_ADM - 1)/pi]
+<lambdifygenerated-4>:2: RuntimeWarning: invalid value encountered in scalar multiply
+  return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) + 2), _Dummy_35*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_35))*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_35))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_35)**(-1.0))*(lambda_ADM - 1)/pi]
+<lambdifygenerated-4>:2: RuntimeWarning: divide by zero encountered in scalar power
+  return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) + 2), _Dummy_35*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_35))*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_35))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_35)**(-1.0))*(lambda_ADM - 1)/pi]
+<lambdifygenerated-4>:2: RuntimeWarning: invalid value encountered in scalar divide
+  return [g*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) + 2), _Dummy_35*((1/3)*g*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2) + (1/2)*g*(-1/3*g*(-1/9 + (5/6)/(6 - 12*_Dummy_35))*(-4 + 5/(1 - 2*_Dummy_35) + 6/(1 - 2*_Dummy_35)**2)/(pi*((1/6)*g*(-2 + 5/(2 - 4*_Dummy_35) + 3/(1 - 2*_Dummy_35)**2)/pi + 1)) - 2 + 5/(2 - 4*_Dummy_35))/pi, (1/2)*g*(-1 + (1 - 2*_Dummy_35)**(-1.0))*(lambda_ADM - 1)/pi]
+  OK   hydraulic_network.png  (2.0s)
+  OK   foliated_3d.png  (1.8s)
+/root/cdev/exasymptoticsafety/src/asymsafety/gui/visualization_3d.py:1024: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+  OK   eh_phase_portrait.png  (3.2s)
+/root/cdev/exasymptoticsafety/src/asymsafety/gui/visualization_3d.py:1285: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+  OK   fp_stability_3d.png  (0.9s)
+/root/cdev/exasymptoticsafety/src/asymsafety/gui/visualization_3d.py:511: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+  OK   flow_basin_3d.png  (1.1s)
+  OK   matter_continuation.png  (1.9s)
+  OK   bode.png  (0.9s)
+  OK   pseudospectrum.png  (0.7s)
+  OK   comparison_table.png  (0.4s)
+  OK   3d_flow.png  (7.0s)
+  OK   scalogram.png  (2.7s)
+  OK   running_newton_constant.png  (1.5s)
+  OK   quadratic_pairwise.png  (4.6s)
+  OK   lapse_with_horizons.png  (1.2s)
+  OK   classical_vs_rg_lapse.png  (1.1s)
+  OK   scale_identification.png  (1.1s)
+  OK   koopman_spectrum.png  (0.8s)
+  OK   qft_power_spectrum.png  (0.6s)
+  OK   flrw_evolution.png  (1.7s)
+  OK   grover_success_probability.png  (0.3s)
+  OK   koopman_modes.png  (1.2s)
+  OK   vqrg_cost_landscape.png  (0.6s)
+  OK   vqrg_optimization_trajectory.png  (0.8s)
+  OK   quantum_fisher_eigenvalues.png  (0.6s)
+  OK   seeley_dewitt_extraction.png  (0.3s)
+  OK   gibbs_state_purity.png  (0.3s)
+  OK   grover_measurement_distribution.png  (2.0s)
+/root/cdev/exasymptoticsafety/src/asymsafety/gui/visualization_3d.py:1512: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+  OK   partition_function.png  (1.4s)
+  OK   koopman_spectrum_3d.png  (1.1s)
+  OK   spectral_sum_convergence.png  (0.5s)
+  OK   heat_kernel_coefficients.png  (0.2s)
+  OK   hawking_temperature.png  (5.9s)
+/root/cdev/exasymptoticsafety/src/asymsafety/gui/visualization_3d.py:1424: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+  OK   charged_fp_boundary.png  (0.5s)
+  OK   ahm_phase_diagram.png  (0.8s)
+  OK   vqrg_cost_isosurface_3d.png  (2.0s)
+  OK   nu_vs_nf.png  (0.7s)
+  OK   ahm_as_bridge.png  (0.6s)
+  OK   graviton_form_factor.png  (1.0s)
+  OK   amplitude_vs_energy.png  (1.1s)
+  OK   regge_trajectory.png  (0.4s)
+  OK   scattering_concept.png  (1.6s)
+  OK   partial_wave_unitarity.png  (1.5s)
+  OK   scattering_bridge.png  (0.5s)
+  OK   as_vs_string.png  (1.0s)
+
+Done in 18.7s: 51 succeeded, 0 failed.

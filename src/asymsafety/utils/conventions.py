@@ -26,7 +26,9 @@ Dimensionless couplings:
     α, β                (R^2 and C^2 couplings, dimensionless in d=4)
 
 Anomalous dimension:
-    η_N = -∂_t G / G = -∂_t ln(G)
+    η_N = +∂_t ln(G) = -∂_t ln(Z_N)      (G ∝ 1/Z_N)
+    Consistent with β_g = (d - 2 + η_N) g for g = G k^{d-2};
+    at the NGFP η_N = -(d-2), i.e. G ~ k^{-(d-2)}.
 """
 
 from sympy import Rational

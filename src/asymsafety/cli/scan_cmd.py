@@ -61,7 +61,8 @@ def run_scan(args: argparse.Namespace) -> int:
     constant_params = parse_kv_pairs(args.param)
     name, values = _parse_param_range(args.param_range)
     raw_guess = parse_kv_pairs(args.guess)
-    guess = {k: float(v) for k, v in raw_guess.items()}
+    user_guess = {k: float(v) for k, v in raw_guess.items()}
+    guess = dict(user_guess)
 
     rows: list[dict] = []
     couplings: list[str] = []
@@ -73,8 +74,21 @@ def run_scan(args: argparse.Namespace) -> int:
         if not couplings:
             couplings = list(system.coupling_names)
         finder = FixedPointFinder(system)
-        # Fall through unknown couplings to 0.0 via the finder's own logic
+        # Fall through unknown couplings to 0.0 via the finder's own logic.
+        # fsolve can fail at isolated parameter values from a guess that
+        # works for both neighbours; fall back to the user's original guess
+        # and a slightly perturbed one before declaring no FP.
         fp = finder.find_fixed_point(guess, tol=args.tol)
+        if fp is None or fp.is_gaussian:
+            for fallback in (
+                user_guess,
+                {k: v * 1.05 + 1e-3 for k, v in guess.items()},
+            ):
+                if not fallback:
+                    continue
+                fp = finder.find_fixed_point(fallback, tol=args.tol)
+                if fp is not None and not fp.is_gaussian:
+                    break
         row: dict = {name: int(value), "fp_exists": fp is not None}
         if fp is not None and not fp.is_gaussian:
             row.update({c: float(fp.location.get(c, 0.0)) for c in couplings})

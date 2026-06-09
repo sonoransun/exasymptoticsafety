@@ -25,6 +25,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from asymsafety.scattering import bootstrap as _bs
 from asymsafety.scattering import consistency as _cons
 from asymsafety.scattering.amplitude import GravitonMediatedAmplitude
@@ -59,8 +61,12 @@ class ScatteringBridge:
         as_ultrasoft = _bs.ultrasoft_falloff(
             self.as_amplitude, cos_theta=self.cos_theta
         )
+        # Sample the string amplitude midway between its Regge poles
+        # (s = (n + 1/2)/alphap) so the falloff fit tracks the decaying
+        # envelope rather than the pole spikes.
+        ladder = (np.arange(2, 26) + 0.5) / self.string_amplitude.alphap
         string_ultrasoft = _bs.ultrasoft_falloff(
-            self.string_amplitude, cos_theta=self.cos_theta
+            self.string_amplitude, cos_theta=self.cos_theta, s_values=ladder
         )
         return {
             "as_growth_exponent": as_froissart["growth_exponent"],

@@ -48,10 +48,10 @@ class ModeSpectrum:
     def multiplicity(self, field_type: str, l: int) -> int:
         """Multiplicity (degeneracy) of mode l on S^d.
 
-        For d=4 (S^4):
-            Scalars:     d_l = (l+1)²(l+2)²/4      [= (2l+3)(l+1)(l+2)/6 * ...]
-            Trans. vec:  d_l = (2l+3)(l+1)(l+2)/2 · 3   (transverse, 3 components)
-            TT tensors:  d_l = 5(2l+3)(l-1)(l+4)/6 · ... [Christensen-Duff 1979]
+        For d=4 (S^4) [Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888]:
+            Scalars:     d_l = (2l+3)(l+1)(l+2)/6,        l ≥ 0
+            Trans. vec:  d_l = l(l+3)(2l+3)/2,            l ≥ 1
+            TT tensors:  d_l = 5(2l+3)(l-1)(l+4)/6,       l ≥ 2
         """
         if self.d != 4:
             raise NotImplementedError(f"Multiplicities for S^{self.d}")
@@ -73,48 +73,35 @@ class ModeSpectrum:
 
     @staticmethod
     def _scalar_mult_S4(l: int) -> int:
-        """Scalar multiplicity on S^4: (l+1)²(l+2)²/4.
+        """Scalar multiplicity on S^4: (2l+3)(l+1)(l+2)/6.
 
-        This equals the dimension of the (l,0) representation of SO(5).
+        This is the dimension of the (l,0) representation of SO(5);
+        anchors: d_0 = 1 (constant), d_1 = 5 (Cartesian coordinates of
+        S^4 ⊂ R^5), d_2 = 14.
+        Reference: Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888.
         """
-        return (l + 1)**2 * (l + 2)**2 // 4
+        return (2 * l + 3) * (l + 1) * (l + 2) // 6
 
     @staticmethod
     def _vector_mult_S4(l: int) -> int:
-        """Transverse vector multiplicity on S^4.
+        """Transverse vector multiplicity on S^4: l(l+3)(2l+3)/2, l ≥ 1.
 
-        Dimension of the (l,1) representation minus longitudinal modes.
-        d_l^vec = (2l+3)(l+3)! / (3! l!) - scalar_mult(l+1)?
-        Actually: total vector = d * scalar_mult, transverse = total - gradient modes.
-
-        For transverse vectors on S^4, l ≥ 1:
-            d_l = (l+1)(l+2)(2l+3) · 1    [need factor]
-
-        Using Rubin-Ordonez (1984) for S^4:
-            Transverse vector mult = l(l+3)(2l+3)/3 · 2
-        Wait, let me use the known result:
-            d_l^{T,vec} on S^4 = (2l+3)(l+3)!/(l! · 3!) - (l+1+1)^2(l+2+1)^2/4
-        This is getting complicated. Let me use the direct formula.
-
-        For transverse vectors on S^N (N=4):
-            d_l = (N-1)(2l+N-1)(l+N-2)! / ((N-1)! l!)
-        With N=4:
-            d_l = 3(2l+3)(l+2)! / (3! l!) = (2l+3)(l+2)(l+1)/2
+        This is the dimension of the (l,1) representation of SO(5);
+        anchor: d_1 = 10 = dim SO(5), the Killing vectors of S^4.
+        Reference: Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888.
         """
         if l < 1:
             return 0
-        return (2 * l + 3) * (l + 2) * (l + 1) // 2
+        return l * (l + 3) * (2 * l + 3) // 2
 
     @staticmethod
     def _TT_mult_S4(l: int) -> int:
-        """TT tensor multiplicity on S^4.
+        """TT tensor multiplicity on S^4: 5(2l+3)(l-1)(l+4)/6, l ≥ 2.
 
-        For symmetric transverse-traceless tensors on S^4, l ≥ 2:
-            d_l = 5(2l+3)(l-1)(l+4)/6
-
-        This is the dimension of the (l,2) representation of SO(5)
-        minus the contributions from vector and scalar modes.
-        Reference: Christensen & Duff (1979).
+        This is the dimension of the (l,2) representation of SO(5);
+        anchor: d_2 = 35.
+        References: Rubin & Ordóñez, J. Math. Phys. 25 (1984) 2888;
+        Christensen & Duff, Nucl. Phys. B 154 (1979) 301.
         """
         if l < 2:
             return 0
@@ -152,19 +139,26 @@ class YorkDecomposition:
         return self.d * (self.d + 1) // 2
 
     def excluded_modes(self, field_type: str) -> list[int]:
-        """Modes excluded from the York decomposition.
+        """Modes excluded from the York decomposition on S^4.
 
-        Killing vectors and conformal Killing vectors correspond to
-        gauge modes that must be excluded:
-            - TT: l = 0, 1 excluded (no TT tensors for l < 2)
-            - Vector: l = 0 excluded (no transverse vectors for l < 1),
-                      l = 1 are Killing vectors (excluded from physical spectrum)
-            - Scalar σ: l = 0, 1 excluded (σ modes don't exist for l < 2)
+        These are harmonics that exist in the constituent field's tower
+        (l ≥ min_l of the underlying harmonic type) but are annihilated
+        by the decomposition map and therefore do not contribute to
+        h_μν. Non-existent harmonics below the tower's minimum l are
+        handled by :meth:`ModeSpectrum.min_l`, not listed here.
+            - TT: none (the TT tower starts at l = 2; no zero modes)
+            - Vector ξ: l = 1, the 10 Killing vectors of S^4
+                        (D_μ ξ_ν + D_ν ξ_μ = 0)
+            - Scalar σ: l = 0 (constant) and l = 1 (proportional to the
+                        5 conformal Killing vectors); both give
+                        (D_μ D_ν - (1/d) g_μν D²) σ = 0
             - Scalar h: no exclusions (l ≥ 0)
+
+        Reference: Lauscher & Reuter, Phys. Rev. D 65 (2002) 025013.
         """
         exclusions = {
-            "TT": [0, 1],
-            "vector": [0],
+            "TT": [],
+            "vector": [1],
             "scalar_sigma": [0, 1],
             "scalar_h": [],
         }

@@ -1,0 +1,7 @@
+Generating 2 animation(s) → evaluation/animations/ (writer=ffmpeg, fps=24, workers=2, timeout=300s)
+
+  OK   rg_flow_ahm  (rg_flow_ahm.mp4, 30 KiB)  (13.4s)
+  OK   nu_vs_nf_sweep  (nu_vs_nf_sweep.mp4, 25 KiB)  (16.3s)
+
+Done in 16.9s: 2 succeeded, 0 failed.
+EXIT=0

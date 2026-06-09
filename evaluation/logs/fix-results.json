@@ -1,0 +1,148 @@
+{
+ "clusters": [
+  {
+   "cluster": "A \u2014 Einstein-Hilbert core + matter unification (HV-8, HV-11b, HV-11c, HV-12, HV-12b, HV-7b)",
+   "findings_fixed": [
+    "HV-8",
+    "HV-11b",
+    "HV-11c",
+    "HV-12",
+    "HV-12b",
+    "HV-7b"
+   ],
+   "files_changed": [
+    "/root/cdev/exasymptoticsafety/src/asymsafety/beta/einstein_hilbert.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/frg/anomalous_dim.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/beta/matter.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/actions/matter.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/utils/conventions.py",
+    "/root/cdev/exasymptoticsafety/tests/test_eh_beta.py",
+    "/root/cdev/exasymptoticsafety/tests/test_matter.py"
+   ],
+   "verification": "HV-8: rebuilt system is symbolically identical to eh_litim_reference.py (simplify(diff)==0 for both betas); reference script prints REFERENCE VALIDATED: True; toolkit FP g*=0.707321, lam*=0.193201, theta=1.475302\u00b13.043206i, eta_N(FP)=-2 to 1e-30, 2 relevant directions (was 0.6937/0.1423, real {+0.75,-29.9}). HV-11b: hv11_gaussian.py now gives d\u03b2_\u03bb/dg|GFP = 1/(2\u03c0) = +0.159155 symbolically (was -8/\u03c0 = -2.546); GFP eigenvalues exactly {2,-2}. HV-11c: d=3 system differs from d=4; \u03b2_g/g \u2192 d-2 (=1 at d=3, 3 at d=5) via the d-dimensional Reuter (1998)/0708.1317 closed forms; d=2 raises NotImplementedError; CLI d=5 evaluates. HV-12: hv12_matter.py: beta_g and beta_lambda \"identical across paths? True\" for eh vs eh_matter(0 matter); eta_N identical; zero-matter NGFP found at (0.707321, 0.193201) by both eh_matter and gravity_matter; hv12b grid finds exactly one NGFP; scan_matter_content fp_exists=True at N=0. HV-12b: per-field A now exactly DEP: scalar +1/(6\u03c0), Dirac +1/(3\u03c0), vector -2/(3\u03c0); Dirac scan g* 0.7073\u21921.0875 (dg*/dN_D>0, FP lost N_D\u22481.4); vectors g* 0.7073\u21920.4656 (stabilize); scalars push \u03bb* 0.193\u21920.236 (N_s=4) toward the 1/2 pole with g* mildly decreasing \u2014 matches DEP's full-system text verbatim (\"scalars push \u039b* towards larger values, while G* is almost stable\"; fermions \"larger G, more negative \u039b\"; vectors \"always decrease G*\"); the perturbative projection g*=12\u03c0/(22-N_S-2N_D+4N_V) increases with N_S as findings.json's DEP Eq. (39) form. HV-7b: conventions.py and anomalous_dim.py headers now state \u03b7_N = +\u2202_t ln G = -\u2202_t ln Z_N.",
+   "tests_status": "Module-local: tests/test_eh_beta.py 19/19 passed (rewritten: pins g*=0.7073208809868445, \u03bb*=0.19320050715078566 at rtol 1e-8, complex pair \u03b8, 2 relevant directions, GFP slope +1/(2\u03c0) symbolic, d-dependence + NotImplementedError tests); tests/test_matter.py 35/35 passed (added TestZeroMatterUnification, TestDEPMatterWeights exact rationals, TestMatterTrends; updated stale guesses). No test_anomalous_dim/test_conventions/test_eh_matter/test_gravity_matter files exist. Full suite: 550 passed, 11 failed \u2014 all 11 outside my editable set: 8 in forbidden tests/test_benchmarks_published.py (6 from this cluster's corrected values needing pin regeneration, 2 from other clusters' in-flight quadratic/gauge-higgs fixes), 1 forbidden visualization heat-kernel hash (other cluster), 1 tests/test_cli_scan.py stale guess (cascade, see blocked_notes), 1 tests/test_cli_amplitude.py pre-existing at branch HEAD (verified via git stash run: fails identically without any of my changes).",
+   "blocked_notes": "(1) tests/test_benchmarks_published.py (forbidden): TestReuterFixedPoint::test_pinned_toolkit_values needs new pins (see new_values); TestGravityMatterFixedPoint fixture guess must become {\"g\":0.66,\"lambda\":0.21,\"lambda_phi\":0.01} and pins (0.6603437193942904, 0.20647823369106516, 0.008955551233512223); its n_relevant is now 3 (\u03b8 = 1.61179832\u00b13.24420356i, +0.77105219), so test_two_relevant_directions must change 2\u21923. (2) tests/test_cli_scan.py::test_gravity_matter_scalar_scan_json passes stale --guess g=0.65,lambda=0.14,lambda_phi=0.01 which no longer converges for N_s=1; change to g=0.66,lambda=0.21,lambda_phi=0.01 (file outside my cluster). (3) validation/reuter_1998.py validate_eh_fixed_point now passes all checks on toolkit output when fed theta_imag=+3.043 (HV-9 relabeling is another cluster's finding). (4) tests/test_cli_amplitude.py failure (ir_newtonian_recovery=False) is pre-existing at HEAD 91a546e, not caused by this cluster. (5) scan_gravity_matter_fps internal default guess updated in-cluster (beta/matter.py) to (0.66, 0.21). (6) In this single-\u03b7_N truncation no scalar/vector FP-annihilation bound arises (FP persists past N_s=39, \u03bb*\u21921/2 asymptotically) \u2014 relevant to the korver_2024 bound finding (HV-12c, other cluster).",
+   "new_values": "NGFP (d=4, Litim Type Ia, de Donder): g* = 0.7073208809868445, \u03bb* = 0.19320050715078566, g*\u03bb* = 0.13665475292499885; \u03b8 = 1.475302425763855 \u00b1 3.043205846411925 i (2 relevant); \u03b7_N(FP) = -2 exactly; \u2202\u03b2_\u03bb/\u2202g|GFP = +1/(2\u03c0). Zero-matter agreement: build_eh_matter_beta_system(MatterContent()) and build_gravity_matter_fp_system(MatterContent()) are symbolically identical to build_eh_beta_system (sympy simplify(diff)==0 both couplings) and find the same FP numerically. g*(N_s), \u03bb*(N_s) for N_s=0..4 (both matter builders agree): N=0: 0.7073208809868445 / 0.19320050715078566; N=1: 0.6605341725518258 / 0.20643574113948215; N=2: 0.6212088040796755 / 0.21762150393733623; N=3: 0.5875186261258835 / 0.22727272727273992; N=4: 0.5582145113053995 / 0.23573534451970557 (\u03b8 pair: 1.475302\u00b13.043206i \u2192 2.031535\u00b13.705061i). Quartic FP (N_s=1, scalar_quartic): (g, \u03bb, \u03bb_\u03c6) = (0.6603437193942904, 0.20647823369106516, 0.008955551233512223), \u03b8 = {1.61179832\u00b13.24420356i, +0.77105219}, n_relevant = 3. Yukawa FP (N_s=1,N_D=1): (0.9342787587933, 0.1579279893884, \u03bb_\u03c6=0.0153385227708, y=0). Running-\u03be FP: \u03be* = 0.3334413258634. Dirac: N_D=1 FP (1.087474, 0.125000), FP annihilates at N_D \u2248 1.4. Vectors: N_V=4 FP (0.465607, 0.222670), no bound."
+  },
+  {
+   "cluster": "B \u2014 string bootstrap (HV-13b, HV-13c, HV-13d, HV-13e)",
+   "findings_fixed": [
+    "HV-13b",
+    "HV-13c",
+    "HV-13d",
+    "HV-13e"
+   ],
+   "files_changed": [
+    "/root/cdev/exasymptoticsafety/src/asymsafety/scattering/bootstrap.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/validation/cheung_2025.py",
+    "/root/cdev/exasymptoticsafety/tests/test_bootstrap.py"
+   ],
+   "verification": "Re-ran evaluation/audit/amplitudes/hv13_bootstrap.py. HV-13b: code residue(1, t=-2.7) = +0.70000000 vs numeric +0.70000000 (was -0.7); all 12 (n,t) cases code_matches_numeric=True including odd n. HV-13c: VS now Gamma(-a_i)/Gamma(1+a_i); at massless points code equals mpmath(dps=40) truth, e.g. VS(2.3,-1.1,-1.2) = -24.404952827835178 vs -24.404952827835192 (old code: identically 1); complex reference 8.874936256687631+7.385956960222661i matches the audit's pinned 8.874936257+7.385956960i. HV-13d: StringAmplitude VS default alpha0=0, sum a_i=0 on u=-s-t; genuine Regge tower \u2014 pole at every level s=4n (audit 6c: True for all levels >= 0; the s=-4 row is below the massless tower by construction). Level residues match [prod_{k=1}^{n-1}(a_t+k)]^2/(n!)^2 to rel 1e-9 (degree 2(n-1), positive). HV-13e: validate_bootstrap all_passed=True; higher-spin check now non-circular (numeric pole-limit residues: max 1.0e-11 at zeros, closed-form-vs-numeric 2.3e-10 < 1e-8) and sign-sensitive; ultrasoft fit on pole-free dual ladder s=(n+1/2)/alphap: slope_lo=-9.80 -> slope_hi=-27.97 (default window -6.40 -> -12.83; [2e2,2e4]: -92.4 -> -164.9) \u2014 super-polynomial on every window, vs the old constant -9 power law.",
+   "tests_status": "tests/test_bootstrap.py: 20 passed (incl. 6 new corrected-math tests: residue sign/amplitude-limit match, VS reference values, Regge tower, level residues, per-kind alpha0, pole-free ultrasoft). tests/test_scattering_bridge.py: 8 passed. tests/test_scattering_{amplitude,consistency,kinematics,visualization}.py: 43 passed. Read-only pinned classes test_benchmarks_published.py::TestCheung2025Bootstrap and ::TestScatteringBridge: pass unmodified. tests/test_cli_amplitude.py: 3 passed, 1 pre-existing failure (test_amplitude_with_checks_and_bridge_json, ir_newtonian_recovery=False) \u2014 confirmed failing on clean branch HEAD with all working-tree changes stashed, i.e. independent of this cluster.",
+   "blocked_notes": "(1) Pre-existing failure outside cluster: tests/test_cli_amplitude.py::test_amplitude_with_checks_and_bridge_json fails via scattering/consistency.py ir_newtonian_recovery on the EH trajectory \u2014 present on clean HEAD before any cluster edits; belongs with the HV-8/EH-trajectory integration step. (2) No stale VS-formula text found in docs/README/notebooks (they reference only function names), so no doc cascade. (3) tests/test_benchmarks_published.py bootstrap assertions pass as-is; no pin regeneration needed for this cluster.",
+   "new_values": "Corrected VS convention: alpha0=0, alphap=alpha'/4=0.25; A = prod Gamma(-a_i)/prod Gamma(1+a_i). Reference values (mpmath dps=40): VS(2.3,-1.1,-1.2) = -24.404952827835192; VS(7.7,-3.3,-4.4) = -0.07382954486058299; VS(1.3+0.7j, -2.2+0.4j, u=-s-t) = 8.874936256687631+7.385956960222661j. Pole tower s_n = n/alphap = 4n; level-n residue (in a_s, on sum a_i=0) = [prod_{k=1}^{n-1}(a_t+k)]^2/(n!)^2. Veneziano residue: Res = -(1/n!) prod_{k=1}^{n}(alpha(t)+k), e.g. Res(n=1, t=-2.7) = +0.7. Ultrasoft slopes on dual ladder s=(n+1/2)/0.25, n=1..25, cos_theta=0.3: slope_lo=-9.797, slope_hi=-27.966; default geomspace [5,50] window: -6.400/-12.832. cheung_2025 residue_atol now 1e-8 (numeric Richardson extraction accuracy ~2e-10)."
+  },
+  {
+   "cluster": "C \u2014 quadratic gravity universals (HV-10, HV-10b, HV-10c, HV-10d)",
+   "findings_fixed": [
+    "HV-10",
+    "HV-10b",
+    "HV-10c",
+    "HV-10d"
+   ],
+   "files_changed": [
+    "/root/cdev/exasymptoticsafety/src/asymsafety/beta/quadratic.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/validation/codello_2009.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/visualization/phase_portrait.py",
+    "/root/cdev/exasymptoticsafety/tests/test_quadratic_beta.py"
+   ],
+   "verification": "HV-10/HV-10b: re-ran evaluation/audit/frg-beta/hv10_quadratic.py \u2014 code now yields 16pi^2*beta_alpha(0) = 5/36 (\"MATCHES lit f_R2 universal (+5/36)\") and 16pi^2*beta_beta(0) = 133/20 (\"MATCHES lit f_C2 universal (+133/20)\"), replacing the condemned 67/180 and -329/90; the 133/10 C^2-normalization and 196/15 = 3x Gauss-Bonnet contaminations are gone (betas are now coupling-independent constants, free_symbols == set()). codello_2009.ONE_LOOP_UNIVERSAL now reads 5/36 and 133/20 and matches the system to rtol 1e-12. HV-10c: beta_beta(0) = +0.04211161695134664 > 0; docstrings in beta/quadratic.py now state AF in the code's coefficient convention (beta = C^2 coefficient grows toward UV, lambda_C = 1/(2 beta) -> 0+, derived from beta_{lambda_C} = -(133/10)lambda_C^2/(16pi^2), Fradkin-Tseytlin 1982 / Avramidi-Barvinsky 1985 / Codello-Percacci hep-th/0607128). HV-10d: re-ran hv10b_quadratic_fp.py \u2014 solve(beta_alpha=0) = [] and solve(beta_beta=0) = [] (no common lambda root, no complete FP); \"Benchmark NGFP coordinates\"/\"four-coupling NGFP search\" advertisements removed from quadratic.py See-Also and quadratic_pairwise_grid docstring; both now state the one-loop system has no interior NGFP and label QUADRATIC_FP as external literature reference values. Symbolic check at origin: beta_alpha = 5/(576 pi^2), beta_beta = 133/(320 pi^2), numeric (8.795241635619598e-4, 4.211161695134664e-2).",
+   "tests_status": "tests/test_quadratic_beta.py: 13/13 pass (rewritten: exact symbolic universal assertions at rtol 1e-12/exact sympy zero, flipped AF sign test to beta_beta > 0, new no-interior-FP + zero-Jacobian-column test, pinned values updated to 8.795241635619598e-4 / 4.211161695134664e-2). tests/test_visualization_smoke.py -k quadratic: 2/2 pass. tests/test_cli_eval.py + tests/test_cli_io.py: 24/24 pass. tests/test_benchmarks_published.py quadratic subset: 1 fail / 1 pass \u2014 expected cascade, see blocked_notes.",
+   "blocked_notes": "1) tests/test_benchmarks_published.py:134 (TestCodelloPercacciBenchmark::test_one_loop_universal_signs) asserts ONE_LOOP_UNIVERSAL[\"beta_beta_1loop\"] < 0 \u2014 now fails with 6.65 (the corrected value). Integration step must flip it to > 0 (AF in the coefficient basis) and update its docstring \"\u03b2_\u03b2 < 0 (Weyl\u00b2 is asymptotically free)\". Lines 125-129 (QUADRATIC_FP keys, n_relevant == 4) and line 133 (beta_alpha_1loop > 0) still pass \u2014 QUADRATIC_FP keys/values were deliberately preserved as literature reference values. 2) scripts/generate_figures.py:346-363 (\"quadratic_pairwise\" FigureCaption) still says \"frozen couplings are anchored at the NGFP\" and \"panels containing beta exhibit asymptotic freedom ... at the GFP (Codello et al. 2009)\" \u2014 same misleading narrative I fixed in phase_portrait.py, but the script is outside my file list. 3) The audit scripts hv10_quadratic.py/hv10b_quadratic_fp.py contain hardcoded prose written for the buggy state (e.g. a final print labels the now-positive beta_beta \"< 0 ... NOT asymptotic freedom\"); the computed numbers are correct \u2014 audit artifacts left untouched.",
+   "new_values": "Corrected one-loop universals (coefficient basis, action \u2283 alpha R^2 + beta C^2, d=4): beta_alpha = (1/16pi^2)\u00b7(5/36) = 5/(576 pi^2) \u2248 8.795241635619598e-4; beta_beta = (1/16pi^2)\u00b7(133/20) = 133/(320 pi^2) \u2248 4.211161695134664e-2. Both are exact coupling-independent constants (sources: Fradkin-Tseytlin 1982; Avramidi-Barvinsky 1985; Codello-Percacci hep-th/0607128). ONE_LOOP_UNIVERSAL = {beta_alpha_1loop: 5/36, beta_beta_1loop: 133/20}. No NGFP coordinates produced \u2014 the one-loop quadratic system provably has no interior fixed point (nothing to pin for FP regeneration in this sector; only the benchmark sign assertion needs flipping)."
+  },
+  {
+   "blocked_notes": "(1) tests/test_visualization_regression.py sha256 baselines: the heat_kernel_coefficients figure and the spectral_sum_convergence figure (built on trace_on_sphere / SeeleyDeWittCoefficients) will now render different values, so their hash baselines must be regenerated in the integration step (not touched per instructions). (2) HV-2b (not assigned): ThresholdFunctions._phi_symbolic still uses the full dt R_k numerator (2x the module's stated Reuter convention) and returns a bare integrand, not an Integral \u2014 left for its own finding. (3) quantum/thermal/hamiltonian.py (foreign file) consumes the corrected ModeSpectrum multiplicities automatically; tests/test_thermal.py passes unmodified (6/6), no edits needed. (4) frg/traces.py (foreign file) HeatKernelTraceEvaluator consumes the corrected b2/b4 and now returns the constrained TT values (R-coeff -5/(96 pi^2 (1+m2))); for TT with d!=4 it would now raise NotImplementedError instead of returning a wrong d-generic value.",
+   "cluster": "D \u2014 spectral / heat kernel / exponential regulator (HV-2, HV-3, HV-4, HV-4b, HV-4c, HV-5, HV-6, HV-6b)",
+   "findings_fixed": [
+    "HV-2",
+    "HV-3",
+    "HV-4",
+    "HV-4b",
+    "HV-4c",
+    "HV-5",
+    "HV-6",
+    "HV-6b"
+   ],
+   "files_changed": [
+    "/root/cdev/exasymptoticsafety/src/asymsafety/frg/threshold.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/geometry/decomposition.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/frg/spectral.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/compute/batch/spectral.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/frg/heat_kernel.py",
+    "/root/cdev/exasymptoticsafety/tests/test_threshold.py",
+    "/root/cdev/exasymptoticsafety/tests/test_heat_kernel.py",
+    "/root/cdev/exasymptoticsafety/tests/test_decomposition.py",
+    "/root/cdev/exasymptoticsafety/tests/test_spectral.py"
+   ],
+   "new_values": "No beta-function/fixed-point pins affected (audit-confirmed: Litim closed forms untouched). Corrected reference values: S^4 degeneracies scalar (2l+3)(l+1)(l+2)/6 = 1,5,14,30,55; transverse vector l(l+3)(2l+3)/2 = 10,35,81 (l=1 gives 10 Killing vectors); TT 5(2l+3)(l-1)(l+4)/6 unchanged. S^3 TT degeneracy 2(l-1)(l+3) (l=2 -> 10). excluded_modes: TT [], vector [1], scalar_sigma [0,1], scalar_h []. Exponential-regulator anchors: Phi^1_1(0)=pi^2/6, Phi^2_1(0)=1, Phi^1_2(0)=2*zeta(3), Phit^1_1(0)=1, Phi^1_1(1/2)=1.2713210370208803. Heat kernel: vector Riem^2 coefficient -11/180; vector/ghost b4 on S^4 = 179 R^2/540 (=716/15 at R=12); TT b2 = -(5/6)R (-D^2) and -(25/6)R (Lichnerowicz, trE=10R/3); TT b4 on S^4 = -R^2/432 (-D^2) and 719 R^2/432 (Lichnerowicz); Omega^2 bundle traces: vector -(1/12), Sym^2/TT -(d+2)/12.",
+   "tests_status": "Module-local (all green): tests/test_threshold.py 22 passed (9 new exponential-regulator tests), tests/test_heat_kernel.py 16 passed (8 new corrected TT/vector assertions), tests/test_decomposition.py 14 passed (new file), tests/test_spectral.py 20 passed (new file, incl. end-to-end trace_on_S1xS3). Consumers: tests/test_thermal.py 6 passed, tests/test_visualization_smoke.py 57 passed (63 total combined). Full suite excluding the pinned files (test_benchmarks_published, test_visualization_regression): 496 passed, 12 failed \u2014 all 12 in test_matter.py / test_cli_scan.py / test_cli_amplitude.py, which contain no reference to any cluster-D module (verified by grep); they stem from other clusters' concurrent in-flight edits (matter/EH-beta/amplitude files show as modified in git status).",
+   "verification": "HV-3/HV-4 (hv34_spectrum.py): S^4 multiplicities now match Rubin-Ordonez exactly for l=0..6 \u2014 scalar 1,5,14,30,55,91,140; vector l=1 = 10 = dim SO(5); TT 35,105,220 verified; trace_on_sphere code/truth ratio 1.0000 at l_max=128/256/512 (was x65 overcount). HV-4b: excluded_modes('vector') = [1] (TT [], sigma [0,1]). HV-4c: trace_on_S1xS3 returns 3575.193 (previously NotImplementedError on every call); S^3 TT degeneracies fallback=vectorized=truth=[0,0,10,24,42,64,90] (l=2 gives 10, was non-integer 25/3). HV-2 (hv2_exponential.py): all 8 Phi cases ratio 1.0000 vs mpmath truth (was NaN); Phi^1_1(0)=1.6449340668 = pi^2/6 (err 0.0 < 1e-8), Phi^2_1(0)=1.0000000000, Phi^1_2(0)=2.4041138063=2zeta(3), Phi^1_1(1/2)=1.2713210370208803; Phi_tilde path unchanged-correct (rel.err <= 1.4e-12). HV-5/6/6b (hv56_heatkernel.py): code symbolic vs mode-sum fit at R=12 \u2014 scalar (1, 2, 29/15) vs fit (1.0, 2.0, 1.933333336); vector (4, 20, 716/15=47.7333) vs fit (4.0, 20.0, 47.73333369), Riem^2 coeff now -11/180, b4 = 179/540 R^2 = independent Vassilevich value; TT (5, -10, -1/3) vs fit (5.0, -9.999999997, -0.3333335889); TT Lichnerowicz b2=-25R/6 (-50), b4=719/432 R^2 (239.667 vs fit 239.6664633)."
+  },
+  {
+   "cluster": "E \u2014 gauge-Higgs analogue + bridge framing (HV-15d-c BUG, HV-15d, HV-15d-b doc/reframing)",
+   "findings_fixed": [
+    "HV-15d-c",
+    "HV-15d",
+    "HV-15d-b"
+   ],
+   "files_changed": [
+    "/root/cdev/exasymptoticsafety/src/asymsafety/transforms/bridge/gauge_higgs.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/transforms/bridge/cross_analogue.py",
+    "/root/cdev/exasymptoticsafety/src/asymsafety/transforms/linear/koopman.py",
+    "/root/cdev/exasymptoticsafety/README.md",
+    "/root/cdev/exasymptoticsafety/tests/test_gauge_higgs_analogue.py",
+    "/root/cdev/exasymptoticsafety/tests/test_bridge.py",
+    "/root/cdev/exasymptoticsafety/tests/test_koopman.py"
+   ],
+   "verification": "HV-15d-c (reproducer evaluation/audit/observables/hv15d_bridge.py section D): charged_fp_guess now returns u_plus = (B+sqrt(disc))/(2A). nu(Nf) INCREASES toward 1: nu(30)=0.6657, nu(40)=0.7542, nu(60)=0.8323 (was 0.5655/0.5330/0.5174 decreasing) vs lattice 0.64/0.745/0.81 (rel err 4.0%/1.2%/2.8%, all pass 10% rtol) and vs Bonati large-Nf 1-9.727/Nf = 0.6758/0.7568/0.8379 (rel err 1.49%/0.36%/0.67% \u2014 within ~1.5%). validate_nu_vs_nf: monotonic=True, all_passed=True (was all False). Relevant directions at FP: 1 at Nf=30 and 60 (was 2, tricritical). HV-15d: verify_commutativity default tol tightened 0.1 -> 1e-9, reframed as linear-algebra regression check; at the EH NGFP transfer max_deviation=6.7e-16, resolvent=0.0 (definitional identity now documented); AHM N=60: 6.7e-16 / 0.0, all_agree=True at 1e-9. HV-15d-b (defense probe hv15db_defense.py): compare_with_stability now runs genuine EDMD \u2014 real input max_dev=1.30e-4 (agrees, tol 1e-3, values_a != values_b); fabricated garbage spectrum now FAILS (max_dev=1e6, agrees=False; was identically 0.0/True for any input). Degree-2 EDMD matches mu(M) to 4.2e-9.",
+   "tests_status": "tests/test_gauge_higgs_analogue.py (17) + tests/test_bridge.py (6) + tests/test_koopman.py (5) = 28 passed, 0 failed. Re-tightened: exact u_plus root assertion (rtol 1e-12), exactly-one-relevant-direction, nu strictly INCREASING over Nf=[30,40,60,100,200], new ~1.5% large-Nf and validate_nu_vs_nf all_passed tests, resolvent deviation == 0.0 and transfer < 1e-9 at default tol, koopman genuine-comparison + garbage-rejection regression test.",
+   "blocked_notes": "(1) tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_toolkit_nu_is_monotone_in_Nf now FAILS (forbidden file): nus=[0.7229,0.6657,0.8011,0.8719,0.9128] over Nfs=[20,30,50,80,120] \u2014 N=20 is below the one-loop threshold N*~27.9 and uses the WF fallback guess, so the curve dips then rises. Pin-regeneration should use Nfs>=28 (e.g. [30,40,60,100,200]), assert strictly increasing toward 1, and delete the stale comment 'toolkit one-loop nu decreases... opposite direction from Bonati MC'. Other 5 Bonati tests pass. (2) docs/cross-analogue-gauge-higgs.md ~lines 89-99 documents the inverted u_minus trend ('nu -> 1/2 from below') as expected \u2014 needs rewrite to the u_plus trend. (3) docs/images/nu_vs_nf.caption.md and docs/animations/nu_vs_nf_sweep.caption.md say the toolkit curve approaches nu -> 1/2; figures/animations need regeneration (scripts/generate_figures.py --update-baselines, generate_animations.py). (4) src/asymsafety/visualization/fixed_point_plot.py ~399-440: docstring/comments still tell the decreasing-nu story; its N* detection heuristic (diffs < -1e-3) still works numerically because nu drops at the fallback->u_plus threshold, so regenerated plots are correct, but text is stale. (5) src/asymsafety/visualization/bridge_diagram.py:269 in-figure text 'All paths yield consistent theta_i' is the remaining HV-15d overclaim (file outside cluster list); needs regression-check phrasing + cross_analogue_bridge.png regeneration. (6) tests/test_visualization_regression.py sha256 baselines for the affected figures must be regenerated afterward.",
+   "new_values": "u_plus charged-FP coordinates (eps=1, Nc=1): N=60 -> {alpha: 0.0166667, u: 0.0144921, r: 0}; theta = {1.20149, -0.75498, -1.0} (one relevant). nu(Nf) at u_plus: 30 -> 0.665694, 40 -> 0.754191, 60 -> 0.832298, 100 -> 0.896260, 200 -> 0.946735 (monotone increasing toward 1). One-loop threshold N* ~ 27.9 (disc = 1 - 24/N - 108/N^2 > 0). README example updated to u=0.0145, nu=0.8323. No gravitational NGFP coordinates produced by this cluster (EH NGFP observed on branch from another cluster's fix: g*=0.707321, lambda*=0.193201, theta=1.475302+/-3.043206i)."
+  }
+ ],
+ "docs": {
+  "cluster": "F \u2014 validation/documentation fixes downstream of EH-core (HV-9, HV-9b, HV-12c, HV-15a-b, HV-15b, HV-15c-b, HV-15c-c, HV-15c-d, HV-2b, HV-14b)",
+  "findings_fixed": [
+   "HV-9",
+   "HV-9b",
+   "HV-12c",
+   "HV-15a-b",
+   "HV-15b",
+   "HV-15c-b",
+   "HV-15c-c",
+   "HV-15c-d",
+   "HV-2b",
+   "HV-14b"
+  ],
+  "files_changed": [
+   "/root/cdev/exasymptoticsafety/src/asymsafety/validation/reuter_1998.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/validation/korver_2024.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/validation/manrique_2011.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/beta/foliated.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/cosmology/rg_improved_bh.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/cosmology/rg_improved_flrw.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/frg/threshold.py",
+   "/root/cdev/exasymptoticsafety/src/asymsafety/scattering/amplitude.py",
+   "/root/cdev/exasymptoticsafety/notebooks/04_rg_improved_bh.ipynb",
+   "/root/cdev/exasymptoticsafety/docs/visualization-guide.md",
+   "/root/cdev/exasymptoticsafety/tests/test_foliated_beta.py",
+   "/root/cdev/exasymptoticsafety/tests/test_threshold.py",
+   "/root/cdev/exasymptoticsafety/tests/test_cosmology.py"
+  ],
+  "verification": "HV-9: hv7_hv8_hv9_toolkit.py now prints all_passed=True, 5/5 checks pass (rel_err: g* 0.000, \u03bb* 0.001, \u03b8' 0.004, \u03b8'' 0.001, product 0.005); \u03b8'' check made label-independent via abs() since the conjugate pair's Im sign is convention. HV-9b: cluster A's eh_fixed_point_litim_d4 verified honest (\"Toolkit-computed NGFP\", both \u03b8 components, no \"known values\" language) \u2014 no edit needed. HV-12c: hv12_matter.py shows max_N_s=23, max_N_v=3, wedge N_s+6.4N_v\u226423.1 (was 12/6); validator now fails both directions: (N_s=2,ngfp=False)\u2192consistent=False, (N_s=30,ngfp=True)\u2192False, (N_v=4,ngfp=True)\u2192False; forbidden korver tests still pass. HV-15a-b/15b: hv15a_bh behavior unchanged; docs now state f'(0)\u22600, R\u224812g*M/(\u03be\u00b2r) divergent, d(r)\u221dr^{3/2} missing; hv15b_flrw doc-grep all five keywords True. HV-15c-b/c/c-d: manrique dicts = MRS Eq.(10) (0.19, 0.31, \u03b8=1.07\u00b13.31i / 0.21, 0.30); \u03bb_ADM=1 documented as ansatz-imposed; \"NGFP exists/restoration\" claims removed; test asserts \u03b2_\u03bbADM>0 above / <0 below plane and M[2,2]=g\u03bb/(\u03c0(1\u22122\u03bb)) (+0.0198944 at (0.5,0.1)). HV-2b: _phi_symbolic numerator R\u2212zR' returns sympy.Integral; ratio vs Reuter-normalized \u03a6 = 1.0 exactly at (1,1,0) and (2,1,0.5) (was 2.0\u00d7); \u03a6\u00b9\u2081(0)=\u03c0\u00b2/6=1.6449340668. HV-14b: sign paragraph added (M_here=\u2212M_DKRS, S=1\u2212iT vs DKRS's +8\u03c0G tu/s, S=1+iT).",
+  "tests_status": "Module-local: tests/test_foliated_beta.py 17/17 passed (sign-aware UV-repulsive test, exact eigenvalue g\u03bb/(\u03c0(1\u22122\u03bb)), MRS Eq.(10) pins, not-a-root pin); tests/test_threshold.py 25/25 (added TestSymbolicPhiBranch: Integral type, \u03c0\u00b2/6 normalization, symbolic\u2261numeric branch); tests/test_cosmology.py 26/26 (docstring-only fix); tests/test_scattering_amplitude.py 16/16. Full suite: 557 passed, 11 failed \u2014 identical failure set to the cluster-A handoff (8 in forbidden tests/test_benchmarks_published.py awaiting pin regeneration, 1 forbidden visualization hash, 1 tests/test_cli_scan.py stale-guess cascade from cluster A, 1 tests/test_cli_amplitude.py pre-existing at branch HEAD). Zero new failures from this cluster; forbidden TestManriqueFoliated, TestKorverSaueressigBounds, TestReuterBenchmark all pass with the corrected dicts/validator.",
+  "blocked_notes": "(1) tests/test_benchmarks_published.py (forbidden): no changes needed for this cluster's files \u2014 manrique/korver/reuter tests pass with corrected values; integration can additionally assert res[\"all_passed\"] in TestReuterBenchmark now that it is True. (2) evaluation/audit/spectral/hv2_exponential.py final section and defense/hv2b_defense.py probe the old bare-integrand API (free z_int/k_int symbols) and now IndexError because _phi_symbolic intentionally returns a closed sympy.Integral at k=1; audit scripts only \u2014 adapted re-run confirms ratio 1.0\u00d7. (3) _phi_tilde_symbolic (threshold.py) still returns a bare integrand; numerator is correct (no factor-2 defect) but for API symmetry it could be wrapped in an Integral \u2014 outside my allowed \"_phi_symbolic region ONLY\" scope. (4) src/asymsafety/gui/visualization_3d.py (~lines 544, 762, 1049, 1090) still advertises \"full-Diff restoration plane\" and \"Benchmark fixed-point coordinates g*\u22480.96, \u03bb*\u22480.20\" mirroring the retracted foliated narrative \u2014 outside my file list. (5) validation/lorentzian_2024.py keeps its own foliated Wick-rotation dicts that may echo the old \u03bb_ADM\u21921-at-NGFP story \u2014 outside my file list.",
+  "new_values": "No new toolkit-computed values; all corrections are literature constants: MRS PRL 106, 251302 [1102.5012] Eq. (10) Euclidean (g*, \u03bb*) = (0.19, 0.31), \u03b8 = 1.07 \u00b1 3.31 i; Lorentzian (0.21, 0.30), \u03b8 = 0.94 \u00b1 3.10 i; KSW [2402.01260] wedge N_s + 6.4 N_v \u2264 23.1 (max_N_s = 23, max_N_v = 3). Exact foliated-plane eigenvalue documented and pinned: \u2202\u03b2_\u03bbADM/\u2202\u03bb_ADM = g\u03bb/(\u03c0(1\u22122\u03bb)) (= +0.019894367886487 at g=0.5, \u03bb=0.1) \u2014 positive, UV-repulsive. Reuter validation on toolkit FP: rel errs (g*, \u03bb*, \u03b8', \u03b8'', g*\u03bb*) = (0.045%, 0.10%, 0.36%, 0.11%, 0.48%), all_passed=True. No pins requiring regeneration originate from this cluster."
+ }
+}

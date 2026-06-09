@@ -178,24 +178,29 @@ def matter_eta_N_correction(matter: MatterContent,
 
     Returns (A_matter, B_matter) contributions.
 
-    For the Litim regulator in d=4:
-        Scalar: A_s = -1/(12π), B_s = 0
-        Dirac:  A_D = 1/(6π),   B_D = 0
-        Vector: A_v = -(d-2)/(6π), B_v = 0
+    Per-field weights from Dona, Eichhorn & Percacci (2014),
+    Phys. Rev. D 89, 084035 [1311.2898], Eqs. (35)/(38) (d=4, Litim):
+        Scalar: A_s = +1/(6π),  B_s = 0
+        Dirac:  A_D = +1/(3π),  B_D = 0
+        Vector: A_v = -2/(3π),  B_v = 0
 
-    (Matter does not contribute to B at one loop in the standard approach.)
+    Scalars and Dirac fermions destabilize the NGFP (dg*/dN > 0),
+    vectors stabilize it (dg*/dN_v < 0). Matter fields are massless
+    and minimally coupled, so the weights carry w = 0 threshold
+    functions and matter does not contribute to B at one loop.
     """
     tf = ThresholdFunctions()
     Phi_1_1_0 = tf.Phi(1, 1, 0)  # = 1
 
-    # Scalar contribution to A
-    A_scalar = -Rational(1, 12) / pi * Phi_1_1_0
+    # Scalar contribution to A: +1/(6π) per field (DEP Eq. (35))
+    A_scalar = Rational(1, 6) / pi * Phi_1_1_0
 
-    # Dirac fermion contribution to A
-    A_dirac = Rational(1, 6) / pi * Phi_1_1_0
+    # Dirac fermion contribution to A: +1/(3π) per field (DEP Eq. (38))
+    A_dirac = Rational(1, 3) / pi * Phi_1_1_0
 
-    # Vector contribution to A: (d-2) net dof
-    A_vector = -Rational(d - 2, 6) / pi * Phi_1_1_0
+    # Vector contribution to A: -(d-2)/(3π) per field, i.e. -2/(3π)
+    # in d=4 (DEP Eq. (38))
+    A_vector = -Rational(d - 2, 3) / pi * Phi_1_1_0
 
     A_matter = (
         matter.n_scalars * A_scalar

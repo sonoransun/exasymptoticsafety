@@ -77,5 +77,22 @@ def test_compare_with_stability(koopman, stability):
     comp = koopman.compare_with_stability(stability)
     assert comp.method_a == "koopman_edmd"
     assert comp.method_b == "stability_matrix"
-    # For the direct comparison method, values_a == values_b
+    # Genuine EDMD comparison: log(eig K)/dt vs eig(M). The deviation
+    # is the finite EDMD reconstruction error — small but nonzero.
     assert comp.agrees
+    assert 0.0 < comp.max_deviation < 1e-3
+    assert not np.array_equal(comp.values_a, comp.values_b)
+
+
+def test_compare_with_stability_rejects_wrong_eigenvalues(koopman):
+    """The comparison must FAIL for a fabricated stability spectrum.
+
+    Regression test for the former self-comparison (which returned
+    agrees=True for any input).
+    """
+    class FakeStability:
+        eigenvalues = np.array([1e6, -42.0])
+
+    comp = koopman.compare_with_stability(FakeStability())
+    assert not comp.agrees
+    assert comp.max_deviation > 1.0

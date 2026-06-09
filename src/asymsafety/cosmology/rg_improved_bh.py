@@ -14,7 +14,16 @@ Key physical predictions (compared to classical Schwarzschild):
       exist (inner Cauchy horizon + outer event horizon).
     - At ``M = M_crit`` the two horizons merge — extremal black hole.
     - For ``M < M_crit`` no horizon exists at all — naked-mass remnant.
-    - ``f(r) → 1`` as ``r → 0`` (de Sitter core) → no curvature singularity.
+    - ``f(r) → 1`` as ``r → 0``, but only *linearly*: the default
+      ``k = ξ/r`` identification gives ``G(r) ≃ g* r²/ξ²`` near the
+      origin, hence ``f(r) ≃ 1 - 2 g* M r/ξ²`` with ``f'(0) ≠ 0``, and
+      the Ricci scalar ``R ≃ 12 g* M/(ξ² r)`` still diverges — much
+      milder than the classical ``∼ M/r³`` curvature growth, but the
+      singularity is softened, not removed. Bonanno & Reuter's regular
+      de Sitter core (``1 - f ∝ r²``, finite curvature) requires the
+      softened proper-distance cutoff ``k ∝ 1/d(r)`` with
+      ``d(r) ∝ r^{3/2}`` near the origin [hep-th/0002196], which none
+      of the shipped ``ScaleIdentification`` classes implement.
 
 References:
     Bonanno & Reuter (2000), Phys. Rev. D 62, 043008 [hep-th/0002196]

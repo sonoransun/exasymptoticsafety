@@ -234,10 +234,12 @@ def plot_matter_content_continuation(
     through the matter-graviton interaction terms and changes the NGFP
     coordinates. The NGFP ceases to exist beyond certain matter
     content — Korver, Saueressig & Wang (2024) bound the foliated
-    truncation at roughly ``N_s <= 12`` minimally coupled scalars and
-    ``N_v <= 6`` gauge vectors. This figure plots ``g^*``, ``lambda^*``
-    and ``Re(theta_i)`` against the continuation parameter (typically
-    ``N_s``) and shades the region beyond the published bound.
+    truncation by the wedge ``N_s + 6.4 N_v <= 23.1`` (p = 0 regulator
+    scheme), i.e. at most ``N_s ≈ 23`` minimally coupled scalars at
+    ``N_v = 0`` and ``N_v = 3`` gauge vectors at ``N_s = 0``. This
+    figure plots ``g^*``, ``lambda^*`` and ``Re(theta_i)`` against the
+    continuation parameter (typically ``N_s``) and shades the region
+    beyond the published bound.
 
     Parameters
     ----------
@@ -245,9 +247,11 @@ def plot_matter_content_continuation(
         Result of a sweep against a matter-counting parameter.
     figsize : tuple, default ``(12, 7)``
     bounds : dict, optional
-        Per-parameter integer bound, e.g. ``{"N_s": 12}``. Defaults to
+        Per-parameter integer bound, e.g. ``{"N_s": 23}``. Defaults to
         :data:`asymsafety.validation.korver_2024.FOLIATED_MATTER_BOUNDS`
-        for the parameter named in the continuation.
+        (the single-species intercepts of the wedge
+        ``N_s + 6.4 N_v <= 23.1``) for the parameter named in the
+        continuation.
     bounds_label : str
         Citation label drawn near the bound region.
     bounds_arxiv : str
@@ -276,8 +280,8 @@ def plot_matter_content_continuation(
         try:
             from asymsafety.validation.korver_2024 import FOLIATED_MATTER_BOUNDS
             bounds = {
-                "N_s": int(FOLIATED_MATTER_BOUNDS.get("max_N_s", 12)),
-                "N_v": int(FOLIATED_MATTER_BOUNDS.get("max_N_v", 6)),
+                "N_s": int(FOLIATED_MATTER_BOUNDS.get("max_N_s", 23)),
+                "N_v": int(FOLIATED_MATTER_BOUNDS.get("max_N_v", 3)),
             }
         except Exception:
             bounds = {}

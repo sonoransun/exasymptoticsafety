@@ -1,0 +1,13 @@
+G(r=1e+02) = 0.700246
+G(r=1e+04) = 0.700563
+G(r=1e+06) = 0.70074
+G_N=0.7006, M_pl=1.195
+M =   0.1 M_pl: horizons = 0
+M =   0.5 M_pl: horizons = 0
+M =   1.0 M_pl: horizons = 0
+M =   2.0 M_pl: horizons = 2
+M =   5.0 M_pl: horizons = 2
+M =  20.0 M_pl: horizons = 2
+M_cr = 1.42857 = 1.1957 M_pl
+horizons at 3 M_pl: ['0.2079', '4.816']
+figure saved

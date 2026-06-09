@@ -4,10 +4,26 @@ Beta functions for the foliated Einstein-Hilbert truncation with
 couplings (g, λ, λ_ADM) computed on an S¹ × S³ background using
 spectral sums.
 
-The key physics results:
-1. The NGFP exists in the foliated formulation
-2. At the NGFP, λ_ADM → 1, restoring full diffeomorphism invariance
-3. The critical exponents are comparable to the covariant computation
+Status and physics content of this implementation:
+
+1. The coefficients are a *schematic* one-loop ADM-sector model, not
+   the full Manrique–Rechenberger–Saueressig computation. Its (g, λ)
+   sector admits NO non-Gaussian fixed point at physical λ: β_g = 0
+   with g > 0 requires η_N = -2, which these coefficients reach only
+   for λ < -1/2 (multi-start root searches find the Gaussian fixed
+   point only). The published foliated NGFP (MRS, Phys. Rev. Lett.
+   106, 251302 [1102.5012], Eq. (10): Euclidean g* ≈ 0.19, λ* ≈ 0.31)
+   is *not* a root of this system; see
+   :mod:`asymsafety.validation.manrique_2011` for the literature
+   values.
+2. λ_ADM = 1 is a fixed plane *by construction*:
+   β_{λ_ADM} ∝ g (λ_ADM - 1). Its single eigenvalue
+   ∂β_{λ_ADM}/∂λ_ADM = g λ/(π(1 - 2λ)) is positive for g > 0,
+   0 < λ < 1/2, so at physical couplings the plane is UV-repulsive
+   (equivalently IR-attractive): the flow approaches λ_ADM = 1 toward
+   the infrared, it is not dynamically restored in the UV. In MRS the
+   plane is not dynamical at all — λ_ADM = 1 is imposed by their
+   diffeomorphism-invariant ansatz (no λ_ADM coupling runs).
 
 References:
     Manrique, Rechenberger & Saueressig (2011), Phys. Rev. Lett. 106, 251302
@@ -42,16 +58,20 @@ def build_foliated_eh_beta_system(
     Returns:
         BetaFunctionSystem with β_g, β_λ, β_{λ_ADM}.
 
+    Warning:
+        This is a schematic truncation: it admits no non-Gaussian fixed
+        point at physical λ, and the λ_ADM = 1 fixed plane is
+        UV-repulsive there (see the module docstring). The published
+        MRS fixed point is a literature reference, not a root of this
+        system.
+
     See Also:
         :func:`asymsafety.gui.visualization_3d.foliated_phase_portrait_3d`
             3D phase portrait of the (g, λ, λ_ADM) flow with the
-            full-Diff-restoration plane highlighted.
-        :func:`asymsafety.gui.visualization_3d.fixed_point_stability_3d`
-            Local zoom on the foliated NGFP.
+            λ_ADM = 1 fixed plane highlighted.
         :mod:`asymsafety.validation.manrique_2011`
-            Benchmark coordinates ``g* ≈ 0.96, λ* ≈ 0.20, λ_ADM* = 1.0``.
-        :mod:`asymsafety.validation.lorentzian_2024`
-            Lorentzian-signature confirmation of the NGFP.
+            Literature fixed-point values (MRS Eq. (10): Euclidean
+            g* ≈ 0.19, λ* ≈ 0.31; λ_ADM = 1 imposed by the ansatz).
 
     References:
         Manrique, Rechenberger & Saueressig (2011),
@@ -125,21 +145,21 @@ def build_foliated_eh_beta_system(
     # --- β_{λ_ADM} ---
     # The λ_ADM coupling runs only under FDiffs.
     # Its beta function comes from the K² projection of the flow.
-    # At the NGFP, β_{λ_ADM} should vanish at λ_ADM = 1,
-    # restoring full diffeomorphism invariance.
     #
-    # The structure is:
-    # β_{λ_ADM} = f(g, λ)(λ_ADM - 1) + higher order
+    # Schematic model: β_{λ_ADM} = g · (λ_ADM - 1) · h(λ), i.e.
+    # λ_ADM = 1 is a fixed *plane* of the flow put in by hand (in MRS
+    # there is no running λ_ADM coupling at all — λ_ADM = 1 is fixed by
+    # their Diff-invariant ansatz). The exact expression would require
+    # the full spin-0 matrix computation (difference between the
+    # K_ij K^ij and K² projections), which is not implemented here.
     #
-    # where f(g, λ) involves the spin-0 sector trace contributions.
-    # The linear approximation around λ_ADM = 1:
-
-    # Schematic: β_{λ_ADM} comes from the difference between
-    # K_ij K^ij and K² projections in the spin-0 sector.
-    # The exact expression requires the full spin-0 matrix computation.
-
-    # For now, use the known result that λ_ADM = 1 is a fixed point:
-    # β_{λ_ADM} ∝ g · (λ_ADM - 1) · h(λ)
+    # With the Litim closed forms, h(λ) = (Φ¹₁(-2λ) - Φ¹₁(0))/(2π)
+    #                                   = λ/(π(1 - 2λ)),
+    # so the plane's single eigenvalue ∂β_{λ_ADM}/∂λ_ADM = g·h(λ) is
+    # POSITIVE for g > 0, 0 < λ < 1/2: λ_ADM = 1 is UV-repulsive
+    # (IR-attractive) at physical couplings — perturbations grow toward
+    # the UV; there is no dynamical "full-Diff restoration" at a UV
+    # fixed point in this model.
     h_factor = Rational(1, 2) / pi * (
         Phi_1_1_w - Phi_1_1_0
     )
@@ -170,17 +190,22 @@ def build_foliated_eh_beta_system(
 
 
 def foliated_eh_benchmark() -> dict[str, float]:
-    """Known benchmark values for the foliated EH NGFP.
+    """Literature benchmark for the foliated EH NGFP (NOT a root here).
 
-    From Manrique, Rechenberger & Saueressig (2011):
-        g* ≈ 0.96
-        λ* ≈ 0.20
-        λ_ADM* = 1 (within numerical precision)
+    Euclidean fixed point from Manrique, Rechenberger & Saueressig,
+    Phys. Rev. Lett. 106, 251302 (2011) [1102.5012], Eq. (10):
+        g* ≈ 0.19, λ* ≈ 0.31, θ = 1.07 ± 3.31 i.
+    λ_ADM = 1 is imposed by the MRS diffeomorphism-invariant ansatz
+    (their truncation contains no running λ_ADM coupling).
 
-    Critical exponents: complex conjugate pair + one real.
+    Warning:
+        These are literature values for comparison only — they are not
+        a fixed point of :func:`build_foliated_eh_beta_system`, whose
+        schematic (g, λ) sector admits no NGFP at physical λ (see the
+        module docstring).
     """
     return {
-        "g": 0.96,
-        "lambda": 0.20,
+        "g": 0.19,
+        "lambda": 0.31,
         "lambda_ADM": 1.0,
     }

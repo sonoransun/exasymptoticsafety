@@ -1,0 +1,54 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0 -- /root/cdev/exasymptoticsafety/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /root/cdev/exasymptoticsafety
+configfile: pyproject.toml
+plugins: nbmake-1.5.5, timeout-2.4.0, hypothesis-6.152.4
+timeout: 120.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 40 items
+
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_ngfp_exists PASSED [  2%]
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_g_star_within_factor_two_of_published PASSED [  5%]
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_lambda_star_positive_and_below_pole PASSED [  7%]
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_product_g_lambda_within_factor_two PASSED [ 10%]
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_validate_eh_function_runs PASSED [ 12%]
+tests/test_benchmarks_published.py::TestReuterFixedPoint::test_pinned_toolkit_values PASSED [ 15%]
+tests/test_benchmarks_published.py::TestCodelloPercacciBenchmark::test_quadratic_fp_dict_has_four_couplings PASSED [ 17%]
+tests/test_benchmarks_published.py::TestCodelloPercacciBenchmark::test_one_loop_universal_signs PASSED [ 20%]
+tests/test_benchmarks_published.py::TestManriqueFoliated::test_foliated_fp_lambda_adm_unity PASSED [ 22%]
+tests/test_benchmarks_published.py::TestManriqueFoliated::test_lorentzian_fp_lambda_adm_unity PASSED [ 25%]
+tests/test_benchmarks_published.py::TestManriqueFoliated::test_g_lambda_below_pole PASSED [ 27%]
+tests/test_benchmarks_published.py::TestKorverSaueressigBounds::test_foliated_matter_bounds_present PASSED [ 30%]
+tests/test_benchmarks_published.py::TestKorverSaueressigBounds::test_covariant_matter_bounds_present PASSED [ 32%]
+tests/test_benchmarks_published.py::TestKorverSaueressigBounds::test_validate_foliated_matter_bounds_within PASSED [ 35%]
+tests/test_benchmarks_published.py::TestKorverSaueressigBounds::test_validate_foliated_matter_bounds_out_of_range PASSED [ 37%]
+tests/test_benchmarks_published.py::TestLorentzianBenchmarks::test_lorentzian_covariant_fp_keys PASSED [ 40%]
+tests/test_benchmarks_published.py::TestLorentzianBenchmarks::test_lorentzian_foliated_wick_keys PASSED [ 42%]
+tests/test_benchmarks_published.py::TestLorentzianBenchmarks::test_validate_lorentzian_function_runs PASSED [ 45%]
+tests/test_benchmarks_published.py::TestLorentzianBenchmarks::test_lorentzian_consistent_with_euclidean PASSED [ 47%]
+tests/test_benchmarks_published.py::TestGravityMatterFixedPoint::test_ngfp_exists PASSED [ 50%]
+tests/test_benchmarks_published.py::TestGravityMatterFixedPoint::test_lambda_phi_star_positive_and_small PASSED [ 52%]
+tests/test_benchmarks_published.py::TestGravityMatterFixedPoint::test_three_critical_exponents PASSED [ 55%]
+tests/test_benchmarks_published.py::TestGravityMatterFixedPoint::test_two_relevant_directions PASSED [ 57%]
+tests/test_benchmarks_published.py::TestGravityMatterFixedPoint::test_pinned_g_lambda_lambdaphi PASSED [ 60%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_reference_table_has_three_Nf PASSED [ 62%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_reference_values_monotone_in_Nf PASSED [ 65%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_large_nf_formula_matches_table PASSED [ 67%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_charged_fp_existence_threshold PASSED [ 70%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_toolkit_ahm_finds_charged_fp PASSED [ 72%]
+tests/test_benchmarks_published.py::TestBonati2025GaugeHiggs::test_toolkit_nu_is_monotone_in_Nf PASSED [ 75%]
+tests/test_benchmarks_published.py::TestDraper2020GravitonAmplitude::test_validate_runs_and_passes PASSED [ 77%]
+tests/test_benchmarks_published.py::TestKnorr2026SafeVsUnsafe::test_safe_bounded_unsafe_grows PASSED [ 80%]
+tests/test_benchmarks_published.py::TestCheung2025Bootstrap::test_validate_bootstrap PASSED [ 82%]
+tests/test_benchmarks_published.py::TestScatteringBridge::test_bridge_verdict PASSED [ 85%]
+tests/test_bridge.py::test_cross_analogue_creation PASSED                [ 87%]
+tests/test_bridge.py::test_rg_critical_exponents PASSED                  [ 90%]
+tests/test_bridge.py::test_matrix_exp_exponents PASSED                   [ 92%]
+tests/test_bridge.py::test_resolvent_poles PASSED                        [ 95%]
+tests/test_bridge.py::test_verify_commutativity PASSED                   [ 97%]
+tests/test_bridge.py::test_impedance_bridge PASSED                       [100%]
+
+============================== 40 passed in 2.53s ==============================

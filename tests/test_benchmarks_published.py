@@ -105,13 +105,15 @@ class TestReuterFixedPoint:
             fp.location["g"], fp.location["lambda"], theta_re, theta_im
         )
         assert "all_passed" in result
-        # Don't assert all_passed=True — toolkit uses simplified scheme
+        # The corrected EH system passes all of reuter_1998's checks
+        # against the published Litim-cutoff values.
+        assert result["all_passed"]
 
     def test_pinned_toolkit_values(self, fp):
         """Hard pin so refactor drift is caught immediately."""
-        np.testing.assert_allclose(fp.location["g"], 0.6936584729648413,
+        np.testing.assert_allclose(fp.location["g"], 0.7073208809868445,
                                      rtol=1e-6)
-        np.testing.assert_allclose(fp.location["lambda"], 0.14228896515894982,
+        np.testing.assert_allclose(fp.location["lambda"], 0.19320050715078566,
                                      rtol=1e-6)
 
 
@@ -129,9 +131,14 @@ class TestCodelloPercacciBenchmark:
         assert QUADRATIC_FP["n_relevant"] == 4
 
     def test_one_loop_universal_signs(self):
-        """β_α > 0, β_β < 0 (Weyl² is asymptotically free)."""
+        """β_α > 0 and β_β > 0 in the coefficient basis.
+
+        In the *coefficient* convention used by the toolkit (β for the C²
+        coefficient itself, not the coupling 1/λ_C), asymptotic freedom of
+        the Weyl² sector means the coefficient grows toward the UV: +133/20.
+        """
         assert ONE_LOOP_UNIVERSAL["beta_alpha_1loop"] > 0
-        assert ONE_LOOP_UNIVERSAL["beta_beta_1loop"] < 0
+        assert ONE_LOOP_UNIVERSAL["beta_beta_1loop"] > 0
 
 
 # ---------------------------------------------------------------------------
@@ -232,7 +239,7 @@ class TestGravityMatterFixedPoint:
         )
         finder = FixedPointFinder(system)
         return finder.find_fixed_point(
-            {"g": 0.65, "lambda": 0.14, "lambda_phi": 0.01}
+            {"g": 0.66, "lambda": 0.21, "lambda_phi": 0.01}
         )
 
     def test_ngfp_exists(self, fp):
@@ -245,18 +252,22 @@ class TestGravityMatterFixedPoint:
     def test_three_critical_exponents(self, fp):
         assert len(fp.critical_exponents) == 3
 
-    def test_two_relevant_directions(self, fp):
-        """Quartic NGFP has two relevant directions (toolkit value)."""
+    def test_three_relevant_directions(self, fp):
+        """Quartic NGFP: complex gravity pair + relevant quartic direction.
+
+        θ = 1.6118 ± 3.2442i and +0.7711 — three relevant directions
+        (toolkit value with the corrected EH core).
+        """
         n_rel = int(np.sum(fp.critical_exponents.real > 0))
-        assert n_rel == 2
+        assert n_rel == 3
 
     def test_pinned_g_lambda_lambdaphi(self, fp):
         np.testing.assert_allclose(fp.location["g"],
-                                     0.6455463813725137, rtol=1e-6)
+                                     0.6603437193942904, rtol=1e-6)
         np.testing.assert_allclose(fp.location["lambda"],
-                                     0.14185513513554493, rtol=1e-6)
+                                     0.20647823369106516, rtol=1e-6)
         np.testing.assert_allclose(fp.location["lambda_phi"],
-                                     0.011174696554990685, rtol=1e-6)
+                                     0.008955551233512223, rtol=1e-6)
 
 
 # ---------------------------------------------------------------------------
@@ -319,15 +330,15 @@ class TestBonati2025GaugeHiggs:
         from asymsafety.transforms.bridge.gauge_higgs import (
             correlation_length_exponent,
         )
-        Nfs = [20, 30, 50, 80, 120]
+        # N_f values above the one-loop charged-FP threshold (N* ≈ 28);
+        # below it the WF fallback root makes ν non-monotone by design.
+        Nfs = [30, 40, 60, 100, 200]
         nus = [correlation_length_exponent(n, epsilon=1.0) for n in Nfs]
-        # Toolkit one-loop ν decreases monotonically toward the WF limit
-        # (the *opposite* direction from Bonati MC, which grows toward 1).
-        # Either monotone direction is acceptable; flag breakage if it
-        # oscillates.
+        # With the correct (B+√disc) root, one-loop ν grows strictly
+        # toward 1 with N_f — the same direction as Bonati MC.
         diffs = [nus[i + 1] - nus[i] for i in range(len(nus) - 1)]
-        assert all(d <= 0 for d in diffs) or all(d >= 0 for d in diffs), (
-            f"ν(N_f) not monotone in the toolkit: {nus}"
+        assert all(d > 0 for d in diffs), (
+            f"ν(N_f) not strictly increasing in the toolkit: {nus}"
         )
 
 

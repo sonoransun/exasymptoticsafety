@@ -17,7 +17,7 @@ class TestScanSubcommand:
             "--truncation", "gravity_matter",
             "--param", "scalar_quartic=true",
             "--param-range", "n_scalars=1:3:3",
-            "--guess", "g=0.65,lambda=0.14,lambda_phi=0.01",
+            "--guess", "g=0.66,lambda=0.21,lambda_phi=0.01",
             "--output", str(out),
         ])
         assert rc == 0
@@ -65,7 +65,7 @@ class TestScanArrays:
             "--truncation", "gravity_matter",
             "--param", "scalar_quartic=true",
             "--param-range", "n_scalars=1:2:2",
-            "--guess", "g=0.65,lambda=0.14,lambda_phi=0.01",
+            "--guess", "g=0.66,lambda=0.21,lambda_phi=0.01",
             "--output", str(out),
         ])
         assert rc == 0

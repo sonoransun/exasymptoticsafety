@@ -1,0 +1,4 @@
+serialized JSON: 3361 bytes
+FP drift after round-trip: dg=0.000e+00, dl=0.000e+00
+VERDICT round-trip: PASS
+standalone code: 688 chars; contains def: True

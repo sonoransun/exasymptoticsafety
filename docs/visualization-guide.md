@@ -368,13 +368,13 @@ fig = plot_flrw_evolution(RGImprovedFLRW(trajectory=traj))
 
 *When to use*:
 - `plot_running_newton_constant` — see `G(r)` vs the classical reference.
-- `plot_lapse_with_horizons` — show the de Sitter core (`f → 1` at `r → 0`) and locate the event horizon `r_+` (also the Cauchy horizon `r_-` for super-critical mass, when both exist). The default `r_range=(1e-3, 5)` and `y_clip=(-2, 1.3)` restrict to the regime where the trajectory-based `G(r)` is physical.
+- `plot_lapse_with_horizons` — show the softened core (`f → 1` only *linearly* at `r → 0` for the default `k = ξ/r`; the curvature still diverges `∝ 1/r`, so this is not a de Sitter core — see the `rg_improved_bh` module docstring) and locate the event horizon `r_+` (also the Cauchy horizon `r_-` for super-critical mass, when both exist). The default `r_range=(1e-3, 5)` and `y_clip=(-2, 1.3)` restrict to the regime where the trajectory-based `G(r)` is physical.
 - `plot_classical_vs_rg_lapse` — visualise the critical-mass remnant.
 - `plot_hawking_temperature` — RG-improved `T_H` vs the classical `1/(8πM)` asymptote. The surface-gravity sign is taken in absolute value to recover physical (positive) `T_H` regardless of how the central-difference of the trajectory-based lapse falls.
 - `plot_scale_identification` — pick a `k(r)` prescription with eyes open about how each regularises the origin.
 - `plot_flrw_evolution` — three-panel FLRW summary `(a(t), H(t), G(t)/Λ(t))`.
 
-**Note**: the cosmology figures use a trajectory of the pure-EH β-functions integrated from a small perturbation off the NGFP backward in RG time. The toolkit's EH system has a non-trivial IR fixed point at roughly `(g, λ) = (0.058, 0.343)` rather than running cleanly to the Gaussian FP, so the dimensional Newton constant `G(r) = g(k)/k²` grows in the deep IR and the asymptotic-classical Schwarzschild regime cannot be shown without restricting the plot's r-range. The shipped figures show the de-Sitter core and the horizon structure faithfully.
+**Note**: the cosmology figures use a trajectory of the pure-EH β-functions integrated from a small perturbation off the NGFP backward in RG time. The toolkit's EH system has a non-trivial IR fixed point at roughly `(g, λ) = (0.058, 0.343)` rather than running cleanly to the Gaussian FP, so the dimensional Newton constant `G(r) = g(k)/k²` grows in the deep IR and the asymptotic-classical Schwarzschild regime cannot be shown without restricting the plot's r-range. The shipped figures show the softened (`f(0) = 1`, curvature `∝ 1/r`) core and the horizon structure faithfully.
 
 ---
 

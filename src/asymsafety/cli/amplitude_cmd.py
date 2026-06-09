@@ -99,14 +99,21 @@ def _build_trajectory(system, guess: dict[str, float]):
         raise ValueError(
             f"No fixed point found from guess {full_guess}; try --guess."
         )
-    # Start slightly off the NGFP and flow UV→IR (mirrors the cosmology
-    # trajectory construction) so G(p²)=g/k² is bounded in the IR.
-    ic_uv = dict(fp.location)
-    ic_uv["g"] = fp.location["g"] - 1e-3
-    if "lambda" in ic_uv:
-        ic_uv["lambda"] = fp.location["lambda"] + 1e-3
+    # The NGFP is UV-attractive (all gravitational directions relevant),
+    # so integrating *upward* from a deep-IR point with classical scaling
+    # g = G_N k² converges onto the fixed point toward the UV. The result
+    # is the Type-IIIa-like trajectory the form factor needs: G(p²) ≈ G_N
+    # constant in the IR, g → g* (UV softening) above the transition.
+    # Perturbing off the NGFP and flowing down instead runs into the
+    # λ = 1/2 pole or the λ → -∞ runaway after a few e-folds.
+    import math
+
+    g_newton_ir = 0.02
+    t_ir = -8.0
+    ic_ir = {n: 0.0 for n in names}
+    ic_ir["g"] = g_newton_ir * math.exp(2.0 * t_ir)
     traj = FlowIntegrator(system).integrate(
-        ic_uv, t_span=(10.0, -10.0), max_step=0.05
+        ic_ir, t_span=(t_ir, 15.0), max_step=0.05
     )
     return fp, traj
 
@@ -178,7 +185,11 @@ def run_amplitude(args: argparse.Namespace) -> int:
             "froissart_exponent": report["froissart"]["growth_exponent"],
             "no_ghost_pole": bool(report["causality"]["passed"]),
             "crossing": bool(report["crossing"]["passed"]),
-            "all_passed": bool(report["all_passed"]),
+            # Newtonian recovery is part of the verdict: a setup whose
+            # trajectory never reaches the IR plateau must not report a
+            # clean bill while ir_ratio_to_gr sits far from 1.
+            "ir_newtonian_recovery": bool(ir["matches_gr"]),
+            "all_passed": bool(report["all_passed"]) and bool(ir["matches_gr"]),
         }
 
     if args.compare_string:
@@ -199,7 +210,11 @@ def run_amplitude(args: argparse.Namespace) -> int:
         f"(IR/GR ratio {ir['ratio']:.3f}, UV bounded={uv['bounded']}) → {out}"
     )
     if args.checks:
-        print(f"  consistency: all_passed={metadata['consistency']['all_passed']}")
+        c = metadata["consistency"]
+        print(
+            f"  consistency: all_passed={c['all_passed']} "
+            f"(ir_newtonian_recovery={c['ir_newtonian_recovery']})"
+        )
     if args.compare_string:
         print(f"  bridge: {metadata['bridge']['summary'][:80]}...")
     return 0
